@@ -10,5 +10,8 @@ ENV SPRING_CONFIG_NAME=application-dev
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/build/libs/app.jar app.jar
+COPY src/main/resources/application-dev.properties /app/config/application-dev.properties
+ENV SPRING_PROFILES_ACTIVE=dev
 EXPOSE 8080
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
