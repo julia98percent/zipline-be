@@ -67,5 +67,5 @@ jobs:
             -e CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS}} \
             -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
             -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            -e SPRING_PROFILES_ACTIVE=dev \
             -d ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
-
