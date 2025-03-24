@@ -60,6 +60,8 @@ jobs:
             sudo docker run -p ${{ secrets.PORT }}:${{ secrets.PORT }} \
             --name ${{ secrets.PROJECT_NAME }} \
             -e PORT=${{ secrets.PORT }} \
+            -e DB_PORT=${{ secrets.DB_PORT }} \
+            -e DB_NAME=${{ secrets.DB_NAME }} \
             -e DB_URL=${{ secrets.DB_URL }} \
             -e JWT_SECRET=${{ secrets.JWT_SECRET}} \
             -e JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION}} \
