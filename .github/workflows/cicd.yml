@@ -61,6 +61,10 @@ jobs:
             --name ${{ secrets.PROJECT_NAME }} \
             -e PORT=${{ secrets.PORT }} \
             -e DB_URL=${{ secrets.DB_URL }} \
+            -e JWT_SECRET=${{ secrets.JWT_SECRET}} \
+            -e JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION}} \
+            -e AWS_REGION=${{ secrets.AWS_REGION}} \
+            -e CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS}} \
             -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
             -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
             -d ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
