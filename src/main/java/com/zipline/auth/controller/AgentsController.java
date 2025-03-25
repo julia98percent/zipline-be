@@ -16,12 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zipline.auth.dto.AgentsRequestDto;
-import com.zipline.auth.dto.AgentsUpdatePasswordRequest;
+import com.zipline.auth.dto.AgentsUpdatePasswordRequestDto;
 import com.zipline.auth.dto.UserResponseDto;
 import com.zipline.auth.entity.Agents;
 import com.zipline.auth.repository.AgentsRepository;
 import com.zipline.auth.service.AgentsService;
 import com.zipline.global.common.response.ApiResponse;
+import com.zipline.global.exception.custom.AgentNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,13 +37,13 @@ public class AgentsController {
 	private final AgentsRepository agentsRepository;
 
 	@GetMapping("/me" )  // 특정 사용자 정보 조회
-	public ResponseEntity<UserResponseDto> findById(
+	public ResponseEntity<ApiResponse<Void>> findById(
 		@RequestParam Long uid
 	) {
 		Agents agents = agentsRepository.findById(uid)
-			.orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. id=" + uid));
-
-		return ResponseEntity.ok(UserResponseDto.of(agents));
+			.orElseThrow(() -> new AgentNotFoundException("해당 유저를 찾을 수 없습니다. id=" + uid, HttpStatus.BAD_REQUEST));
+		ApiResponse<Void> response = ApiResponse.ok("조회 성공" );
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	@PostMapping("/signup" )
@@ -56,35 +57,47 @@ public class AgentsController {
 	public ResponseEntity<ApiResponse<Void>> login(
 		@RequestBody AgentsRequestDto agentsRequestDto
 	) {
-		ApiResponse<Void> response = ApiResponse.create("로그인 성공" );
+		agentsService.login(agentsRequestDto);
+		ApiResponse<Void> response = ApiResponse.ok("로그인 성공" );
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	@PatchMapping("/logout" )
-	public ResponseEntity<String> logout(
-		@AuthenticationPrincipal UserDetails userDetails
-		, Principal principal
+	public ResponseEntity<ApiResponse<Void>> logout(
+		@AuthenticationPrincipal UserDetails userDetails,
+		Principal principal
 	) {
 		Long uid = Long.parseLong(principal.getName());
 		agentsService.logout(uid);
-		return ResponseEntity.ok("로그아웃 성공" );
+
+		ApiResponse<Void> response = ApiResponse.ok("로그아웃 성공" );
+		return ResponseEntity.ok(response);
 	}
 
 	@PatchMapping("/updateinfo" )
-	public ResponseEntity<UserResponseDto> updateInfo(@RequestBody AgentsRequestDto agentsRequestDto,
-		Principal principal) {
+	public ResponseEntity<ApiResponse<UserResponseDto>> updateInfo(
+		@RequestBody AgentsRequestDto agentsRequestDto,
+		Principal principal
+	) {
 		Long uid = Long.parseLong(principal.getName());
-		agentsService.updateInfo(uid, agentsRequestDto);
-		return ResponseEntity.status(HttpStatus.OK).body(null);
+		UserResponseDto updatedInfo = agentsService.updateInfo(uid, agentsRequestDto);
+
+		ApiResponse<UserResponseDto> response = ApiResponse.ok("회원 정보 수정 완료", updatedInfo);
+		return ResponseEntity.ok(response);
 	}
 
 	@PatchMapping("/updatepassword" )
-	public void updatePassword(@AuthenticationPrincipal UserDetails userDetails,
-		@Validated @RequestBody AgentsUpdatePasswordRequest agentsUpdatePasswordRequest) {
+	public ResponseEntity<ApiResponse<Void>> updatePassword(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@Validated @RequestBody AgentsUpdatePasswordRequestDto request
+	) {
 		log.info("로그인된 사용자 ID: {}", userDetails.getUsername());
 		String id = userDetails.getUsername();
-		agentsService.updatePassword(id, agentsUpdatePasswordRequest.getCurrentPassword(),
-			agentsUpdatePasswordRequest.getNewPassword());
+
+		agentsService.updatePassword(id, request.getCurrentPassword(), request.getNewPassword());
+
+		ApiResponse<Void> response = ApiResponse.ok("비밀번호 변경 완료" );
+		return ResponseEntity.ok(response);
 	}
 
 }

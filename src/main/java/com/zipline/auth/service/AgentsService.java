@@ -35,7 +35,7 @@ public class AgentsService {
 	@Transactional
 	public UserResponseDto signup(AgentsRequestDto agentsRequestDto) {
 		if (agentsRepository.existsById(agentsRequestDto.getId())) {
-			throw new RuntimeException("이미 가입되어있는 유저" );
+			throw new AgentNotFoundException("이미 가입되어있는 유저입니다.", HttpStatus.BAD_REQUEST);
 		}
 
 		Agents agents = Agents.builder()
@@ -61,23 +61,22 @@ public class AgentsService {
 	@Transactional
 	public TokenDto login(AgentsRequestDto agentsRequestDto) {
 
-		UsernamePasswordAuthenticationToken authenticationToken = agentsRequestDto.toAuthentifation();
-
-		// 1. 사용자 존재 확인
-		Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-
 		Agents agents = agentsRepository.findById(agentsRequestDto.getId())
-			.orElseThrow(() -> new RuntimeException("가입되지 않은 사용자입니다." ));
+			.orElseThrow(() -> new AgentNotFoundException("가입되지 않은 사용자입니다.", HttpStatus.BAD_REQUEST));
 
 		// 2. 비밀번호 검증
 		if (!passwordEncoder.matches(agentsRequestDto.getPassword(), agents.getPassword())) {
-			throw new RuntimeException("비밀번호가 일치하지 않습니다." );
+			throw new AgentNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
 		}
 
-		// 3. 인증 객체 생성
+		// 3. 권한 설정
 		List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER" ));
 
-		// 4. Access Token 발급
+		// 4. 수동 인증 객체 생성
+		Authentication authentication = new UsernamePasswordAuthenticationToken(
+			agents.getId(), null, authorities
+		);
+
 		return tokenProvider.generateTokenDto(authentication, agents.getUid());
 	}
 
@@ -105,7 +104,7 @@ public class AgentsService {
 		Agents agents = agentsRepository.findById(id)
 			.orElseThrow(() -> new AgentNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 		if (!passwordEncoder.matches(currentPassword, agents.getPassword())) {
-			throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다." );
+			throw new AgentNotFoundException("현재 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
 		}
 		return agents;
 	}
