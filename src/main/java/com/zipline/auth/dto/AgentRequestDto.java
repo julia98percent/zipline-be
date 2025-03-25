@@ -13,10 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AgentRequestDto {
 
-	private Long agencyId;
 	private String id;
 	private String password;
-
 	private String passwordCheck; // 비밀번호 확인
 	private String name;
 	private String role;

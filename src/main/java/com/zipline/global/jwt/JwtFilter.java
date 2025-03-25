@@ -23,6 +23,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	public final TokenProvider tokenProvider;
 
+	@Override
 	protected void doFilterInternal(HttpServletRequest request
 		, HttpServletResponse response
 		, FilterChain filterChain) throws IOException, ServletException {
@@ -45,7 +46,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
 			String token = bearerToken.substring(BEARER_PREFIX.length()).trim();
-			log.info("[JwtFilter] 추출된 JWT: {}", token);
 			return token;
 		}
 		return null;

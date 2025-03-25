@@ -35,9 +35,12 @@ public class SecurityConfig {
 			.sessionManagement(
 				session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함 (JWT 기반 인증 시 필요)
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/agents/login", "/api/agents/signup" ).permitAll()
-				.requestMatchers("/api/agents/updatepassword", "/api/agents/updateinfo" ).hasRole("USER" )
-				.anyRequest().authenticated()
+				.requestMatchers("/api/agents/login", "/api/agents/signup" )
+				.permitAll()
+				.requestMatchers("/api/agents/updatepassword", "/api/agents/updateinfo", "/api/agents/me" )
+				.hasRole("USER" )
+				.anyRequest()
+				.authenticated()
 			).addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}

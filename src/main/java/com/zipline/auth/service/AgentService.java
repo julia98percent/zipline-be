@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,7 +17,6 @@ import com.zipline.auth.entity.Agent;
 import com.zipline.auth.entity.Authority;
 import com.zipline.auth.repository.AgentRepository;
 import com.zipline.global.exception.custom.AgentNotFoundException;
-import com.zipline.global.exception.custom.BaseException;
 import com.zipline.global.jwt.TokenProvider;
 
 import jakarta.transaction.Transactional;
@@ -28,18 +26,25 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AgentService {
 
-	private final AuthenticationManagerBuilder authenticationManagerBuilder;
 	private final AgentRepository agentRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final TokenProvider tokenProvider;
 
 	@Transactional
+	public AgentResponseDto findById(Long uid) {
+		Agent agent = agentRepository.findById(uid)
+			.orElseThrow(() -> new AgentNotFoundException("해당 유저를 찾을 수 없습니다. id=" + uid, HttpStatus.BAD_REQUEST));
+
+		return AgentResponseDto.of(agent);
+	}
+
+	@Transactional
 	public AgentResponseDto signup(AgentRequestDto agentRequestDto) {
 
 		if (!agentRequestDto.getPassword().equals(agentRequestDto.getPasswordCheck())) {
-			throw new BaseException("비밀번호와 비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+			throw new AgentNotFoundException("비밀번호와 비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
 		}
-		
+
 		if (agentRepository.existsById(agentRequestDto.getId())) {
 			throw new AgentNotFoundException("이미 가입되어있는 유저입니다.", HttpStatus.BAD_REQUEST);
 		}

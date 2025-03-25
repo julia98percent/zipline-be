@@ -19,11 +19,8 @@ import com.zipline.auth.dto.AgentRequestDto;
 import com.zipline.auth.dto.AgentResponseDto;
 import com.zipline.auth.dto.AgentUpdatePasswordRequestDto;
 import com.zipline.auth.dto.TokenDto;
-import com.zipline.auth.entity.Agent;
-import com.zipline.auth.repository.AgentRepository;
 import com.zipline.auth.service.AgentService;
 import com.zipline.global.common.response.ApiResponse;
-import com.zipline.global.exception.custom.AgentNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,15 +32,11 @@ import lombok.extern.slf4j.Slf4j;
 public class AgentController {
 
 	private final AgentService agentService;
-	private final AgentRepository agentRepository;
 
 	@GetMapping("/me" )  // 특정 사용자 정보 조회
-	public ResponseEntity<ApiResponse<Void>> findById(
-		@RequestParam Long uid
-	) {
-		Agent agent = agentRepository.findById(uid)
-			.orElseThrow(() -> new AgentNotFoundException("해당 유저를 찾을 수 없습니다. id=" + uid, HttpStatus.BAD_REQUEST));
-		ApiResponse<Void> response = ApiResponse.ok("조회 성공" );
+	public ResponseEntity<ApiResponse<AgentResponseDto>> findById(@RequestParam Long uid) {
+		AgentResponseDto dto = agentService.findById(uid);
+		ApiResponse<AgentResponseDto> response = ApiResponse.ok("조회 성공", dto);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
@@ -77,8 +70,7 @@ public class AgentController {
 	@PatchMapping("/update-info" )
 	public ResponseEntity<ApiResponse<AgentResponseDto>> updateInfo(
 		@RequestBody AgentRequestDto agentRequestDto,
-		Principal principal
-	) {
+		Principal principal) {
 		Long uid = Long.parseLong(principal.getName());
 		AgentResponseDto updatedInfo = agentService.updateInfo(uid, agentRequestDto);
 
