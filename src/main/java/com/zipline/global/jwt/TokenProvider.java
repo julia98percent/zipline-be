@@ -52,7 +52,6 @@ public class TokenProvider {
 			.uid(uid)
 			.grantType(BEARER_TYPE)
 			.accessToken(accessToken)
-			.accessTokenExpiresIn(accessTokenExpiresIn.getTime())
 			.build();
 	}
 

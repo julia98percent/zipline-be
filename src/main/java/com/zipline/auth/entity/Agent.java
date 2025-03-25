@@ -2,7 +2,7 @@ package com.zipline.auth.entity;
 
 import java.time.LocalDate;
 
-import com.zipline.auth.dto.AgentsRequestDto;
+import com.zipline.auth.dto.AgentRequestDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @Table(name = "agents" )
-public class Agents {
+public class Agent {
 
 	@Enumerated(EnumType.STRING)
 	private Authority authority;
@@ -33,15 +33,12 @@ public class Agents {
 	private Long uid; // PK
 
 	@Column(nullable = false)
-	private Long agencyId; // FK
-
-	@Column
 	private String id;
 
-	@Column
+	@Column(nullable = false)
 	private String password;
 
-	@Column
+	@Column(nullable = false)
 	private String name;
 
 	@Column
@@ -69,10 +66,9 @@ public class Agents {
 	private LocalDate certIssueDate;
 
 	@Builder
-	public Agents(Long agencyId, String id, String password, String name, String role,
+	public Agent(Long agencyId, String id, String password, String name, String role,
 		String url, LocalDate birthday, String qr, String phoneNo, String email,
 		String certNo, LocalDate certIssueDate, Authority authority) {
-		this.agencyId = agencyId;
 		this.id = id;
 		this.password = password;
 		this.name = name;
@@ -87,7 +83,7 @@ public class Agents {
 		this.authority = authority;
 	}
 
-	public void updateInfo(AgentsRequestDto dto) {
+	public void updateInfo(AgentRequestDto dto) {
 		this.id = dto.getId();
 		this.name = dto.getName();
 		this.role = dto.getRole();

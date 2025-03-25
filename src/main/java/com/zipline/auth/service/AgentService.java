@@ -11,13 +11,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.zipline.auth.dto.AgentsRequestDto;
+import com.zipline.auth.dto.AgentRequestDto;
+import com.zipline.auth.dto.AgentResponseDto;
 import com.zipline.auth.dto.TokenDto;
-import com.zipline.auth.dto.UserResponseDto;
-import com.zipline.auth.entity.Agents;
+import com.zipline.auth.entity.Agent;
 import com.zipline.auth.entity.Authority;
-import com.zipline.auth.repository.AgentsRepository;
+import com.zipline.auth.repository.AgentRepository;
 import com.zipline.global.exception.custom.AgentNotFoundException;
+import com.zipline.global.exception.custom.BaseException;
 import com.zipline.global.jwt.TokenProvider;
 
 import jakarta.transaction.Transactional;
@@ -25,47 +26,51 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class AgentsService {
+public class AgentService {
 
 	private final AuthenticationManagerBuilder authenticationManagerBuilder;
-	private final AgentsRepository agentsRepository;
+	private final AgentRepository agentRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final TokenProvider tokenProvider;
 
 	@Transactional
-	public UserResponseDto signup(AgentsRequestDto agentsRequestDto) {
-		if (agentsRepository.existsById(agentsRequestDto.getId())) {
+	public AgentResponseDto signup(AgentRequestDto agentRequestDto) {
+
+		if (!agentRequestDto.getPassword().equals(agentRequestDto.getPasswordCheck())) {
+			throw new BaseException("비밀번호와 비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+		}
+		
+		if (agentRepository.existsById(agentRequestDto.getId())) {
 			throw new AgentNotFoundException("이미 가입되어있는 유저입니다.", HttpStatus.BAD_REQUEST);
 		}
 
-		Agents agents = Agents.builder()
-			.agencyId(agentsRequestDto.getAgencyId())
-			.id(agentsRequestDto.getId())
-			.password(passwordEncoder.encode(agentsRequestDto.getPassword()))
-			.name(agentsRequestDto.getName())
-			.role(agentsRequestDto.getRole())
-			.url(agentsRequestDto.getUrl())
-			.birthday(agentsRequestDto.getBirthday())
-			.qr(agentsRequestDto.getQr())
-			.phoneNo(agentsRequestDto.getPhoneNo())
-			.email(agentsRequestDto.getEmail())
-			.certNo(agentsRequestDto.getCertNo())
-			.certIssueDate(agentsRequestDto.getCertIssueDate())
+		Agent agent = Agent.builder()
+			.id(agentRequestDto.getId())
+			.password(passwordEncoder.encode(agentRequestDto.getPassword()))
+			.name(agentRequestDto.getName())
+			.role(agentRequestDto.getRole())
+			.url(agentRequestDto.getUrl())
+			.birthday(agentRequestDto.getBirthday())
+			.qr(agentRequestDto.getQr())
+			.phoneNo(agentRequestDto.getPhoneNo())
+			.email(agentRequestDto.getEmail())
+			.certNo(agentRequestDto.getCertNo())
+			.certIssueDate(agentRequestDto.getCertIssueDate())
 			.authority(Authority.ROLE_USER)
 			.build();
 
-		agentsRepository.save(agents);
-		return UserResponseDto.of(agents);  //**공통응답처리**//
+		agentRepository.save(agent);
+		return AgentResponseDto.of(agent);
 	}
 
 	@Transactional
-	public TokenDto login(AgentsRequestDto agentsRequestDto) {
+	public TokenDto login(AgentRequestDto agentRequestDto) {
 
-		Agents agents = agentsRepository.findById(agentsRequestDto.getId())
+		Agent agent = agentRepository.findById(agentRequestDto.getId())
 			.orElseThrow(() -> new AgentNotFoundException("가입되지 않은 사용자입니다.", HttpStatus.BAD_REQUEST));
 
 		// 2. 비밀번호 검증
-		if (!passwordEncoder.matches(agentsRequestDto.getPassword(), agents.getPassword())) {
+		if (!passwordEncoder.matches(agentRequestDto.getPassword(), agent.getPassword())) {
 			throw new AgentNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
 		}
 
@@ -74,39 +79,39 @@ public class AgentsService {
 
 		// 4. 수동 인증 객체 생성
 		Authentication authentication = new UsernamePasswordAuthenticationToken(
-			agents.getId(), null, authorities
+			agent.getUid(), null, authorities
 		);
 
-		return tokenProvider.generateTokenDto(authentication, agents.getUid());
+		return tokenProvider.generateTokenDto(authentication, agent.getUid());
 	}
 
 	public void logout(Long uid) {
-		Agents agents = agentsRepository.findById(uid)
+		Agent agent = agentRepository.findById(uid)
 			.orElseThrow(() -> new AgentNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-		agentsRepository.save(agents);
+		agentRepository.save(agent);
 	}
 
-	public UserResponseDto updateInfo(Long uid, AgentsRequestDto agentsRequestDto) {
-		Agents agents = agentsRepository.findById(uid)
+	public AgentResponseDto updateInfo(Long uid, AgentRequestDto agentRequestDto) {
+		Agent agent = agentRepository.findById(uid)
 			.orElseThrow(() -> new AgentNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-		agents.updateInfo(agentsRequestDto);
+		agent.updateInfo(agentRequestDto);
 
-		agentsRepository.save(agents);
-		return UserResponseDto.of(agents);
+		agentRepository.save(agent);
+		return AgentResponseDto.of(agent);
 	}
 
 	public void updatePassword(String id, String currentPassword, String newPassword) {
-		Agents agents = validatePassword(id, currentPassword);
-		agents.updatePassword(passwordEncoder.encode((newPassword)));
+		Agent agent = validatePassword(id, currentPassword);
+		agent.updatePassword(passwordEncoder.encode((newPassword)));
 	}
 
-	public Agents validatePassword(String id, String currentPassword) {
-		Agents agents = agentsRepository.findById(id)
+	public Agent validatePassword(String id, String currentPassword) {
+		Agent agent = agentRepository.findById(id)
 			.orElseThrow(() -> new AgentNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-		if (!passwordEncoder.matches(currentPassword, agents.getPassword())) {
+		if (!passwordEncoder.matches(currentPassword, agent.getPassword())) {
 			throw new AgentNotFoundException("현재 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
 		}
-		return agents;
+		return agent;
 	}
 
 }

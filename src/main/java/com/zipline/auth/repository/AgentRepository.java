@@ -4,10 +4,10 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.zipline.auth.entity.Agents;
+import com.zipline.auth.entity.Agent;
 
-public interface AgentsRepository extends JpaRepository<Agents, Long> {
-	Optional<Agents> findById(String id);
+public interface AgentRepository extends JpaRepository<Agent, Long> {
+	Optional<Agent> findById(String id);
 
 	boolean existsById(String id);
 }
