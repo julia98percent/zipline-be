@@ -22,7 +22,7 @@ public class CustomUserDetailService implements UserDetailsService {
 	@Override
 	@Transactional
 	public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
-		return userRepository.findById(id)
+		return userRepository.findByLoginId(id)
 			.map(this::createUserDetails)
 			.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 	}

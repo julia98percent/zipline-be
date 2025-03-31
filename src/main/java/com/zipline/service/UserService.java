@@ -74,7 +74,7 @@ public class UserService {
 		}
 
 		//1. 사용자 조회
-		User user = userRepository.findById(userRequestDto.getId())
+		User user = userRepository.findByLoginId(userRequestDto.getId())
 			.orElseThrow(() -> new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST));
 
 		// 2. 비밀번호 검증
