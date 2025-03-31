@@ -1,12 +1,12 @@
-package com.zipline.auth.service;
+package com.zipline.service;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.zipline.auth.entity.User;
-import com.zipline.auth.repository.UserRepository;
+import com.zipline.entity.User;
+import com.zipline.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
-package com.zipline.auth.dto;
+package com.zipline.dto;
 
-import com.zipline.auth.entity.User;
+import com.zipline.entity.User;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.zipline.auth.controller;
+package com.zipline.controller;
 
 import java.security.Principal;
 
@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zipline.auth.dto.TokenRequestDto;
-import com.zipline.auth.dto.TokenResponseDto;
-import com.zipline.auth.dto.UserRequestDto;
-import com.zipline.auth.dto.UserResponseDto;
-import com.zipline.auth.service.UserService;
+import com.zipline.dto.TokenRequestDto;
+import com.zipline.dto.TokenResponseDto;
+import com.zipline.dto.UserRequestDto;
+import com.zipline.dto.UserResponseDto;
 import com.zipline.global.common.response.ApiResponse;
+import com.zipline.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

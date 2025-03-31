@@ -1,6 +1,6 @@
-package com.zipline.auth.entity;
+package com.zipline.entity;
 
-import com.zipline.auth.dto.UserRequestDto;
+import com.zipline.dto.UserRequestDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

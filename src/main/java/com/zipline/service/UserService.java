@@ -1,8 +1,7 @@
-package com.zipline.auth.service;
+package com.zipline.service;
 
 import java.util.List;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,14 +11,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zipline.auth.dto.TokenRequestDto;
-import com.zipline.auth.dto.UserRequestDto;
-import com.zipline.auth.dto.UserResponseDto;
-import com.zipline.auth.entity.Authority;
-import com.zipline.auth.entity.User;
-import com.zipline.auth.repository.UserRepository;
+import com.zipline.dto.TokenRequestDto;
+import com.zipline.dto.UserRequestDto;
+import com.zipline.dto.UserResponseDto;
+import com.zipline.entity.Authority;
+import com.zipline.entity.User;
 import com.zipline.global.exception.custom.AgentNotFoundException;
 import com.zipline.global.jwt.TokenProvider;
+import com.zipline.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +29,6 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final TokenProvider tokenProvider;
-	private final RedisTemplate<String, String> redisTemplate;
 
 	@Transactional(readOnly = true)
 	public UserResponseDto findById(Long uid) {

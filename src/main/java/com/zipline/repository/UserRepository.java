@@ -1,10 +1,10 @@
-package com.zipline.auth.repository;
+package com.zipline.repository;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.zipline.auth.entity.User;
+import com.zipline.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 	Optional<User> findById(String id);
