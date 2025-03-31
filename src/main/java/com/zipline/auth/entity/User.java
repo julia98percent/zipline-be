@@ -1,8 +1,6 @@
 package com.zipline.auth.entity;
 
-import java.time.LocalDate;
-
-import com.zipline.auth.dto.AgentRequestDto;
+import com.zipline.auth.dto.UserRequestDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,78 +20,63 @@ import lombok.NoArgsConstructor;
 @Builder
 @Getter
 @Entity
-@Table(name = "agents" )
-public class Agent {
+@Table(name = "users")
+public class User {
 
 	@Enumerated(EnumType.STRING)
-	private Authority authority;
+	private Authority role;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long uid; // PK
 
-	@Column(nullable = false)
+	@Column(nullable = false, length = 20, unique = true)
 	private String id;
 
-	@Column(nullable = false)
+	@Column(nullable = false, length = 100)
 	private String password;
 
-	@Column(nullable = false)
+	@Column(nullable = false, length = 50)
 	private String name;
 
-	@Column
-	private String role;
-
-	@Column
+	@Column(length = 255)
 	private String url;
 
 	@Column
-	private LocalDate birthday;
+	private Integer birthday;
 
 	@Column
-	private String qr;
+	private Integer noticeMonth;
 
-	@Column
+	@Column(length = 20)
 	private String phoneNo;
 
-	@Column
+	@Column(length = 255)
 	private String email;
 
-	@Column
-	private String certNo;
-
-	@Column
-	private LocalDate certIssueDate;
-
 	@Builder
-	public Agent(Long agencyId, String id, String password, String name, String role,
-		String url, LocalDate birthday, String qr, String phoneNo, String email,
-		String certNo, LocalDate certIssueDate, Authority authority) {
+	public User(String id, String password, String name, Authority role,
+		String url, Integer birthday, String phoneNo, String email, Integer noticeMonth
+	) {
 		this.id = id;
 		this.password = password;
 		this.name = name;
 		this.role = role;
 		this.url = url;
 		this.birthday = birthday;
-		this.qr = qr;
 		this.phoneNo = phoneNo;
 		this.email = email;
-		this.certNo = certNo;
-		this.certIssueDate = certIssueDate;
-		this.authority = authority;
+		this.noticeMonth = noticeMonth;
 	}
 
-	public void updateInfo(AgentRequestDto dto) {
+	public void updateInfo(UserRequestDto dto) {
 		this.id = dto.getId();
 		this.name = dto.getName();
-		this.role = dto.getRole();
 		this.url = dto.getUrl();
 		this.birthday = dto.getBirthday();
-		this.qr = dto.getQr();
 		this.phoneNo = dto.getPhoneNo();
 		this.email = dto.getEmail();
-		this.certNo = dto.getCertNo();
-		this.certIssueDate = dto.getCertIssueDate();
+		this.noticeMonth = dto.getNoticeMonth();
 	}
 
 	public void updatePassword(String newPassword) {

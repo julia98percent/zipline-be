@@ -28,17 +28,18 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain userFilterChain(HttpSecurity http) throws Exception {
 		http
+			.securityMatcher("/api/user/**")
 			.csrf(csrf -> csrf.disable())
-			.formLogin(form -> form.disable())  // 기본 로그인 창 비활성화
+			.formLogin(form -> form.disable())
 			.sessionManagement(
-				session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함 (JWT 기반 인증 시 필요)
+				session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/agents/login", "/api/agents/signup" )
+				.requestMatchers("/api/user/login", "/api/user/signup", "/api/user/me")
 				.permitAll()
-				.requestMatchers("/api/agents/updatepassword", "/api/agents/updateinfo", "/api/agents/me" )
-				.hasRole("USER" )
+				.requestMatchers("/api/user/updatepassword", "/api/user/updateinfo")
+				.hasRole("AGENT")
 				.anyRequest()
 				.authenticated()
 			).addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
