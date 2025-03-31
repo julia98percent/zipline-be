@@ -16,7 +16,7 @@ import com.zipline.dto.UserRequestDto;
 import com.zipline.dto.UserResponseDto;
 import com.zipline.entity.Authority;
 import com.zipline.entity.User;
-import com.zipline.global.exception.custom.AgentNotFoundException;
+import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.jwt.TokenProvider;
 import com.zipline.repository.UserRepository;
 
@@ -33,7 +33,7 @@ public class UserService {
 	@Transactional(readOnly = true)
 	public UserResponseDto findById(Long uid) {
 		User user = userRepository.findById(uid)
-			.orElseThrow(() -> new AgentNotFoundException("해당 유저를 찾을 수 없습니다. id=" + uid, HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다. id=" + uid, HttpStatus.BAD_REQUEST));
 
 		return UserResponseDto.of(user);
 	}
@@ -42,11 +42,11 @@ public class UserService {
 	public UserResponseDto signup(UserRequestDto userRequestDto) {
 
 		if (!userRequestDto.getPassword().equals(userRequestDto.getPasswordCheck())) {
-			throw new AgentNotFoundException("비밀번호와 비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+			throw new UserNotFoundException("비밀번호와 비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
 		}
 
 		if (userRepository.existsById(userRequestDto.getId())) {
-			throw new AgentNotFoundException("사용할 수 없는 아이디입니다.", HttpStatus.BAD_REQUEST);
+			throw new UserNotFoundException("사용할 수 없는 아이디입니다.", HttpStatus.BAD_REQUEST);
 		}
 
 		User user = User.builder()
@@ -70,16 +70,16 @@ public class UserService {
 
 		// 0. 입력값 null 체크
 		if (userRequestDto.getId().isBlank() || userRequestDto.getPassword().isBlank()) {
-			throw new AgentNotFoundException("아이디와 비밀번호를 모두 입력해주세요.", HttpStatus.BAD_REQUEST);
+			throw new UserNotFoundException("아이디와 비밀번호를 모두 입력해주세요.", HttpStatus.BAD_REQUEST);
 		}
 
 		//1. 사용자 조회
 		User user = userRepository.findById(userRequestDto.getId())
-			.orElseThrow(() -> new AgentNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST));
 
 		// 2. 비밀번호 검증
 		if (!passwordEncoder.matches(userRequestDto.getPassword(), user.getPassword())) {
-			throw new AgentNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+			throw new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
 		}
 
 		// 3. 권한 설정
@@ -95,12 +95,12 @@ public class UserService {
 
 	public void logout(Long uid) {
 		User user = userRepository.findById(uid)
-			.orElseThrow(() -> new AgentNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 	}
 
 	public UserResponseDto updateInfo(Long uid, UserRequestDto userRequestDto) {
 		User user = userRepository.findById(uid)
-			.orElseThrow(() -> new AgentNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 		user.updateInfo(userRequestDto);
 
 		userRepository.save(user);
