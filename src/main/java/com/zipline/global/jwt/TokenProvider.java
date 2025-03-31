@@ -33,8 +33,11 @@ public class TokenProvider {
 	private static final String AUTHORITIES_KEY = "auth";
 	private static final String BEARER_TYPE = "Bearer";
 
-	private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 15;
-	private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 24 * 7; //7일
+	@Value("${jwt.accessToken.expiration}")
+	long ACCESS_TOKEN_EXPIRE_TIME;
+
+	@Value("${jwt.refreshToken.expiration}")
+	long REFRESH_TOKEN_EXPIRE_TIME;
 
 	private final Key key;
 

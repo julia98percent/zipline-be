@@ -85,7 +85,7 @@ public class UserController {
 
 		ResponseCookie expiredCookie = ResponseCookie.from("refreshToken", "")
 			.httpOnly(true)
-			.secure(true)
+			.secure(false)  //https에서만 전송하려면 true로 전환
 			.path("/")
 			.maxAge(0) // 즉시 만료
 			.sameSite("Strict")
