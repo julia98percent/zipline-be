@@ -1,6 +1,4 @@
-package com.zipline.auth.dto;
-
-import java.time.LocalDate;
+package com.zipline.dto;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
@@ -11,20 +9,17 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class AgentRequestDto {
+public class UserRequestDto {
 
 	private String id;
 	private String password;
 	private String passwordCheck; // 비밀번호 확인
 	private String name;
-	private String role;
 	private String url;
-	private LocalDate birthday;
-	private String qr;
+	private Integer birthday;
 	private String phoneNo;
 	private String email;
-	private String certNo;
-	private LocalDate certIssueDate;
+	private Integer noticeMonth;
 
 	public UsernamePasswordAuthenticationToken toAuthentifation() {
 		return new UsernamePasswordAuthenticationToken(id, password);
