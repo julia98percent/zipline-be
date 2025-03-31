@@ -1,0 +1,37 @@
+package com.zipline.service;
+
+import java.time.LocalDateTime;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.zipline.dto.CustomerRegisterRequestDTO;
+import com.zipline.entity.Customer;
+import com.zipline.entity.User;
+import com.zipline.global.common.response.ApiResponse;
+import com.zipline.global.exception.custom.UserNotFoundException;
+import com.zipline.repository.CustomerRepository;
+import com.zipline.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
+@Service
+public class CustomerService {
+
+	private final CustomerRepository customerRepository;
+	private final UserRepository userRepository;
+
+	@Transactional
+	public ApiResponse<Void> registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUID) {
+		User loginedUser = userRepository.findById(userUID)
+			.orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+		Customer customer = customerRegisterRequestDTO.toEntity(loginedUser, false,
+			LocalDateTime.now(), null, null);
+		customerRepository.save(customer);
+		return ApiResponse.create("유저 등록에 성공하였습니다.");
+	}
+}
