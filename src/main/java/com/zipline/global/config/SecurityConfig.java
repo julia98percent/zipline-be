@@ -30,7 +30,6 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain userFilterChain(HttpSecurity http) throws Exception {
 		http
-			.securityMatcher("/api/user/**")
 			.csrf(csrf -> csrf.disable())
 			.formLogin(form -> form.disable())
 			.sessionManagement(
@@ -38,7 +37,10 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/user/login", "/api/user/signup", "/api/user/me")
 				.permitAll()
-				.requestMatchers("/api/user/updatepassword", "/api/user/updateinfo")
+				.requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**",
+					"/v3/api-docs/**")
+				.permitAll()
+				.requestMatchers("/api/**")
 				.hasRole("AGENT")
 				.anyRequest()
 				.authenticated()
