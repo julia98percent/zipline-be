@@ -2,6 +2,7 @@ package com.zipline.global.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -18,6 +19,14 @@ public class GlobalExceptionHandler {
 		log.error(e.getMessage(), e);
 		ExceptionResponseDTO response = ExceptionResponseDTO.of(e.getStatus(), e.getMessage());
 		return ResponseEntity.status(e.getStatus()).body(response);
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ExceptionResponseDTO> handleException(MethodArgumentNotValidException e) {
+		log.error(e.getMessage(), e);
+		ExceptionResponseDTO response = ExceptionResponseDTO.of(HttpStatus.BAD_REQUEST,
+			e.getBindingResult().getFieldError().getDefaultMessage());
+		return ResponseEntity.status(e.getStatusCode()).body(response);
 	}
 
 	@ExceptionHandler(Exception.class)
