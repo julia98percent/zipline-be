@@ -72,7 +72,7 @@ public class CustomerRegisterRequestDTO {
 	private BigInteger minDeposit;
 
 	@Schema(description = "최대 보증금", example = "10000000")
-	@DecimalMax(value = "1000000000", message = "최대 보증금은 너무 높습니다.")
+	@DecimalMax(value = "1000000000", message = "최대 보증금은 1000000000 이하이어야 합니다.")
 	private BigInteger maxDeposit;
 
 	public Customer toEntity(User user, boolean isDeleted, LocalDateTime createdAt, LocalDateTime updatedAt,
