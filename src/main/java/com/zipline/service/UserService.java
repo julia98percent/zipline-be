@@ -1,7 +1,9 @@
 package com.zipline.service;
 
+import java.time.Duration;
 import java.util.List;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,6 +31,7 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final TokenProvider tokenProvider;
+	private final RedisTemplate<String, String> redisTemplate;
 
 	@Transactional(readOnly = true)
 	public UserResponseDto findById(Long uid) {
@@ -90,12 +93,22 @@ public class UserService {
 
 		TokenRequestDto tokenRequestDto = tokenProvider.generateTokenDto(authentication, user.getUid());
 
+		redisTemplate.opsForValue().set(
+			"refresh:" + user.getUid(),
+			tokenRequestDto.getRefreshToken(),
+			Duration.ofDays(7)
+		);
+
 		return tokenRequestDto;
 	}
 
 	public void logout(Long uid) {
 		User user = userRepository.findById(uid)
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+
+		String redisKey = "refresh:" + uid;
+
+		redisTemplate.delete(redisKey);
 	}
 
 	public UserResponseDto updateInfo(Long uid, UserRequestDto userRequestDto) {
@@ -108,4 +121,3 @@ public class UserService {
 	}
 
 }
-
