@@ -1,8 +1,11 @@
 package com.zipline.controller;
 
 import java.security.Principal;
+import java.time.Duration;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +23,7 @@ import com.zipline.dto.UserResponseDto;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.service.UserService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,9 +51,19 @@ public class UserController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<ApiResponse<TokenResponseDto>> login(@RequestBody UserRequestDto userRequestDto) {
+	public ResponseEntity<ApiResponse<TokenResponseDto>> login(
+		@RequestBody UserRequestDto userRequestDto,
+		HttpServletResponse response) {
 
 		TokenRequestDto tokenRequestDto = userService.login(userRequestDto); // 로그인 & 토큰 발급
+
+		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenRequestDto.getRefreshToken())
+			.httpOnly(true)
+			.secure(false)  //https에서만 전송하려면 true로 전환
+			.path("/")
+			.maxAge(Duration.ofDays(7))
+			.build();
+		response.setHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
 		TokenResponseDto tokenResponseDto = TokenResponseDto.builder()
 			.uid(tokenRequestDto.getUid())
@@ -62,9 +76,21 @@ public class UserController {
 	}
 
 	@PatchMapping("/logout")
-	public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal UserDetails userDetails) {
+	public ResponseEntity<ApiResponse<Void>> logout(
+		@AuthenticationPrincipal UserDetails userDetails,
+		HttpServletResponse response
+	) {
 		Long uid = Long.parseLong(userDetails.getUsername());
 		userService.logout(uid);
+
+		ResponseCookie expiredCookie = ResponseCookie.from("refreshToken", "")
+			.httpOnly(true)
+			.secure(true)
+			.path("/")
+			.maxAge(0) // 즉시 만료
+			.sameSite("Strict")
+			.build();
+		response.setHeader(HttpHeaders.SET_COOKIE, expiredCookie.toString());
 
 		ApiResponse<Void> responseBody = ApiResponse.ok("로그아웃 성공");
 		return ResponseEntity.ok(responseBody);
@@ -80,4 +106,5 @@ public class UserController {
 		ApiResponse<UserResponseDto> response = ApiResponse.ok("회원 정보 수정 완료", updatedInfo);
 		return ResponseEntity.ok(response);
 	}
+
 }
