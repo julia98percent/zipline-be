@@ -3,6 +3,10 @@ package com.zipline.entity;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 
+import org.springframework.http.HttpStatus;
+
+import com.zipline.global.exception.custom.customer.PriceValidationException;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -118,5 +122,62 @@ public class Customer {
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.deletedAt = deletedAt;
+	}
+
+	public void modifyCustomer(String name, String phoneNo, String address, String telProvider, String region,
+		BigInteger minRent, BigInteger maxRent, String trafficSource, boolean isTenant, boolean isLandlord,
+		boolean isBuyer, boolean isSeller, BigInteger maxPrice, BigInteger minPrice, BigInteger minDeposit,
+		BigInteger maxDeposit, LocalDateTime updatedAt) {
+		validatePrices(minRent, maxRent, maxPrice, minPrice, minDeposit, maxDeposit);
+		this.name = name;
+		this.phoneNo = phoneNo;
+		this.address = address;
+		this.telProvider = telProvider;
+		this.region = region;
+		this.minRent = minRent;
+		this.maxRent = maxRent;
+		this.trafficSource = trafficSource;
+		this.isTenant = isTenant;
+		this.isLandlord = isLandlord;
+		this.isBuyer = isBuyer;
+		this.isSeller = isSeller;
+		this.minPrice = minPrice;
+		this.maxPrice = maxPrice;
+		this.minDeposit = minDeposit;
+		this.maxDeposit = maxDeposit;
+		this.updatedAt = updatedAt;
+	}
+
+	private void validatePrices(BigInteger minRent, BigInteger maxRent, BigInteger minPrice, BigInteger maxPrice,
+		BigInteger minDeposit, BigInteger maxDeposit) {
+		validateNotNegative(minRent);
+		validateNotNegative(maxRent);
+		validateNotNegative(minPrice);
+		validateNotNegative(maxPrice);
+		validateNotNegative(minDeposit);
+		validateNotNegative(maxDeposit);
+		validateRange(minRent, maxRent);
+		validateRange(minPrice, maxPrice);
+		validateRange(minDeposit, maxDeposit);
+	}
+
+	private void validateNotNegative(BigInteger price) {
+		if (price == null) {
+			return;
+		}
+
+		if (price.compareTo(BigInteger.ZERO) < 0) {
+			throw new PriceValidationException("가격은 음수일 수 없습니다.", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	private void validateRange(BigInteger min, BigInteger max) {
+		if (min == null || max == null) {
+			return;
+		}
+
+		if (min.compareTo(max) > 0) {
+			throw new PriceValidationException("최소 가격이 최대 가격보다 클 수 없습니다.", HttpStatus.BAD_REQUEST);
+		}
 	}
 }

@@ -1,10 +1,6 @@
 package com.zipline.dto;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
-
-import com.zipline.entity.Customer;
-import com.zipline.entity.User;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMax;
@@ -16,8 +12,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class CustomerRegisterRequestDTO {
-
+public class CustomerModifyRequestDTO {
 	@Schema(description = "사용자 이름", example = "홍길동", required = true)
 	@NotBlank(message = "이름은 필수 입력 항목입니다.")
 	private String name;
@@ -72,33 +67,6 @@ public class CustomerRegisterRequestDTO {
 	private BigInteger minDeposit;
 
 	@Schema(description = "최대 보증금", example = "10000000")
-	@DecimalMax(value = "1000000000", message = "최대 보증금은 1000000000 이하이어야 합니다.")
+	@DecimalMax(value = "1000000000", message = "최대 보증금은 1000000000 이하여야 합니다.")
 	private BigInteger maxDeposit;
-
-	public Customer toEntity(User user, boolean isDeleted, LocalDateTime createdAt, LocalDateTime updatedAt,
-		LocalDateTime deletedAt) {
-		return Customer.builder()
-			.user(user)
-			.name(name)
-			.phoneNo(phoneNo)
-			.address(address)
-			.telProvider(telProvider)
-			.region(region)
-			.minRent(minRent)
-			.maxRent(maxRent)
-			.trafficSource(trafficSource)
-			.isLandlord(isLandlord)
-			.isTenant(isTenant)
-			.isBuyer(isBuyer)
-			.isSeller(isSeller)
-			.maxPrice(maxPrice)
-			.minPrice(minPrice)
-			.minDeposit(minDeposit)
-			.maxDeposit(maxDeposit)
-			.isDeleted(isDeleted)
-			.createdAt(createdAt)
-			.updatedAt(updatedAt)
-			.deletedAt(deletedAt)
-			.build();
-	}
 }

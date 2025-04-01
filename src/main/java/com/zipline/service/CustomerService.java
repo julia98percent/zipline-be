@@ -6,11 +6,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.zipline.dto.CustomerModifyRequestDTO;
+import com.zipline.dto.CustomerModifyResponseDTO;
 import com.zipline.dto.CustomerRegisterRequestDTO;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.global.exception.custom.UserNotFoundException;
+import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
+import com.zipline.global.exception.custom.customer.PermissionDeniedException;
 import com.zipline.repository.CustomerRepository;
 import com.zipline.repository.UserRepository;
 
@@ -33,5 +37,30 @@ public class CustomerService {
 			LocalDateTime.now(), null, null);
 		customerRepository.save(customer);
 		return ApiResponse.create("유저 등록에 성공하였습니다.");
+	}
+
+	@Transactional
+	public ApiResponse<CustomerModifyResponseDTO> modifyCustomer(Long customerUid,
+		CustomerModifyRequestDTO customerModifyRequestDTO, Long userUID) {
+		Customer savedCustomer = customerRepository.findByUidAndIsDeletedFalse(customerUid)
+			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+
+		if (!savedCustomer.getUser().getUid().equals(userUID)) {
+			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+		}
+
+		savedCustomer.modifyCustomer(customerModifyRequestDTO.getName(), customerModifyRequestDTO.getPhoneNo(),
+			customerModifyRequestDTO.getAddress(), customerModifyRequestDTO.getTelProvider(),
+			customerModifyRequestDTO.getRegion(),
+			customerModifyRequestDTO.getMinRent(), customerModifyRequestDTO.getMaxRent(),
+			customerModifyRequestDTO.getTrafficSource(),
+			customerModifyRequestDTO.isTenant(), customerModifyRequestDTO.isLandlord(),
+			customerModifyRequestDTO.isBuyer(),
+			customerModifyRequestDTO.isSeller(), customerModifyRequestDTO.getMaxPrice(),
+			customerModifyRequestDTO.getMinPrice(),
+			customerModifyRequestDTO.getMinDeposit(), customerModifyRequestDTO.getMaxDeposit(), LocalDateTime.now());
+
+		CustomerModifyResponseDTO customerModifyResponseDTO = new CustomerModifyResponseDTO(savedCustomer);
+		return ApiResponse.ok("고객 수정에 성공하였습니다.", customerModifyResponseDTO);
 	}
 }
