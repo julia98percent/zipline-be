@@ -51,7 +51,7 @@ public class CustomerRegisterRequestDTO {
 	private boolean isLandlord;
 
 	@Schema(description = "임차인 여부", example = "true")
-	private boolean isLessee;
+	private boolean isTenant;
 
 	@Schema(description = "매수인 여부", example = "false")
 	private boolean isBuyer;
@@ -88,7 +88,7 @@ public class CustomerRegisterRequestDTO {
 			.maxRent(maxRent)
 			.trafficSource(trafficSource)
 			.isLandlord(isLandlord)
-			.isLandlord(isLessee)
+			.isTenant(isTenant)
 			.isBuyer(isBuyer)
 			.isSeller(isSeller)
 			.maxPrice(maxPrice)
