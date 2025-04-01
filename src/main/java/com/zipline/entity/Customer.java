@@ -148,6 +148,11 @@ public class Customer {
 		this.updatedAt = updatedAt;
 	}
 
+	public void delete(LocalDateTime deletedAt) {
+		this.isDeleted = true;
+		this.deletedAt = deletedAt;
+	}
+
 	private void validatePrices(BigInteger minRent, BigInteger maxRent, BigInteger minPrice, BigInteger maxPrice,
 		BigInteger minDeposit, BigInteger maxDeposit) {
 		validateNotNegative(minRent);
