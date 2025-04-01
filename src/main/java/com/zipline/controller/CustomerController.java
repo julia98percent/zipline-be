@@ -4,6 +4,7 @@ import java.security.Principal;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -44,6 +45,13 @@ public class CustomerController {
 
 		ApiResponse<CustomerModifyResponseDTO> response = customerService.modifyCustomer(
 			customerUid, customerModifyRequestDTO, Long.parseLong(principal.getName()));
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@DeleteMapping("/customers/{customerUid}")
+	public ResponseEntity<ApiResponse<Void>> deleteCustomer(@PathVariable Long customerUid, Principal principal) {
+		ApiResponse<Void> response = customerService.deleteCustomer(customerUid,
+			Long.parseLong(principal.getName()));
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }

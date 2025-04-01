@@ -33,8 +33,8 @@ public class CustomerService {
 	public ApiResponse<Void> registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUID) {
 		User loginedUser = userRepository.findById(userUID)
 			.orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-		Customer customer = customerRegisterRequestDTO.toEntity(loginedUser, false,
-			LocalDateTime.now(), null, null);
+		Customer customer = customerRegisterRequestDTO.toEntity(loginedUser, false, LocalDateTime.now(),
+			null, null);
 		customerRepository.save(customer);
 		return ApiResponse.create("유저 등록에 성공하였습니다.");
 	}
@@ -62,5 +62,18 @@ public class CustomerService {
 
 		CustomerModifyResponseDTO customerModifyResponseDTO = new CustomerModifyResponseDTO(savedCustomer);
 		return ApiResponse.ok("고객 수정에 성공하였습니다.", customerModifyResponseDTO);
+	}
+
+	@Transactional
+	public ApiResponse<Void> deleteCustomer(Long customerUID, Long userUID) {
+		Customer savedCustomer = customerRepository.findByUidAndIsDeletedFalse(customerUID)
+			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+
+		if (!savedCustomer.getUser().getUid().equals(userUID)) {
+			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+		}
+
+		savedCustomer.delete(LocalDateTime.now());
+		return ApiResponse.ok("고객 삭제에 성공하였습니다.");
 	}
 }
