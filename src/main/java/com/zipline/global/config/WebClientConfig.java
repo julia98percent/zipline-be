@@ -1,6 +1,5 @@
 package com.zipline.global.config;
 
-import com.zipline.service.SignatureService;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,9 +15,13 @@ public class WebClientConfig {
   String apiKey;
 
   @Bean
-  public WebClient webClient(SignatureService signatureService) {
-    Map<String, String> signatureResult = signatureService.generateSignature()
-        .block();
+  public WebClient webClient() {
+    // 임시 값
+    Map<String, String> signatureResult = Map.of(
+        "time", "2025-04-01T15:29:00Z",
+        "salt", "randomSaltValue123",
+        "hash", "exampleHashValue456"
+    );
 
     if (signatureResult == null || signatureResult.isEmpty()) {
       throw new IllegalArgumentException("유효하지 않은 signature 값 입니다.");
