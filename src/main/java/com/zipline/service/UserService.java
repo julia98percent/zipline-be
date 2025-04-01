@@ -112,7 +112,6 @@ public class UserService {
 			throw new UserNotFoundException("유효x 토큰", HttpStatus.BAD_REQUEST);
 		}
 
-		String redisKey = "refresh:" + uid;
 		String refreshKey = "refresh:" + uid;
 		redisTemplate.delete(refreshKey);
 
