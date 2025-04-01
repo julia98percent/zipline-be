@@ -24,6 +24,8 @@ import com.zipline.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
+//todo: 추후 webconfig 활용 리펙터링 
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
