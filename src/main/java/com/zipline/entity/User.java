@@ -78,8 +78,4 @@ public class User {
 		this.email = dto.getEmail();
 		this.noticeMonth = dto.getNoticeMonth();
 	}
-
-	public void updatePassword(String newPassword) {
-		this.password = newPassword;
-	}
 }

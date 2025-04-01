@@ -120,7 +120,7 @@ public class TokenProvider {
 		return claims.getSubject();
 	}
 
-	private Claims parseClaims(String token) {
+	public Claims parseClaims(String token) {
 		try {
 			return Jwts.parserBuilder()
 				.setSigningKey(key).build()
@@ -131,5 +131,3 @@ public class TokenProvider {
 		}
 	}
 }
-
-

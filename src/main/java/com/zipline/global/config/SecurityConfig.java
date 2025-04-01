@@ -2,6 +2,7 @@ package com.zipline.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final TokenProvider jwtTokenProvider;
+	private final RedisTemplate<String, String> redisTemplate;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -44,7 +46,9 @@ public class SecurityConfig {
 				.hasRole("AGENT")
 				.anyRequest()
 				.authenticated()
-			).addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+			)
+			.addFilterBefore(new JwtFilter(jwtTokenProvider, redisTemplate),
+				UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
 }

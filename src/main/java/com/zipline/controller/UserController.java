@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -78,10 +79,12 @@ public class UserController {
 	@PatchMapping("/logout")
 	public ResponseEntity<ApiResponse<Void>> logout(
 		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestHeader("Authorization") String authorizationHeader,
 		HttpServletResponse response
 	) {
 		Long uid = Long.parseLong(userDetails.getUsername());
-		userService.logout(uid);
+		String accessToken = authorizationHeader.replace("Bearer ", "");
+		userService.logout(uid, accessToken);
 
 		ResponseCookie expiredCookie = ResponseCookie.from("refreshToken", "")
 			.httpOnly(true)
