@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ExceptionResponseDTO> handleException(Exception e) {
 		log.error(e.getMessage(), e);
 		ExceptionResponseDTO response = ExceptionResponseDTO.of(HttpStatus.INTERNAL_SERVER_ERROR,
-			"서버 에러가 발생하였습니다.");
+				"서버 에러가 발생하였습니다.");
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 	}
 }
