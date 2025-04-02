@@ -23,7 +23,6 @@ import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.jwt.TokenProvider;
 import com.zipline.repository.UserRepository;
 
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 
 //todo: 추후 webconfig 활용 리펙터링 
@@ -111,14 +110,13 @@ public class UserService {
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 		// 1. Access Token 검증
 		if (!tokenProvider.validateToken(accessToken)) {
-			throw new UserNotFoundException("유효x 토큰", HttpStatus.BAD_REQUEST);
+			throw new UserNotFoundException("유효하지 않은 토큰입니다.", HttpStatus.BAD_REQUEST);
 		}
 
 		String refreshKey = "refresh:" + uid;
 		redisTemplate.delete(refreshKey);
 
-		Claims claims = tokenProvider.parseClaims(accessToken);
-		Date expiration = claims.getExpiration();
+		Date expiration = tokenProvider.getExpiration(accessToken);
 		long now = System.currentTimeMillis();
 		long remainingExpiration = expiration.getTime() - now;
 

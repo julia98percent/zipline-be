@@ -126,7 +126,7 @@ public class TokenProvider {
 		return claims.getSubject();
 	}
 
-	public Claims parseClaims(String token) {
+	private Claims parseClaims(String token) {
 		try {
 			return Jwts.parserBuilder()
 				.setSigningKey(key).build()
@@ -136,4 +136,11 @@ public class TokenProvider {
 			return e.getClaims();
 		}
 	}
+
+	public Date getExpiration(String accessToken) {
+		Claims claims = parseClaims(accessToken);
+		Date expiration = claims.getExpiration();
+		return expiration;
+	}
+
 }
