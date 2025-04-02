@@ -1,6 +1,7 @@
 package com.zipline.service;
 
 import java.time.Duration;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -104,13 +105,28 @@ public class UserService {
 		return tokenRequestDto;
 	}
 
-	public void logout(Long uid) {
+	public void logout(Long uid, String accessToken) {
 		User user = userRepository.findById(uid)
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+		// 1. Access Token 검증
+		if (!tokenProvider.validateToken(accessToken)) {
+			throw new UserNotFoundException("유효하지 않은 토큰입니다.", HttpStatus.BAD_REQUEST);
+		}
 
-		String redisKey = "refresh:" + uid;
+		String refreshKey = "refresh:" + uid;
+		redisTemplate.delete(refreshKey);
 
-		redisTemplate.delete(redisKey);
+		Date expiration = tokenProvider.getExpiration(accessToken);
+		long now = System.currentTimeMillis();
+		long remainingExpiration = expiration.getTime() - now;
+
+		if (remainingExpiration > 0) {
+			redisTemplate.opsForValue().set(
+				"blacklist:" + accessToken,
+				"logout",
+				Duration.ofMillis(remainingExpiration)
+			);
+		}
 	}
 
 	public UserResponseDto updateInfo(Long uid, UserRequestDto userRequestDto) {

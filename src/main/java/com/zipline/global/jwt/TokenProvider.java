@@ -130,6 +130,11 @@ public class TokenProvider {
 			return e.getClaims();
 		}
 	}
+
+	public Date getExpiration(String accessToken) {
+		Claims claims = parseClaims(accessToken);
+		Date expiration = claims.getExpiration();
+		return expiration;
+	}
+
 }
-
-
