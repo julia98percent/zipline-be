@@ -11,9 +11,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.zipline.global.jwt.JwtAccessDeniedHandler;
+import com.zipline.global.jwt.JwtAuthenticationEntryPoint;
 import com.zipline.global.jwt.JwtFilter;
 import com.zipline.global.jwt.TokenProvider;
 
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -27,6 +33,20 @@ public class SecurityConfig {
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
+	public OpenAPI customOpenAPI() {
+		return new OpenAPI()
+			.addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
+			.components(new Components()
+				.addSecuritySchemes("BearerAuth",
+					new SecurityScheme()
+						.name("Authorization")
+						.type(SecurityScheme.Type.HTTP)
+						.scheme("bearer")
+						.bearerFormat("JWT")
+				));
 	}
 
 	@Bean
@@ -48,7 +68,12 @@ public class SecurityConfig {
 				.authenticated()
 			)
 			.addFilterBefore(new JwtFilter(jwtTokenProvider, redisTemplate),
-				UsernamePasswordAuthenticationFilter.class);
+				UsernamePasswordAuthenticationFilter.class)
+			.exceptionHandling(exception ->
+				exception
+					.authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+					.accessDeniedHandler(new JwtAccessDeniedHandler())
+			);
 		return http.build();
 	}
 }

@@ -1,8 +1,14 @@
 package com.zipline.global.common.response;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.http.HttpStatus;
 
+import net.minidev.json.JSONObject;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.zipline.global.jwt.ErrorCode;
 
 import lombok.Getter;
 
@@ -27,6 +33,16 @@ public class ApiResponse<T> {
 
 	public static <T> ApiResponse<T> success(HttpStatus status, String message) {
 		return new ApiResponse<>(true, status.value(), message, null);
+	}
+
+	public static JSONObject jsonOf(ErrorCode errorCode) {
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+		jsonObject.put("success", false);
+		jsonObject.put("message", errorCode.getMessage());
+		jsonObject.put("status", errorCode.getHttpStatus().value());
+		jsonObject.put("code", errorCode.getHttpStatus());
+		return jsonObject;
 	}
 
 	public static <T> ApiResponse<T> ok(String message, T data) {
