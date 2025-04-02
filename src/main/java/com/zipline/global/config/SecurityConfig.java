@@ -11,8 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.zipline.global.jwt.JwtAccessDeniedHandler;
-import com.zipline.global.jwt.JwtAuthenticationEntryPoint;
 import com.zipline.global.jwt.JwtFilter;
 import com.zipline.global.jwt.TokenProvider;
 
@@ -68,12 +66,8 @@ public class SecurityConfig {
 				.authenticated()
 			)
 			.addFilterBefore(new JwtFilter(jwtTokenProvider, redisTemplate),
-				UsernamePasswordAuthenticationFilter.class)
-			.exceptionHandling(exception ->
-				exception
-					.authenticationEntryPoint(new JwtAuthenticationEntryPoint())
-					.accessDeniedHandler(new JwtAccessDeniedHandler())
-			);
+				UsernamePasswordAuthenticationFilter.class);
+
 		return http.build();
 	}
 }
