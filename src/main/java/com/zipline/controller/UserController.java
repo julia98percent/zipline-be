@@ -9,6 +9,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,9 +27,7 @@ import com.zipline.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -60,10 +59,12 @@ public class UserController {
 
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenRequestDto.getRefreshToken())
 			.httpOnly(true)
-			.secure(false)  //https에서만 전송하려면 true로 전환
+			.secure(true)  //https에서만 전송하려면 true로 전환
 			.path("/")
 			.maxAge(Duration.ofDays(7))
+			.sameSite("None")
 			.build();
+
 		response.setHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
 		TokenResponseDto tokenResponseDto = TokenResponseDto.builder()
@@ -108,6 +109,29 @@ public class UserController {
 
 		ApiResponse<UserResponseDto> response = ApiResponse.ok("회원 정보 수정 완료", updatedInfo);
 		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/reissue")
+	public ResponseEntity<ApiResponse<TokenResponseDto>> reissue(@CookieValue("refreshToken") String refreshToken) {
+		TokenRequestDto tokenRequestDto = userService.reissue(refreshToken);
+
+		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenRequestDto.getRefreshToken())
+			.httpOnly(true)
+			.secure(true)
+			.path("/")
+			.maxAge(Duration.ofDays(7))
+			.sameSite("None")
+			.build();
+
+		TokenResponseDto tokenResponseDto = TokenResponseDto.builder()
+			.uid(tokenRequestDto.getUid())
+			.grantType(tokenRequestDto.getGrantType())
+			.accessToken(tokenRequestDto.getAccessToken())
+			.build();
+
+		ApiResponse<TokenResponseDto> response = ApiResponse.ok("AccessToken 재발급 성공", tokenResponseDto);
+		return ResponseEntity.ok(response);
+
 	}
 
 }

@@ -20,9 +20,11 @@ import com.zipline.dto.UserResponseDto;
 import com.zipline.entity.Authority;
 import com.zipline.entity.User;
 import com.zipline.global.exception.custom.UserNotFoundException;
+import com.zipline.global.jwt.ErrorCode;
 import com.zipline.global.jwt.TokenProvider;
 import com.zipline.repository.UserRepository;
 
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 
 //todo: 추후 webconfig 활용 리펙터링 
@@ -97,7 +99,7 @@ public class UserService {
 		TokenRequestDto tokenRequestDto = tokenProvider.generateTokenDto(authentication, user.getUid());
 
 		redisTemplate.opsForValue().set(
-			"refresh:" + user.getUid(),
+			"refreshToken:" + user.getUid(),
 			tokenRequestDto.getRefreshToken(),
 			Duration.ofDays(7)
 		);
@@ -113,7 +115,7 @@ public class UserService {
 			throw new UserNotFoundException("유효하지 않은 토큰입니다.", HttpStatus.BAD_REQUEST);
 		}
 
-		String refreshKey = "refresh:" + uid;
+		String refreshKey = "refreshToken:" + uid;
 		redisTemplate.delete(refreshKey);
 
 		Date expiration = tokenProvider.getExpiration(accessToken);
@@ -136,6 +138,37 @@ public class UserService {
 
 		userRepository.save(user);
 		return UserResponseDto.of(user);
+	}
+
+	@Transactional
+	public TokenRequestDto reissue(String refreshToken) {
+		if (!tokenProvider.validateToken(refreshToken)) {
+			throw new JwtException(ErrorCode.JWT_DECODE_FAIL.getMessage());
+		}
+
+		String uidStr = tokenProvider.getUserIdFromToken(refreshToken);
+		Long uid = Long.parseLong(uidStr);
+		//refreshToken = "refreshToken: " + refreshToken;
+		String redisKey = "refreshToken:" + uidStr;
+		String saveRefreshToken = redisTemplate.opsForValue().get(redisKey);
+
+		if (saveRefreshToken == null || !saveRefreshToken.equals(refreshToken)) {
+			throw new JwtException(ErrorCode.JWT_SIGNATURE_FAIL.getMessage());
+		}
+
+		User user = userRepository.findById(uid)
+			.orElseThrow(() -> new UserNotFoundException("해당 사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+
+		List<GrantedAuthority> authorities =
+			List.of(new SimpleGrantedAuthority(user.getRole().name()));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(uid, null, authorities);
+
+		TokenRequestDto tokenRequestDto = tokenProvider.generateTokenDto(authentication, uid);
+
+		redisTemplate.opsForValue().set(redisKey, refreshToken, Duration.ofDays(7));
+
+		return tokenRequestDto;
 	}
 
 }

@@ -57,6 +57,7 @@ public class TokenProvider {
 			.collect(Collectors.joining(","));
 
 		long now = (new Date().getTime());
+		Claims claims = Jwts.claims().setSubject(uid.toString());
 
 		Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
 		Date refreshTokenExpiresIn = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
@@ -68,7 +69,7 @@ public class TokenProvider {
 			.compact();
 
 		String refreshToken = Jwts.builder()
-			.setSubject(uid.toString())
+			.setClaims(claims)
 			.setExpiration(refreshTokenExpiresIn)
 			.signWith(key, SignatureAlgorithm.HS512)
 			.compact();
