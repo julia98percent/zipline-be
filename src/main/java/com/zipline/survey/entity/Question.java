@@ -34,6 +34,8 @@ public class Question {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long uid;
 
+	private String title;
+
 	@Enumerated(EnumType.STRING)
 	private QuestionType questionType;
 
@@ -41,21 +43,22 @@ public class Question {
 	@JoinColumn(name = "survey_uid")
 	private Survey survey;
 
-	private String text;
+	private String description;
 
 	@OneToMany(mappedBy = "question", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	private List<Choice> choices = new ArrayList<>();
 
-	public Question(QuestionType questionType, String text, Survey survey) {
+	public Question(String title, QuestionType questionType, String description, Survey survey) {
+		this.title = title;
 		this.questionType = questionType;
-		this.text = text;
+		this.description = description;
 		this.survey = survey;
 	}
 
 	public void addChoice(Choice choice) {
 		if (this.questionType == QuestionType.FILE_UPLOAD
 			|| this.questionType == QuestionType.SUBJECTIVE) {
-			throw new ChoiceNotAllowedException("객관식이 아닌 질문에는 선택지를 추가할 수 없습니다.", HttpStatus.BAD_REQUEST);
+			throw new ChoiceNotAllowedException("객관식이 아닌 문항에는 선택지를 추가할 수 없습니다.", HttpStatus.BAD_REQUEST);
 		}
 		this.choices.add(choice);
 	}
