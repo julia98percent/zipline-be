@@ -66,7 +66,7 @@ public class QuestionValidator
 	}
 
 	private int getMaxLengthByType(String questionType) {
-		if (questionType.equals("MULTIPLE_CHOICE") || questionType.equals("SINGLE_CHOICE")) {
+		if (isChoiceQuestion(questionType)) {
 			return 30;
 		}
 		return 200;
