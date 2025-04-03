@@ -5,6 +5,7 @@ import java.security.Principal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -12,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zipline.dto.CustomerListResponseDTO;
 import com.zipline.dto.CustomerModifyRequestDTO;
 import com.zipline.dto.CustomerModifyResponseDTO;
 import com.zipline.dto.CustomerRegisterRequestDTO;
+import com.zipline.dto.PageRequestDTO;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.service.CustomerService;
 
@@ -29,6 +32,14 @@ import lombok.extern.slf4j.Slf4j;
 public class CustomerController {
 
 	private final CustomerService customerService;
+
+	@GetMapping("/customers")
+	public ResponseEntity<ApiResponse<CustomerListResponseDTO>> getCustomers(PageRequestDTO pageRequestDTO,
+		Principal principal) {
+		ApiResponse<CustomerListResponseDTO> response = customerService.getCustomers(pageRequestDTO,
+			Long.parseLong(principal.getName()));
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
 
 	@PostMapping("/customers")
 	public ResponseEntity<ApiResponse<Void>> registerCustomer(
