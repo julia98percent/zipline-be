@@ -1,7 +1,6 @@
-package com.zipline.util;
+package com.zipline.global.util;
 
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
 

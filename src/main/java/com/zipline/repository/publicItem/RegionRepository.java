@@ -1,4 +1,4 @@
-package com.zipline.repository;
+package com.zipline.repository.publicItem;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.zipline.entity.Region;
+import com.zipline.entity.publicItem.Region;
 
 @Repository
 public interface RegionRepository extends JpaRepository<Region, Long> {

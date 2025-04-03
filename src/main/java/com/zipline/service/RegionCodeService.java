@@ -1,6 +1,5 @@
 package com.zipline.service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,10 +8,10 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zipline.dto.RegionDto;
-import com.zipline.entity.Region;
-import com.zipline.repository.RegionRepository;
-import com.zipline.util.RandomSleepUtil;
+import com.zipline.dto.publicItem.RegionDto;
+import com.zipline.entity.publicItem.Region;
+import com.zipline.repository.publicItem.RegionRepository;
+import com.zipline.global.util.RandomSleepUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

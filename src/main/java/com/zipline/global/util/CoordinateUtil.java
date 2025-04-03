@@ -1,4 +1,4 @@
-package com.zipline.util;
+package com.zipline.global.util;
 
 public class CoordinateUtil {
     private static final double EARTH_RADIUS = 6371.0; // 지구 반경 (km)

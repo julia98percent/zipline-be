@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zipline.dto.publicItem.ProxyStatusDTO;
-import com.zipline.entity.Region;
+import com.zipline.entity.publicItem.Region;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.global.util.ProxyPool;
-import com.zipline.repository.RegionRepository;
+import com.zipline.repository.publicItem.RegionRepository;
 import com.zipline.service.NaverArticleService;
 import com.zipline.service.publicItem.ProxyNaverArticleService;
 import com.zipline.service.RegionCodeService;
-import com.zipline.util.CrawlingStatusManager;
+import com.zipline.global.util.CrawlingStatusManager;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

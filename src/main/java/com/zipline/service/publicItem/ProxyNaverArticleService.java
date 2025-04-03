@@ -4,13 +4,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -29,12 +24,12 @@ import com.zipline.dto.publicItem.CrawlingStatusDTO;
 import com.zipline.dto.publicItem.PageResultDTO;
 import com.zipline.dto.publicItem.ProxyInfoDTO;
 import com.zipline.entity.PropertyArticle;
-import com.zipline.entity.Region;
+import com.zipline.entity.publicItem.Region;
 import com.zipline.global.util.ProxyPool;
-import com.zipline.repository.PropertyArticleRepository;
-import com.zipline.repository.RegionRepository;
-import com.zipline.util.CoordinateUtil;
-import com.zipline.util.RandomSleepUtil;
+import com.zipline.repository.publicItem.PropertyArticleRepository;
+import com.zipline.repository.publicItem.RegionRepository;
+import com.zipline.global.util.CoordinateUtil;
+import com.zipline.global.util.RandomSleepUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +49,7 @@ public class ProxyNaverArticleService {
     @Getter
     private final ProxyPool proxyPool;
     
-    private static final int MAX_CONCURRENT_REQUESTS = 5;
+    private static final int MAX_CONCURRENT_REQUESTS = 20;
     private static final String BASE_URL = "https://m.land.naver.com/cluster/ajax/articleList";
     private static final String REFERER = "https://new.land.naver.com";
     private static final int CONNECT_TIMEOUT = 5000;
@@ -71,13 +66,13 @@ public class ProxyNaverArticleService {
     private long retryDelayMs;
 
     public void crawlAndSaveArticlesByLevel(int level) {
-        log.info("=== 프록시를 통한 레벨 {} 매물 정보 수집 시작 ===", level);
+        log.info("[Thread-{}] === 프록시를 통한 레벨 {} 매물 정보 수집 시작 ===", Thread.currentThread().getId(), level);
         try {
             LocalDateTime cutoffDate = LocalDateTime.now().minusDays(7); // 일주일 전
-            log.info("수집 기준일: {}", cutoffDate);
+            log.info("[Thread-{}] 수집 기준일: {}", Thread.currentThread().getId(), cutoffDate);
             
             List<Region> regionsToUpdate = regionRepository.findRegionsNeedingUpdateForNaver(level, cutoffDate);
-            log.info("처리할 총 지역 수: {}", regionsToUpdate.size());
+            log.info("[Thread-{}] 처리할 총 지역 수: {}", Thread.currentThread().getId(), regionsToUpdate.size());
             
             // 지역 간 병렬 처리를 위한 CompletableFuture 리스트
             List<CompletableFuture<Void>> regionFutures = new ArrayList<>();
@@ -88,7 +83,7 @@ public class ProxyNaverArticleService {
                     try {
                         crawlAndSaveArticlesForRegion(region);
                     } catch (Exception e) {
-                        log.error("[{}] 지역 처리 중 오류 발생: {}", region.getCortarName(), e.getMessage(), e);
+                        log.error("[Thread-{}] [{}] 지역 처리 중 오류 발생: {}", Thread.currentThread().getId(), region.getCortarName(), e.getMessage(), e);
                     }
                 }, executorService);
                 
@@ -109,9 +104,9 @@ public class ProxyNaverArticleService {
             // 모든 지역 처리가 완료될 때까지 대기
             CompletableFuture.allOf(regionFutures.toArray(new CompletableFuture[0])).join();
             
-            log.info("=== 프록시를 통한 레벨 {} 매물 정보 수집 완료 ===", level);
+            log.info("[Thread-{}] === 프록시를 통한 레벨 {} 매물 정보 수집 완료 ===", Thread.currentThread().getId(), level);
         } catch (Exception e) {
-            log.error("매물 정보 수집 중 오류 발생: {}", e.getMessage(), e);
+            log.error("[Thread-{}] 매물 정보 수집 중 오류 발생: {}", Thread.currentThread().getId(), e.getMessage(), e);
             throw e;
         }
     }
@@ -134,7 +129,7 @@ public class ProxyNaverArticleService {
      */
     public void crawlAndSaveArticlesForRegion(Region region) {
         String regionName = region.getCortarName();
-        log.info("\n[{}] 매물 정보 수집 시작", regionName);
+        log.info("[Thread-{}] \n[{}] 매물 정보 수집 시작", Thread.currentThread().getId(), regionName);
         
         // 크롤링 상태 초기화
         CrawlingStatusDTO status = CrawlingStatusDTO.initialize(regionName);
@@ -147,12 +142,7 @@ public class ProxyNaverArticleService {
         try {
             int currentPage = 1;
             boolean isRegionCompleted = false;
-            Set<Integer> pendingPages = new HashSet<>();
-            Set<Integer> failedPages = new HashSet<>();
-            Map<Integer, Integer> retryCount = new HashMap<>();
-            ConcurrentHashMap<Integer, Boolean> pageMoreStatus = new ConcurrentHashMap<>();
             AtomicInteger totalArticles = new AtomicInteger(0);
-            AtomicInteger lastConfirmedPage = new AtomicInteger(0);
             
             // 첫 페이지 처리
             PageResultDTO firstPage = crawlPage(region.getCortarNo(), 1);
@@ -161,123 +151,54 @@ public class ProxyNaverArticleService {
             }
             
             totalArticles.addAndGet(saveArticles(firstPage.getArticles(), region));
-            pageMoreStatus.put(1, firstPage.isHasMore());
-            lastConfirmedPage.set(1);
+            processPage(region, 1, firstPage.isHasMore());
             
             // 첫 페이지에 더 이상 데이터가 없으면 바로 종료
             if (!firstPage.isHasMore()) {
                 isRegionCompleted = true;
-                log.info("[{}] 첫 페이지에 더 이상 데이터가 없어 수집 완료", regionName);
+                log.info("[Thread-{}] [{}] 첫 페이지에 더 이상 데이터가 없어 수집 완료", Thread.currentThread().getId(), regionName);
             }
             
-            // 병렬 처리할 페이지 수 제한
-            int maxConcurrentPages = Math.min(MAX_CONCURRENT_REQUESTS, 10);
-            
-            while (!isRegionCompleted || !pendingPages.isEmpty() || !failedPages.isEmpty()) {
-                List<CompletableFuture<PageResultDTO>> pageFutures = new ArrayList<>();
+            // 페이지 순차 처리
+            while (!isRegionCompleted) {
+                currentPage++;
+                PageResultDTO result = crawlPage(region.getCortarNo(), currentPage);
                 
-                // 아직 지역 수집이 완료되지 않은 경우, 새로운 페이지 요청
-                if (!isRegionCompleted && pendingPages.size() < maxConcurrentPages) {
-                    int nextPage = currentPage + 1;
-                    currentPage = nextPage;
-                    pendingPages.add(nextPage);
+                if (result.isSuccess()) {
+                    totalArticles.addAndGet(saveArticles(result.getArticles(), region));
+                    log.info("[Thread-{}] [{}] 페이지 {} 처리 완료 (현재 {}개 매물) {}", 
+                        Thread.currentThread().getId(), regionName, currentPage, totalArticles.get(),
+                        result.isHasMore() ? "▶" : "■");
                     
-                    pageFutures.add(CompletableFuture.supplyAsync(
-                        () -> crawlPage(region.getCortarNo(), nextPage),
-                        executorService
-                    ));
+                    processPage(region, currentPage, result.isHasMore());
                     
-                    log.debug("[{}] 페이지 {} 요청 시작 (대기 중: {})", 
-                        regionName, nextPage, pendingPages.size());
-                }
-                
-                // 실패한 페이지 재시도
-                Iterator<Integer> failedPageIterator = failedPages.iterator();
-                while (failedPageIterator.hasNext() && pageFutures.size() < maxConcurrentPages) {
-                    int failedPage = failedPageIterator.next();
-                    if (retryCount.getOrDefault(failedPage, 0) < maxRetryCount) {
-                        pendingPages.add(failedPage);
-                        failedPageIterator.remove();
-                        
-                        pageFutures.add(CompletableFuture.supplyAsync(
-                            () -> {
-                                handleRetry(region.getCortarNo(), failedPage);
-                                return crawlPage(region.getCortarNo(), failedPage);
-                            },
-                            executorService
-                        ));
-                        retryCount.merge(failedPage, 1, Integer::sum);
-                        
-                        log.debug("[{}] 실패한 페이지 {} 재시도 (시도 횟수: {})", 
-                            regionName, failedPage, retryCount.get(failedPage));
+                    if (!result.isHasMore()) {
+                        isRegionCompleted = true;
+                        log.info("[Thread-{}] [{}] 페이지 {}에서 더 이상 데이터가 없어 수집 완료", 
+                            Thread.currentThread().getId(), regionName, currentPage);
+                    }
+                } else {
+                    if (result.isProxyError()) {
+                        log.warn("[Thread-{}] [{}] 페이지 {} 프록시 오류: {}", 
+                            Thread.currentThread().getId(), regionName, currentPage, result.getError());
+                        // 프록시 오류 시 짧은 대기 후 재시도
+                        RandomSleepUtil.sleepShort();
                     } else {
-                        log.warn("[{}] 페이지 {} 최대 재시도 횟수 초과로 스킵", 
-                            regionName, failedPage);
-                        failedPageIterator.remove();
+                        log.warn("[Thread-{}] [{}] 페이지 {} 처리 실패 (스킵): {}", 
+                            Thread.currentThread().getId(), regionName, currentPage, result.getError());
+                        isRegionCompleted = true;
                     }
-                }
-                
-                // 결과 처리
-                for (CompletableFuture<PageResultDTO> future : pageFutures) {
-                    try {
-                        PageResultDTO result = future.get();
-                        pendingPages.remove(result.getPage());
-                        
-                        if (result.isSuccess()) {
-                            totalArticles.addAndGet(saveArticles(result.getArticles(), region));
-                            pageMoreStatus.put(result.getPage(), result.isHasMore());
-                            
-                            log.info("[{}] 페이지 {} 처리 완료 (현재 {}개 매물) {}", 
-                                regionName, result.getPage(), totalArticles.get(),
-                                result.isHasMore() ? "▶" : "■");
-                            
-                            // 연속된 페이지의 more 상태 확인
-                            int confirmedPage = lastConfirmedPage.get();
-                            while (pageMoreStatus.containsKey(confirmedPage + 1)) {
-                                confirmedPage++;
-                                if (!pageMoreStatus.get(confirmedPage)) {
-                                    isRegionCompleted = true;
-                                    lastConfirmedPage.set(confirmedPage);
-                                    log.info("[{}] 페이지 {}에서 더 이상 데이터가 없어 수집 완료", 
-                                        regionName, confirmedPage);
-                                    break;
-                                }
-                            }
-                            lastConfirmedPage.set(confirmedPage);
-                            
-                        } else {
-                            if (result.isProxyError()) {
-                                failedPages.add(result.getPage());
-                                log.warn("[{}] 페이지 {} 프록시 오류로 재시도 예정: {}", 
-                                    regionName, result.getPage(), result.getError());
-                            } else {
-                                log.warn("[{}] 페이지 {} 처리 실패 (스킵): {}", 
-                                    regionName, result.getPage(), result.getError());
-                            }
-                        }
-                    } catch (Exception e) {
-                        log.error("[{}] 페이지 처리 중 오류 발생: {}", regionName, e.getMessage());
-                    }
-                }
-                
-                // 대기 중인 페이지가 없고 지역이 완료되지 않았다면 짧은 대기
-                if (pendingPages.isEmpty() && !isRegionCompleted) {
-                    RandomSleepUtil.sleepShort();
                 }
             }
             
             // 최종 상태 업데이트
-            if (failedPages.isEmpty()) {
-                region.setNaverStatus(Region.CrawlStatus.COMPLETED);
-                log.info("[{}] 매물 정보 수집 완료 - 총 {}개 매물", regionName, totalArticles.get());
-            } else {
-                region.setNaverStatus(Region.CrawlStatus.PARTIALLY_COMPLETED);
-                log.warn("[{}] 매물 정보 일부 수집 완료 - 총 {}개 매물, {}개 페이지 실패", 
-                    regionName, totalArticles.get(), failedPages.size());
-            }
+            region.setNaverStatus(Region.CrawlStatus.COMPLETED);
+            log.info("[Thread-{}] [{}] 매물 정보 수집 완료 - 총 {}개 매물", 
+                Thread.currentThread().getId(), regionName, totalArticles.get());
             
         } catch (Exception e) {
-            log.error("[{}] 매물 정보 수집 중 오류 발생: {}", regionName, e.getMessage());
+            log.error("[Thread-{}] [{}] 매물 정보 수집 중 오류 발생: {}", 
+                Thread.currentThread().getId(), regionName, e.getMessage());
             region.setNaverStatus(Region.CrawlStatus.FAILED);
         } finally {
             region.setNaverLastCrawledAt(LocalDateTime.now());
@@ -322,7 +243,7 @@ public class ProxyNaverArticleService {
                 saveArticle(article, region);
                 count++;
             } catch (Exception e) {
-                log.error("[{}] 매물 저장 중 오류 발생: {}", region.getCortarName(), e.getMessage());
+                log.error("[Thread-{}] [{}] 매물 저장 중 오류 발생: {}", Thread.currentThread().getId(), region.getCortarName(), e.getMessage());
             }
         }
         return count;
@@ -361,8 +282,8 @@ public class ProxyNaverArticleService {
         double bottom = bounds[2];
         double left = bounds[3];
         
-        log.info("[{}] URL 생성 - 중심좌표: ({}, {}), 범위: top={}, right={}, bottom={}, left={}",
-            region.getCortarName(),
+        log.info("[Thread-{}] [{}] URL 생성 - 중심좌표: ({}, {}), 범위: top={}, right={}, bottom={}, left={}",
+            Thread.currentThread().getId(), region.getCortarName(),
             region.getCenterLat(),
             region.getCenterLon(),
             top, right, bottom, left
@@ -389,19 +310,19 @@ public class ProxyNaverArticleService {
         try {
             new java.net.URL(url);
         } catch (java.net.MalformedURLException e) {
-            log.error("[{}] 잘못된 URL 형식: {}", region.getCortarName(), url);
+            log.error("[Thread-{}] [{}] 잘못된 URL 형식: {}", Thread.currentThread().getId(), region.getCortarName(), url);
             throw new RuntimeException("잘못된 URL 형식", e);
         }
         
         // URL 길이 검증
         if (url.length() > 2048) {
-            log.warn("[{}] URL 길이가 너무 깁니다: {} 문자", region.getCortarName(), url.length());
+            log.warn("[Thread-{}] [{}] URL 길이가 너무 깁니다: {} 문자", Thread.currentThread().getId(), region.getCortarName(), url.length());
         }
         
         // 필수 파라미터 검증
         if (!url.contains("cortarNo=") || !url.contains("page=") || 
             !url.contains("lat=") || !url.contains("lon=")) {
-            log.error("[{}] 필수 파라미터 누락: {}", region.getCortarName(), url);
+            log.error("[Thread-{}] [{}] 필수 파라미터 누락: {}", Thread.currentThread().getId(), region.getCortarName(), url);
             throw new RuntimeException("필수 파라미터가 누락되었습니다");
         }
         
@@ -418,6 +339,7 @@ public class ProxyNaverArticleService {
         
         while (retryCount < maxRetryCount) {
             try {
+                // 프록시 풀에서 다음 프록시 가져오기 (로테이션)
                 proxy = proxyPool.getNextAvailableProxy();
                 if (proxy == null) {
                     log.warn("사용 가능한 프록시가 없습니다. 프록시 풀을 새로고침합니다.");
@@ -429,6 +351,10 @@ public class ProxyNaverArticleService {
                     throw new RuntimeException("프록시를 사용할 수 없습니다.");
                 }
                 
+                // API 요청 시작 시간 기록
+                long startTime = System.currentTimeMillis();
+                
+                // API 요청
                 java.net.URL url = new java.net.URL(apiUrl);
                 java.net.Proxy proxyObj = new java.net.Proxy(
                     java.net.Proxy.Type.HTTP,
@@ -451,7 +377,7 @@ public class ProxyNaverArticleService {
                 conn.setReadTimeout(READ_TIMEOUT);
                 
                 int responseCode = conn.getResponseCode();
-                log.info("[프록시: {}] 응답 코드: {}", proxy.getKey(), responseCode);
+                log.info("[Thread-{}] [프록시: {}] 응답 코드: {}", Thread.currentThread().getId(), proxy.getKey(), responseCode);
                 
                 if (responseCode == 200) {
                     try (java.io.BufferedReader reader = new java.io.BufferedReader(
@@ -461,26 +387,24 @@ public class ProxyNaverArticleService {
                         while ((line = reader.readLine()) != null) {
                             response.append(line);
                         }
+                        
+                        // 성공한 프록시의 응답 시간 업데이트
+                        long responseTime = System.currentTimeMillis() - startTime;
+                        proxy = proxy.withUpdatedResponseTime(responseTime);
                         proxyPool.releaseProxy(proxy);
+                        
                         return response.toString();
                     }
                 } else {
-                    log.warn("[프록시: {}] 응답 실패. 응답 코드: {}", proxy.getKey(), responseCode);
-                    try (java.io.BufferedReader reader = new java.io.BufferedReader(
-                            new java.io.InputStreamReader(conn.getErrorStream()))) {
-                        StringBuilder errorResponse = new StringBuilder();
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            errorResponse.append(line);
-                        }
-                        log.error("[프록시: {}] 에러 응답: {}", proxy.getKey(), errorResponse.toString());
-                    }
+                    log.warn("[Thread-{}] [프록시: {}] 응답 실패. 응답 코드: {}", 
+                        Thread.currentThread().getId(), proxy.getKey(), responseCode);
                     proxyPool.markProxyAsFailed(proxy);
                     retryCount++;
                 }
             } catch (Exception e) {
                 lastException = e;
-                log.error("[프록시: {}] 요청 중 오류 발생: {}", 
+                log.error("[Thread-{}] [프록시: {}] 요청 중 오류 발생: {}", 
+                    Thread.currentThread().getId(), 
                     proxy != null ? proxy.getKey() : "unknown", e.getMessage());
                 if (proxy != null) {
                     proxyPool.markProxyAsFailed(proxy);
@@ -492,7 +416,8 @@ public class ProxyNaverArticleService {
                 try {
                     // 재시도 횟수에 따라 대기 시간을 점진적으로 증가
                     long delay = retryDelayMs * (1 + retryCount);
-                    log.info("{}초 후 재시도... (시도 {}/{})", delay/1000, retryCount, maxRetryCount);
+                    log.info("[Thread-{}] {}초 후 재시도... (시도 {}/{})", 
+                        Thread.currentThread().getId(), delay/1000, retryCount, maxRetryCount);
                     Thread.sleep(delay);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -554,8 +479,22 @@ public class ProxyNaverArticleService {
             propertyArticleRepository.save(article);
             
         } catch (Exception e) {
-            log.error("매물 정보 저장 중 오류 발생: {}", e.getMessage(), e);
+            log.error("[Thread-{}] [{}] 매물 정보 저장 중 오류 발생: {}", Thread.currentThread().getId(), region.getCortarName(), e.getMessage(), e);
             throw new RuntimeException("매물 정보 저장 실패", e);
+        }
+    }
+
+    private void processPage(Region region, int page, boolean hasMore) {
+        // 대기 시간을 페이지 처리 결과에 따라 동적으로 조정
+        if (!hasMore) {
+            RandomSleepUtil.sleepShort();
+        } else {
+            // 연속된 페이지 처리 시 짧은 대기
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 } 

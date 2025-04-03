@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.entity.PropertyArticle;
-import com.zipline.entity.Region;
-import com.zipline.repository.PropertyArticleRepository;
-import com.zipline.repository.RegionRepository;
-import com.zipline.util.CoordinateUtil;
-import com.zipline.util.RandomSleepUtil;
+import com.zipline.entity.publicItem.Region;
+import com.zipline.repository.publicItem.PropertyArticleRepository;
+import com.zipline.repository.publicItem.RegionRepository;
+import com.zipline.global.util.CoordinateUtil;
+import com.zipline.global.util.RandomSleepUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

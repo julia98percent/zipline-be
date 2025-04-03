@@ -9,13 +9,11 @@ import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
  * 지역별 크롤링 상태를 추적하는 DTO 클래스
  */
-@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
