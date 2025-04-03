@@ -1,6 +1,7 @@
 package com.zipline.survey.controller;
 
 import java.security.Principal;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +31,11 @@ public class SurveyController {
 
 	@PostMapping("/surveys")
 	@Operation(summary = "설문 생성", description = "새로운 설문을 생성합니다.")
-	public ResponseEntity<ApiResponse<Void>> createSurvey(@Valid @RequestBody SurveyCreateRequestDTO requestDTO,
+	public ResponseEntity<ApiResponse<Map<String, Long>>> createSurvey(
+		@Valid @RequestBody SurveyCreateRequestDTO requestDTO,
 		Principal principal) {
-		ApiResponse<Void> response = surveyService.createSurvey(requestDTO, Long.parseLong(principal.getName()));
+		ApiResponse<Map<String, Long>> response = surveyService.createSurvey(requestDTO,
+			Long.parseLong(principal.getName()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 }

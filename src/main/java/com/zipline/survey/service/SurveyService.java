@@ -1,6 +1,8 @@
 package com.zipline.survey.service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,7 +30,7 @@ public class SurveyService {
 	private final UserRepository userRepository;
 
 	@Transactional
-	public ApiResponse<Void> createSurvey(SurveyCreateRequestDTO requestDTO, Long agentUID) {
+	public ApiResponse<Map<String, Long>> createSurvey(SurveyCreateRequestDTO requestDTO, Long agentUID) {
 		User user = userRepository.findById(agentUID)
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 		Survey survey = new Survey(user, SurveyStatus.IN_PROGRESS, LocalDateTime.now(), null);
@@ -45,6 +47,6 @@ public class SurveyService {
 		});
 		surveyRepository.save(survey);
 		user.setUrl(String.valueOf(survey.getUid()));
-		return ApiResponse.create("설문 등록 완료");
+		return ApiResponse.create("설문 등록 완료", Collections.singletonMap("surveyURL", survey.getUid()));
 	}
 }
