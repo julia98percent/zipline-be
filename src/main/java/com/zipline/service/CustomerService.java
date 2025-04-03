@@ -1,14 +1,19 @@
 package com.zipline.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.zipline.dto.CustomerListResponseDTO;
+import com.zipline.dto.CustomerListResponseDTO.CustomerResponseDTO;
 import com.zipline.dto.CustomerModifyRequestDTO;
 import com.zipline.dto.CustomerModifyResponseDTO;
 import com.zipline.dto.CustomerRegisterRequestDTO;
+import com.zipline.dto.PageRequestDTO;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
 import com.zipline.global.common.response.ApiResponse;
@@ -42,6 +47,7 @@ public class CustomerService {
 	@Transactional
 	public ApiResponse<CustomerModifyResponseDTO> modifyCustomer(Long customerUid,
 		CustomerModifyRequestDTO customerModifyRequestDTO, Long userUID) {
+
 		Customer savedCustomer = customerRepository.findByUidAndIsDeletedFalse(customerUid)
 			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
@@ -75,5 +81,18 @@ public class CustomerService {
 
 		savedCustomer.delete(LocalDateTime.now());
 		return ApiResponse.ok("고객 삭제에 성공하였습니다.");
+	}
+
+	@Transactional(readOnly = true)
+	public ApiResponse<CustomerListResponseDTO> getCustomers(PageRequestDTO pageRequestDTO, Long userUID) {
+		Page<Customer> customerPage = customerRepository.findByUserUidAndIsDeleted(userUID, false,
+			pageRequestDTO.toPageable());
+		List<CustomerResponseDTO> customerResponseDTOList = customerPage.getContent().stream()
+			.map(CustomerResponseDTO::new)
+			.toList();
+
+		CustomerListResponseDTO result = new CustomerListResponseDTO(customerResponseDTOList, customerPage);
+
+		return ApiResponse.ok("고객 목록 조회에 성공하였습니다.", result);
 	}
 }
