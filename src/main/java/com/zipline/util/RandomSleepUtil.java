@@ -1,6 +1,7 @@
 package com.zipline.util;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,7 +21,7 @@ public class RandomSleepUtil {
             Thread.sleep(sleepTime * 1000L);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.error("대기 중 인터럽트 발생: {}", e.getMessage());
+            log.error("대기 중 인터럽트 발생", e);
         }
     }
     
