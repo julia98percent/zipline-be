@@ -59,10 +59,10 @@ public class UserController {
 
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenRequestDto.getRefreshToken())
 			.httpOnly(true)
-			.secure(true)  //https에서만 전송하려면 true로 전환
+			.secure(false)  //https에서만 전송하려면 true로 전환
 			.path("/")
 			.maxAge(Duration.ofDays(7))
-			.sameSite("None")
+			.sameSite("Strict")
 			.build();
 
 		response.setHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
@@ -117,10 +117,10 @@ public class UserController {
 
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenRequestDto.getRefreshToken())
 			.httpOnly(true)
-			.secure(true)
+			.secure(false)
 			.path("/")
 			.maxAge(Duration.ofDays(7))
-			.sameSite("None")
+			.sameSite("Strict")
 			.build();
 
 		TokenResponseDto tokenResponseDto = TokenResponseDto.builder()
