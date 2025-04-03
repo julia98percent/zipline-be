@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zipline.dto.publicItem.ProxyStatus;
+import com.zipline.dto.publicItem.ProxyStatusDTO;
 import com.zipline.entity.Region;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.global.util.ProxyPool;
@@ -112,8 +112,8 @@ public class CrawlerController {
     }
 
     @GetMapping("/proxy/status")
-    public ResponseEntity<ApiResponse<ProxyStatus>> getProxyStatus() {
-        ProxyStatus status = ProxyStatus.of(
+    public ResponseEntity<ApiResponse<ProxyStatusDTO>> getProxyStatus() {
+        ProxyStatusDTO status = ProxyStatusDTO.of(
             proxyPool.getAvailableProxyCount(),
             proxyPool.getInUseProxyCount(),
             proxyPool.getActiveProxies()

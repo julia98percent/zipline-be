@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProxyList {
+public class ProxyListDTO {
     private ProxyInfoWrapper proxy;
     
     /**
@@ -21,8 +21,8 @@ public class ProxyList {
      * @param proxies 프록시 목록
      * @return ProxyList 객체
      */
-    public static ProxyList of(List<ProxyInfo> proxies) {
-        return ProxyList.builder()
+    public static ProxyListDTO of(List<ProxyInfoDTO> proxies) {
+        return ProxyListDTO.builder()
             .proxy(ProxyInfoWrapper.builder()
                 .proxies(proxies)
                 .build())
@@ -34,7 +34,7 @@ public class ProxyList {
      * 
      * @return 프록시 목록
      */
-    public List<ProxyInfo> getProxies() {
+    public List<ProxyInfoDTO> getProxies() {
         return proxy != null ? proxy.getProxies() : List.of();
     }
     
@@ -52,7 +52,7 @@ public class ProxyList {
      * 
      * @return 정렬된 프록시 목록
      */
-    public List<ProxyInfo> getSortedProxiesByQuality() {
+    public List<ProxyInfoDTO> getSortedProxiesByQuality() {
         return getProxies().stream()
             .sorted((p1, p2) -> Double.compare(p2.calculateQualityScore(), p1.calculateQualityScore()))
             .collect(Collectors.toList());
@@ -64,7 +64,7 @@ public class ProxyList {
      * @param country 국가 코드
      * @return 필터링된 프록시 목록
      */
-    public List<ProxyInfo> getProxiesByCountry(String country) {
+    public List<ProxyInfoDTO> getProxiesByCountry(String country) {
         return getProxies().stream()
             .filter(p -> country.equals(p.getCountry()))
             .collect(Collectors.toList());
@@ -76,7 +76,7 @@ public class ProxyList {
      * @param city 도시 이름
      * @return 필터링된 프록시 목록
      */
-    public List<ProxyInfo> getProxiesByCity(String city) {
+    public List<ProxyInfoDTO> getProxiesByCity(String city) {
         return getProxies().stream()
             .filter(p -> city.equals(p.getCity()))
             .collect(Collectors.toList());
@@ -87,6 +87,6 @@ public class ProxyList {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ProxyInfoWrapper {
-        private List<ProxyInfo> proxies;
+        private List<ProxyInfoDTO> proxies;
     }
 } 

@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import com.zipline.dto.publicItem.ProxyInfo;
+import com.zipline.dto.publicItem.ProxyInfoDTO;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -31,8 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class ProxyPool {
-    private final ConcurrentLinkedQueue<ProxyInfo> availableProxies = new ConcurrentLinkedQueue<>();
-    private final ConcurrentHashMap<String, ProxyInfo> inUseProxies = new ConcurrentHashMap<>();
+    private final ConcurrentLinkedQueue<ProxyInfoDTO> availableProxies = new ConcurrentLinkedQueue<>();
+    private final ConcurrentHashMap<String, ProxyInfoDTO> inUseProxies = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, AtomicInteger> proxyFailureCount = new ConcurrentHashMap<>();
     private final ExecutorService validationExecutor = Executors.newFixedThreadPool(10);
     
@@ -90,7 +90,7 @@ public class ProxyPool {
             
             for (String line : lines) {
                 try {
-                    ProxyInfo proxy = ProxyInfo.fromString(line.trim());
+                    ProxyInfoDTO proxy = ProxyInfoDTO.fromString(line.trim());
                     availableProxies.offer(proxy);
                     proxyFailureCount.put(proxy.getKey(), new AtomicInteger(0));
                     log.debug("프록시 추가됨: {}", proxy.getKey());
@@ -107,10 +107,10 @@ public class ProxyPool {
     
     private void validateProxies() {
         log.info("프록시 검증 시작");
-        List<ProxyInfo> proxiesToValidate = new ArrayList<>(availableProxies);
+        List<ProxyInfoDTO> proxiesToValidate = new ArrayList<>(availableProxies);
         availableProxies.clear();
         
-        for (ProxyInfo proxy : proxiesToValidate) {
+        for (ProxyInfoDTO proxy : proxiesToValidate) {
             validationExecutor.submit(() -> validateProxy(proxy));
         }
         
@@ -128,7 +128,7 @@ public class ProxyPool {
         log.info("프록시 검증 완료. 사용 가능한 프록시: {}", availableProxies.size());
     }
     
-    private void validateProxy(ProxyInfo proxy) {
+    private void validateProxy(ProxyInfoDTO proxy) {
         log.info("프록시 검증 시작: {}", proxy.getKey());
         
         try {
@@ -154,8 +154,8 @@ public class ProxyPool {
         }
     }
     
-    public ProxyInfo getNextAvailableProxy() {
-        ProxyInfo proxy = availableProxies.poll();
+    public ProxyInfoDTO getNextAvailableProxy() {
+        ProxyInfoDTO proxy = availableProxies.poll();
         if (proxy != null) {
             inUseProxies.put(proxy.getKey(), proxy);
             log.info("프록시 할당: {} (사용 가능: {}, 사용 중: {})", 
@@ -186,7 +186,7 @@ public class ProxyPool {
         return null;
     }
     
-    public void releaseProxy(ProxyInfo proxy) {
+    public void releaseProxy(ProxyInfoDTO proxy) {
         if (proxy != null) {
             inUseProxies.remove(proxy.getKey());
             availableProxies.offer(proxy);
@@ -197,7 +197,7 @@ public class ProxyPool {
         }
     }
     
-    public void markProxyAsFailed(ProxyInfo proxy) {
+    public void markProxyAsFailed(ProxyInfoDTO proxy) {
         if (proxy != null) {
             AtomicInteger failures = proxyFailureCount.get(proxy.getKey());
             if (failures != null) {
@@ -222,7 +222,7 @@ public class ProxyPool {
         return inUseProxies.size();
     }
     
-    public List<ProxyInfo> getActiveProxies() {
+    public List<ProxyInfoDTO> getActiveProxies() {
         return new ArrayList<>(inUseProxies.values());
     }
     

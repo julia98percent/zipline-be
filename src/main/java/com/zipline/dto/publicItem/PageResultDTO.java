@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PageResult {
+public class PageResultDTO {
     private int page;
     private boolean success;
     private List<JsonNode> articles;
@@ -32,8 +32,8 @@ public class PageResult {
      * @param hasMore 더 많은 데이터가 있는지 여부
      * @return 성공한 PageResult 객체
      */
-    public static PageResult success(int page, List<JsonNode> articles, boolean hasMore) {
-        return PageResult.builder()
+    public static PageResultDTO success(int page, List<JsonNode> articles, boolean hasMore) {
+        return PageResultDTO.builder()
             .page(page)
             .success(true)
             .articles(articles)
@@ -49,8 +49,8 @@ public class PageResult {
      * @param isProxyError 프록시 오류 여부
      * @return 실패한 PageResult 객체
      */
-    public static PageResult failure(int page, String error, boolean isProxyError) {
-        return PageResult.builder()
+    public static PageResultDTO failure(int page, String error, boolean isProxyError) {
+        return PageResultDTO.builder()
             .page(page)
             .success(false)
             .error(error)

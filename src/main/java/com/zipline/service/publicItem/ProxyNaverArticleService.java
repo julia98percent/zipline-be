@@ -25,9 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zipline.dto.publicItem.CrawlingStatus;
-import com.zipline.dto.publicItem.PageResult;
-import com.zipline.dto.publicItem.ProxyInfo;
+import com.zipline.dto.publicItem.CrawlingStatusDTO;
+import com.zipline.dto.publicItem.PageResultDTO;
+import com.zipline.dto.publicItem.ProxyInfoDTO;
 import com.zipline.entity.PropertyArticle;
 import com.zipline.entity.Region;
 import com.zipline.global.util.ProxyPool;
@@ -62,7 +62,7 @@ public class ProxyNaverArticleService {
     private static final int ZOOM_LEVEL = 12;
     
     private final ExecutorService executorService = Executors.newFixedThreadPool(MAX_CONCURRENT_REQUESTS);
-    private final ConcurrentHashMap<String, CrawlingStatus> regionStatuses = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, CrawlingStatusDTO> regionStatuses = new ConcurrentHashMap<>();
 
     @Value("${crawler.max-retry-count:10}")
     private int maxRetryCount;
@@ -137,7 +137,7 @@ public class ProxyNaverArticleService {
         log.info("\n[{}] 매물 정보 수집 시작", regionName);
         
         // 크롤링 상태 초기화
-        CrawlingStatus status = CrawlingStatus.initialize(regionName);
+        CrawlingStatusDTO status = CrawlingStatusDTO.initialize(regionName);
         regionStatuses.put(regionName, status);
         
         region.setNaverStatus(Region.CrawlStatus.PROCESSING);
@@ -155,7 +155,7 @@ public class ProxyNaverArticleService {
             AtomicInteger lastConfirmedPage = new AtomicInteger(0);
             
             // 첫 페이지 처리
-            PageResult firstPage = crawlPage(region.getCortarNo(), 1);
+            PageResultDTO firstPage = crawlPage(region.getCortarNo(), 1);
             if (!firstPage.isSuccess()) {
                 throw new RuntimeException("첫 페이지 수집 실패: " + firstPage.getError());
             }
@@ -174,7 +174,7 @@ public class ProxyNaverArticleService {
             int maxConcurrentPages = Math.min(MAX_CONCURRENT_REQUESTS, 10);
             
             while (!isRegionCompleted || !pendingPages.isEmpty() || !failedPages.isEmpty()) {
-                List<CompletableFuture<PageResult>> pageFutures = new ArrayList<>();
+                List<CompletableFuture<PageResultDTO>> pageFutures = new ArrayList<>();
                 
                 // 아직 지역 수집이 완료되지 않은 경우, 새로운 페이지 요청
                 if (!isRegionCompleted && pendingPages.size() < maxConcurrentPages) {
@@ -218,9 +218,9 @@ public class ProxyNaverArticleService {
                 }
                 
                 // 결과 처리
-                for (CompletableFuture<PageResult> future : pageFutures) {
+                for (CompletableFuture<PageResultDTO> future : pageFutures) {
                     try {
-                        PageResult result = future.get();
+                        PageResultDTO result = future.get();
                         pendingPages.remove(result.getPage());
                         
                         if (result.isSuccess()) {
@@ -285,7 +285,7 @@ public class ProxyNaverArticleService {
         }
     }
     
-    private PageResult crawlPage(Long cortarNo, int page) {
+    private PageResultDTO crawlPage(Long cortarNo, int page) {
         try {
             String apiUrl = buildApiUrl(cortarNo, page);
             String response = getArticlesWithProxy(apiUrl);
@@ -300,17 +300,17 @@ public class ProxyNaverArticleService {
                         .collect(Collectors.toList()) : 
                     Collections.emptyList();
                 
-                return PageResult.success(page, articles, hasMore);
+                return PageResultDTO.success(page, articles, hasMore);
             }
             
-            return PageResult.failure(page, "빈 응답", true);
+            return PageResultDTO.failure(page, "빈 응답", true);
                 
         } catch (Exception e) {
             boolean isProxyError = e instanceof IOException || 
                                  e.getMessage().contains("timeout") ||
                                  e.getMessage().contains("connection");
             
-            return PageResult.failure(page, e.getMessage(), isProxyError);
+            return PageResultDTO.failure(page, e.getMessage(), isProxyError);
         }
     }
     
@@ -412,7 +412,7 @@ public class ProxyNaverArticleService {
      * 프록시를 통해 네이버 부동산 API를 호출합니다.
      */
     private String getArticlesWithProxy(String apiUrl) {
-        ProxyInfo proxy = null;
+        ProxyInfoDTO proxy = null;
         int retryCount = 0;
         Exception lastException = null;
         

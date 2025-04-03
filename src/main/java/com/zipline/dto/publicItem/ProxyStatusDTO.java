@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProxyStatus {
+public class ProxyStatusDTO {
     private int availableProxyCount;
     private int inUseProxyCount;
-    private List<ProxyInfo> activeProxies;
+    private List<ProxyInfoDTO> activeProxies;
     
     /**
      * ProxyPool에서 ProxyStatus 객체를 생성합니다.
@@ -25,8 +25,8 @@ public class ProxyStatus {
      * @param activeProxies 활성 프록시 목록
      * @return ProxyStatus 객체
      */
-    public static ProxyStatus of(int availableCount, int inUseCount, List<ProxyInfo> activeProxies) {
-        return ProxyStatus.builder()
+    public static ProxyStatusDTO of(int availableCount, int inUseCount, List<ProxyInfoDTO> activeProxies) {
+        return ProxyStatusDTO.builder()
             .availableProxyCount(availableCount)
             .inUseProxyCount(inUseCount)
             .activeProxies(activeProxies)
@@ -59,7 +59,7 @@ public class ProxyStatus {
      * 
      * @return 정렬된 활성 프록시 목록
      */
-    public List<ProxyInfo> getSortedActiveProxiesByQuality() {
+    public List<ProxyInfoDTO> getSortedActiveProxiesByQuality() {
         return activeProxies.stream()
             .sorted((p1, p2) -> Double.compare(p2.calculateQualityScore(), p1.calculateQualityScore()))
             .collect(Collectors.toList());

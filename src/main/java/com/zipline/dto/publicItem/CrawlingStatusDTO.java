@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CrawlingStatus {
+public class CrawlingStatusDTO {
     private String regionName;
     private int currentPage;
     private int totalArticles;
@@ -36,8 +36,8 @@ public class CrawlingStatus {
      * @param regionName 지역 이름
      * @return 초기화된 CrawlingStatus 객체
      */
-    public static CrawlingStatus initialize(String regionName) {
-        return CrawlingStatus.builder()
+    public static CrawlingStatusDTO initialize(String regionName) {
+        return CrawlingStatusDTO.builder()
             .regionName(regionName)
             .currentPage(1)
             .totalArticles(0)

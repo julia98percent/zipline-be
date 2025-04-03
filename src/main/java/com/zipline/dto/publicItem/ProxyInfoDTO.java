@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProxyInfo {
+public class ProxyInfoDTO {
     private String host;
     private int port;
     private String protocol;
@@ -36,13 +36,13 @@ public class ProxyInfo {
      * @return ProxyInfo 객체
      * @throws IllegalArgumentException 잘못된 형식의 문자열이 제공된 경우
      */
-    public static ProxyInfo fromString(String proxyString) {
+    public static ProxyInfoDTO fromString(String proxyString) {
         String[] parts = proxyString.split(":");
         if (parts.length != 2) {
             throw new IllegalArgumentException("잘못된 프록시 형식: " + proxyString);
         }
         
-        return ProxyInfo.builder()
+        return ProxyInfoDTO.builder()
             .host(parts[0].trim())
             .port(Integer.parseInt(parts[1].trim()))
             .build();
@@ -63,8 +63,8 @@ public class ProxyInfo {
      * @param responseTime 새로운 응답 시간 (밀리초)
      * @return 업데이트된 ProxyInfo 객체
      */
-    public ProxyInfo withUpdatedResponseTime(double responseTime) {
-        return ProxyInfo.builder()
+    public ProxyInfoDTO withUpdatedResponseTime(double responseTime) {
+        return ProxyInfoDTO.builder()
             .host(this.host)
             .port(this.port)
             .protocol(this.protocol)
@@ -83,8 +83,8 @@ public class ProxyInfo {
      * @param uptime 새로운 가용성 값 (%)
      * @return 업데이트된 ProxyInfo 객체
      */
-    public ProxyInfo withUpdatedUptime(int uptime) {
-        return ProxyInfo.builder()
+    public ProxyInfoDTO withUpdatedUptime(int uptime) {
+        return ProxyInfoDTO.builder()
             .host(this.host)
             .port(this.port)
             .protocol(this.protocol)
@@ -102,8 +102,8 @@ public class ProxyInfo {
      * 
      * @return 업데이트된 ProxyInfo 객체
      */
-    public ProxyInfo withUpdatedLastChecked() {
-        return ProxyInfo.builder()
+    public ProxyInfoDTO withUpdatedLastChecked() {
+        return ProxyInfoDTO.builder()
             .host(this.host)
             .port(this.port)
             .protocol(this.protocol)
