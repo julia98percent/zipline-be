@@ -13,19 +13,24 @@ import com.zipline.global.common.response.ApiResponse;
 import com.zipline.survey.dto.SurveyCreateRequestDTO;
 import com.zipline.survey.service.SurveyService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api")
+@Tag(name = "설문 API", description = "설문 관련 API")
 @RestController
 public class SurveyController {
 
 	private final SurveyService surveyService;
 
 	@PostMapping("/surveys")
-	public ResponseEntity<ApiResponse<Void>> createSurvey(@RequestBody SurveyCreateRequestDTO requestDTO,
+	@Operation(summary = "설문 생성", description = "새로운 설문을 생성합니다.")
+	public ResponseEntity<ApiResponse<Void>> createSurvey(@Valid @RequestBody SurveyCreateRequestDTO requestDTO,
 		Principal principal) {
 		ApiResponse<Void> response = surveyService.createSurvey(requestDTO, Long.parseLong(principal.getName()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
