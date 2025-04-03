@@ -34,11 +34,11 @@ public class SurveyService {
 		Survey survey = new Survey(user, SurveyStatus.IN_PROGRESS, LocalDateTime.now(), null);
 
 		requestDTO.getQuestions().forEach(questionDTO -> {
-			Question question = new Question(QuestionType.valueOf(questionDTO.getType()), questionDTO.getText(),
-				survey);
+			Question question = new Question(questionDTO.getTitle(), QuestionType.valueOf(questionDTO.getType()),
+				questionDTO.getDescription(), survey);
 
 			questionDTO.getChoices().forEach(choiceDTO -> {
-				Choice choice = new Choice(choiceDTO.getText(), question);
+				Choice choice = new Choice(choiceDTO.getContent(), question);
 				question.addChoice(choice);
 			});
 			survey.getQuestions().add(question);
