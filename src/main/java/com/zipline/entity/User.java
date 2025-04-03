@@ -78,4 +78,8 @@ public class User {
 		this.email = dto.getEmail();
 		this.noticeMonth = dto.getNoticeMonth();
 	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
 }
