@@ -1,8 +1,8 @@
 package com.zipline.survey.entity.enums;
 
 public enum QuestionType {
-	MULTIPLE_CHOICE_SINGLE,
-	MULTIPLE_CHOICE_MULTI,
+	SINGLE_CHOICE,
+	MULTIPLE_CHOICE,
 	SUBJECTIVE,
 	FILE_UPLOAD,
 }
