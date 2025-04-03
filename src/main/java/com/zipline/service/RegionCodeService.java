@@ -200,7 +200,7 @@ public class RegionCodeService {
     private void saveRegion(RegionDto dto, int level) {
         log.info("\n=== 지역 정보 저장 시작 ===");
         log.info("저장할 지역: {} (레벨: {})", dto.getCortarName(), level);
-        
+          
         Optional<Region> existingRegion = regionRepository.findByCortarNo(dto.getCortarNo());
         
         Region region;
@@ -212,8 +212,9 @@ public class RegionCodeService {
             region.setCortarNo(dto.getCortarNo());
             region.setCortarName(dto.getCortarName());
             region.setLevel(level);
-            region.setNaverLastCrawledAt(LocalDateTime.now());
-            region.setNaverStatus(Region.CrawlStatus.PENDING);
+            region.setNaverStatus(Region.CrawlStatus.NEW);
+            region.setZigbangStatus(Region.CrawlStatus.NEW); 
+            region.setDabangStatus(Region.CrawlStatus.NEW); 
             log.info("새로운 지역 정보 생성: {}", region.getCortarName());
         }
         

@@ -97,8 +97,8 @@ public class NaverArticleService {
         log.info("매물 정보 수집 시작 - 지역 코드: {}", cortarNo);
         
         Region region = regionRepository.findByCortarNo(cortarNo)
-            .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
-        
+                .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
+            
         // 상태 업데이트
         region.setNaverStatus(Region.CrawlStatus.PROCESSING);
         region.setNaverLastCrawledAt(LocalDateTime.now());
@@ -131,7 +131,7 @@ public class NaverArticleService {
                     
                     if (hasMore) {
                         RandomSleepUtil.sleep(); // 다음 페이지 요청 전 대기
-                        page++;
+                    page++;
                     }
                 } else {
                     throw new RuntimeException("매물 목록이 비어있습니다.");

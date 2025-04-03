@@ -23,13 +23,15 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     @Query("SELECT r FROM Region r WHERE r.level = 3 AND CONCAT(r.cortarNo, '') LIKE CONCAT(:parentCortarNo, '%')")
     List<Region> findLevel3RegionsByParentCortarNo(@Param("parentCortarNo") Long parentCortarNo);
     
-    @Query("SELECT r FROM Region r WHERE r.level = :level AND (r.naverLastCrawledAt IS NULL OR r.naverLastCrawledAt < :cutoffDate)")
-    List<Region> findRegionsNeedingUpdateForNaver(@Param("level") int level,
+    @Query("SELECT r FROM Region r WHERE r.level = :level " +
+           "AND (r.naverLastCrawledAt < :cutoffDate " +
+           "OR r.naverStatus != 'COMPLETED')")
+    List<Region> findRegionsNeedingUpdateForNaver(
+            @Param("level") int level,
             @Param("cutoffDate") LocalDateTime cutoffDate);
     
     @Query("SELECT r.cortarNo FROM Region r WHERE r.level = :level " +
-           "AND (r.naverLastCrawledAt IS NULL " +
-           "OR r.naverLastCrawledAt < :cutoffDate " +
+           "AND (r.naverLastCrawledAt < :cutoffDate " +
            "OR r.naverStatus != 'COMPLETED')")
     Page<Long> findCortarNosNeedingUpdate(
                     @Param("level") int level,

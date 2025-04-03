@@ -77,9 +77,11 @@ public class Region {
     private LocalDateTime dabangLastCrawledAt;
 
     public enum CrawlStatus {
-        PENDING,    // 대기 중
-        PROCESSING, // 처리 중
-        COMPLETED,  // 완료
-        FAILED      // 실패
+        NEW,         // 최초 생성 상태 (한 번도 크롤링되지 않음)
+        PENDING,     // 크롤링 대기 중
+        PROCESSING,  // 크롤링 진행 중
+        COMPLETED,   // 크롤링 완료
+        PARTIALLY_COMPLETED,  // 일부 페이지만 크롤링 완료
+        FAILED       // 크롤링 실패
     }
-} 
+}
