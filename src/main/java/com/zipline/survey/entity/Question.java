@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 
-import com.zipline.global.exception.custom.customer.ChoiceNotAllowedException;
+import com.zipline.global.exception.custom.ChoiceNotAllowedException;
 import com.zipline.survey.entity.enums.QuestionType;
 
 import jakarta.persistence.CascadeType;
