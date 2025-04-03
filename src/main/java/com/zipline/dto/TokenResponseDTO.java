@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class TokenResponseDto {
+public class TokenResponseDTO {
 	private Long uid;
 	private String grantType;   //ex) Bearer
 	private String accessToken;

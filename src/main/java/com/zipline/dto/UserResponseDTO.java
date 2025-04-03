@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class UserResponseDto {
+public class UserResponseDTO {
 	private String uid;
 	private String id;
 	private String name;
@@ -18,8 +18,8 @@ public class UserResponseDto {
 	private String email;
 	private Integer noticeMonth;
 
-	public static UserResponseDto of(User user) {
-		return UserResponseDto.builder()
+	public static UserResponseDTO of(User user) {
+		return UserResponseDTO.builder()
 			.uid(String.valueOf(user.getUid()))
 			.id(user.getId())
 			.name(user.getName())

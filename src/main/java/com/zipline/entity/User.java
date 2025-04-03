@@ -1,6 +1,6 @@
 package com.zipline.entity;
 
-import com.zipline.dto.UserRequestDto;
+import com.zipline.dto.UserRequestDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -69,7 +69,7 @@ public class User {
 		this.noticeMonth = noticeMonth;
 	}
 
-	public void updateInfo(UserRequestDto dto) {
+	public void updateInfo(UserRequestDTO dto) {
 		this.id = dto.getId();
 		this.name = dto.getName();
 		this.url = dto.getUrl();
