@@ -19,12 +19,14 @@ import com.zipline.dto.TokenRequestDto;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -83,7 +85,7 @@ public class TokenProvider {
 		Claims claims = parseClaims(accessToken);   //token 내부 정보 읽어옴
 
 		if (claims.get(AUTHORITIES_KEY) == null) {
-			throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+			throw new JwtException(ErrorCode.MISSING_AUTHORITY.getMessage());
 		}
 
 		Collection<? extends GrantedAuthority> authorities =
@@ -98,21 +100,25 @@ public class TokenProvider {
 
 	public boolean validateToken(String token) {
 		try {
-			Jwts.parserBuilder()
+			Jws<Claims> claims = Jwts.parser()
 				.setSigningKey(key)
-				.build()
 				.parseClaimsJws(token);
-			return true;
-		} catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-			log.info("잘못된 JWT 서명입니다.");
+
+			return !claims.getBody().getExpiration().before(new Date());
+
+		} catch (SignatureException e) {
+			log.info("SignatureException");
+			throw new JwtException(ErrorCode.JWT_SIGNATURE_FAIL.getMessage());
+		} catch (MalformedJwtException e) {
+			log.info("MalformedJwtException");
+			throw new JwtException(ErrorCode.JWT_DECODE_FAIL.getMessage());
 		} catch (ExpiredJwtException e) {
-			log.info("만료된 JWT 토큰입니다.");
-		} catch (UnsupportedJwtException e) {
-			log.info("지원되지 않는 JWT 토큰입니다.");
+			log.info("ExpiredJwtException");
+			throw new JwtException(ErrorCode.EXPIRED_TOKEN.getMessage());
 		} catch (IllegalArgumentException e) {
-			log.info("JWT 토큰이 잘못되었습니다.");
+			log.info("IllegalArgumentException");
+			throw new JwtException(ErrorCode.UNAUTHORIZED_CLIENT.getMessage());
 		}
-		return false;
 	}
 
 	public String getUserIdFromToken(String token) {

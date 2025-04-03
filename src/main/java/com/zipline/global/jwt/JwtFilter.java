@@ -8,6 +8,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import net.minidev.json.JSONObject;
+
+import com.zipline.global.common.response.ApiResponse;
+
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,21 +39,42 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		//2. validateToken으로 토큰 유효성 검사
 		//정상 토큰이면 해당 토큰으로 Authentication을 가져와서 SecurityContext에 저장
-		if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-			String blacklistKey = "blacklist:" + jwt;
-			Boolean isBlacklisted = redisTemplate.hasKey(blacklistKey);
+		try {
+			if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+				String blacklistKey = "blacklist:" + jwt;
+				Boolean isBlacklisted = redisTemplate.hasKey(blacklistKey);
 
-			if (isBlacklisted) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				response.setContentType("application/json;charset=UTF-8");
-				response.getWriter().write("{\"message\":\"로그아웃된 토큰입니다.\"}");
-				return;
+				if (isBlacklisted) {
+					setResponse(response, ErrorCode.EXPIRED_TOKEN);
+					return;
+				}
+				Authentication authentication = tokenProvider.getAuthentication(jwt);
+				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}
-			Authentication authentication = tokenProvider.getAuthentication(jwt);
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-		}
 
-		filterChain.doFilter(request, response);
+			filterChain.doFilter(request, response);
+		} catch (JwtException ex) {
+			String message = ex.getMessage();
+			if (ErrorCode.UNAUTHORIZED_CLIENT.getMessage().equals(message))
+				setResponse(response, ErrorCode.UNAUTHORIZED_CLIENT);
+			else if (ErrorCode.JWT_SIGNATURE_FAIL.getMessage().equals(message))
+				setResponse(response, ErrorCode.JWT_SIGNATURE_FAIL);
+			else if (ErrorCode.EXPIRED_TOKEN.getMessage().equals(message))
+				setResponse(response, ErrorCode.EXPIRED_TOKEN);
+			else if (ErrorCode.JWT_DECODE_FAIL.getMessage().equals(message))
+				setResponse(response, ErrorCode.JWT_DECODE_FAIL);
+			else
+				setResponse(response, ErrorCode.FORBIDDEN_CLIENT);
+		}
+	}
+
+	private void setResponse(HttpServletResponse response, ErrorCode errorCode) throws RuntimeException, IOException {
+		JSONObject apiResponse = ApiResponse.jsonOf(errorCode);
+		String json = apiResponse.toJSONString();
+
+		response.setContentType("application/json;charset=UTF-8");
+		response.setStatus(errorCode.getHttpStatus().value());
+		response.getWriter().write(json);
 	}
 
 	private String resolveToken(HttpServletRequest request) {
