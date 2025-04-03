@@ -38,7 +38,6 @@ public class JwtFilter extends OncePerRequestFilter {
 		String jwt = resolveToken(request);
 
 		//2. validateToken으로 토큰 유효성 검사
-		//정상 토큰이면 해당 토큰으로 Authentication을 가져와서 SecurityContext에 저장
 		try {
 			if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
 				String blacklistKey = "blacklist:" + jwt;
@@ -71,7 +70,6 @@ public class JwtFilter extends OncePerRequestFilter {
 	private void setResponse(HttpServletResponse response, ErrorCode errorCode) throws RuntimeException, IOException {
 		JSONObject apiResponse = ApiResponse.jsonOf(errorCode);
 		String json = apiResponse.toJSONString();
-
 		response.setContentType("application/json;charset=UTF-8");
 		response.setStatus(errorCode.getHttpStatus().value());
 		response.getWriter().write(json);

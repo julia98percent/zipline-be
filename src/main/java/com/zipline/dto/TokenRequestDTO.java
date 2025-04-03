@@ -6,14 +6,14 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class TokenRequestDto {
+public class TokenRequestDTO {
 	private Long uid;
 	private String grantType;   //ex) Bearer
 	private String accessToken;
 	private String refreshToken;
 
 	@Builder
-	public TokenRequestDto(Long uid, String grantType, String accessToken, String refreshToken) {
+	public TokenRequestDTO(Long uid, String grantType, String accessToken, String refreshToken) {
 		this.uid = uid;
 		this.grantType = grantType;
 		this.accessToken = accessToken;

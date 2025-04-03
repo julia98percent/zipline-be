@@ -15,7 +15,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import com.zipline.dto.TokenRequestDto;
+import com.zipline.dto.TokenRequestDTO;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -50,13 +50,14 @@ public class TokenProvider {
 		this.key = Keys.hmacShaKeyFor(keyBytes);
 	}
 
-	public TokenRequestDto generateTokenDto(Authentication authentication, Long uid) {
+	public TokenRequestDTO generateTokenDto(Authentication authentication, Long uid) {
 
 		String authorities = authentication.getAuthorities().stream()
 			.map(GrantedAuthority::getAuthority)
 			.collect(Collectors.joining(","));
 
 		long now = (new Date().getTime());
+		Claims claims = Jwts.claims().setSubject(uid.toString());
 
 		Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
 		Date refreshTokenExpiresIn = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
@@ -68,12 +69,12 @@ public class TokenProvider {
 			.compact();
 
 		String refreshToken = Jwts.builder()
-			.setSubject(uid.toString())
+			.setClaims(claims)
 			.setExpiration(refreshTokenExpiresIn)
 			.signWith(key, SignatureAlgorithm.HS512)
 			.compact();
 
-		return TokenRequestDto.builder()
+		return TokenRequestDTO.builder()
 			.uid(uid)
 			.grantType(BEARER_TYPE)
 			.accessToken(accessToken)
