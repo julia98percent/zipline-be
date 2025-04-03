@@ -40,3 +40,4 @@ application.properties
 *.yaml
 *.yml
 db/Dockerfile
+logs
