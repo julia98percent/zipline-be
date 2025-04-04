@@ -17,6 +17,10 @@ import lombok.Getter;
 @Getter
 public class SurveyCreateRequestDTO {
 
+	@NotBlank(message = "설문 제목의 최소 길이는 1자 입니다.")
+	@Size(max = 20, message = "설문 제목의 최대 길이는 20자 입니다.")
+	private String title;
+
 	@ArraySchema(schema = @Schema(description = "설문의 문항 목록", implementation = QuestionRequestDTO.class))
 	@NotEmpty(message = "설문에는 최소 한 개의 문항이 필요합니다.")
 	@Size(max = 20, message = "설문에는 최대 20개의 문항만 포함할수 있습니다.")

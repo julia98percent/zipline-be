@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import com.zipline.survey.entity.Question;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
-	@Query("SELECT q FROM Question q JOIN FETCH q.choices WHERE q.survey.uid = :surveyUID ")
+	@Query("SELECT q FROM Question q LEFT JOIN FETCH q.choices WHERE q.survey.uid = :surveyUID ")
 	List<Question> findAllBySurveyUidWithChoices(Long surveyUID);
 }

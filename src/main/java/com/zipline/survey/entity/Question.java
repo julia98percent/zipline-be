@@ -45,13 +45,16 @@ public class Question {
 
 	private String description;
 
+	private boolean isRequired;
+
 	@OneToMany(mappedBy = "question", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	private List<Choice> choices = new ArrayList<>();
 
-	public Question(String title, QuestionType questionType, String description, Survey survey) {
+	public Question(String title, QuestionType questionType, String description, boolean isRequired, Survey survey) {
 		this.title = title;
 		this.questionType = questionType;
 		this.description = description;
+		this.isRequired = isRequired;
 		this.survey = survey;
 	}
 

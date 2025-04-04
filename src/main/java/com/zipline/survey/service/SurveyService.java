@@ -38,11 +38,11 @@ public class SurveyService {
 	public ApiResponse<Map<String, Long>> createSurvey(SurveyCreateRequestDTO requestDTO, Long agentUID) {
 		User user = userRepository.findById(agentUID)
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-		Survey survey = new Survey(user, SurveyStatus.ACTIVE, LocalDateTime.now(), null);
+		Survey survey = new Survey(requestDTO.getTitle(), user, SurveyStatus.ACTIVE, LocalDateTime.now(), null);
 
 		requestDTO.getQuestions().forEach(questionDTO -> {
 			Question question = new Question(questionDTO.getTitle(), QuestionType.valueOf(questionDTO.getType()),
-				questionDTO.getDescription(), survey);
+				questionDTO.getDescription(), questionDTO.getIsRequired(), survey);
 
 			questionDTO.getChoices().forEach(choiceDTO -> {
 				Choice choice = new Choice(choiceDTO.getContent(), question);
