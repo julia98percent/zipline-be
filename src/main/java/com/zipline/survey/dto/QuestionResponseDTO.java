@@ -6,14 +6,15 @@ import java.util.stream.Collectors;
 import com.zipline.survey.entity.Choice;
 import com.zipline.survey.entity.Question;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class QuestionResponseDTO {
 	private Long id;
 	private String title;
 	private String description;
 	private String type;
+	private boolean isRequired;
 	private List<ChoiceResponseDTO> choices;
 
 	private QuestionResponseDTO(Question question, List<ChoiceResponseDTO> choices) {
@@ -21,6 +22,7 @@ public class QuestionResponseDTO {
 		this.id = question.getUid();
 		this.description = question.getDescription();
 		this.type = question.getQuestionType().name();
+		this.isRequired = question.isRequired();
 		this.choices = choices;
 	}
 
