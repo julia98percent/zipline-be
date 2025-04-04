@@ -14,9 +14,9 @@ import com.zipline.entity.publicItem.Region;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.global.util.ProxyPool;
 import com.zipline.repository.publicItem.RegionRepository;
-import com.zipline.service.NaverArticleService;
+import com.zipline.service.publicItem.NaverArticleService;
 import com.zipline.service.publicItem.ProxyNaverArticleService;
-import com.zipline.service.RegionCodeService;
+import com.zipline.service.publicItem.RegionCodeService;
 import com.zipline.global.util.CrawlingStatusManager;
 
 import lombok.RequiredArgsConstructor;

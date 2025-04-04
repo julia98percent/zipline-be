@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.dto.publicItem.CrawlingStatusDTO;
 import com.zipline.dto.publicItem.PageResultDTO;
 import com.zipline.dto.publicItem.ProxyInfoDTO;
-import com.zipline.entity.PropertyArticle;
+import com.zipline.entity.publicItem.PropertyArticle;
 import com.zipline.entity.publicItem.Region;
 import com.zipline.global.util.ProxyPool;
 import com.zipline.repository.publicItem.PropertyArticleRepository;

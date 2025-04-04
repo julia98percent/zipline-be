@@ -1,4 +1,4 @@
-package com.zipline.service;
+package com.zipline.service.publicItem;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zipline.entity.PropertyArticle;
+import com.zipline.entity.publicItem.PropertyArticle;
 import com.zipline.entity.publicItem.Region;
 import com.zipline.repository.publicItem.PropertyArticleRepository;
 import com.zipline.repository.publicItem.RegionRepository;

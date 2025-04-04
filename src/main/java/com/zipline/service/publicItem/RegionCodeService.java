@@ -1,4 +1,4 @@
-package com.zipline.service;
+package com.zipline.service.publicItem;
 
 import java.util.ArrayList;
 import java.util.List;

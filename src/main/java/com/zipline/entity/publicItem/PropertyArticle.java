@@ -1,4 +1,4 @@
-package com.zipline.entity;
+package com.zipline.entity.publicItem;
 
 import java.time.LocalDateTime;
 
