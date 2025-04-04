@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zipline.dto.publicItem.RegionDto;
+import com.zipline.dto.publicItem.RegionDTO;
 import com.zipline.entity.publicItem.Region;
 import com.zipline.repository.publicItem.RegionRepository;
 import com.zipline.global.util.RandomSleepUtil;
@@ -103,10 +103,10 @@ public class RegionCodeService {
             log.info("API 응답: {}", response);
             
             if (response != null && !response.isEmpty()) {
-                List<RegionDto> regions = parseRegions(response);
+                List<RegionDTO> regions = parseRegions(response);
                 log.info("파싱된 지역 정보: {}", regions);
                 
-                for (RegionDto region : regions) {
+                for (RegionDTO region : regions) {
                     saveRegion(region, 1);
                 }
             } else {
@@ -132,10 +132,10 @@ public class RegionCodeService {
                 log.info("API 응답: {}", response);
                 
                 if (response != null && !response.isEmpty()) {
-                    List<RegionDto> regions = parseRegions(response);
+                    List<RegionDTO> regions = parseRegions(response);
                     log.info("파싱된 지역 정보: {}", regions);
                     
-                    for (RegionDto region : regions) {
+                    for (RegionDTO region : regions) {
                         saveRegion(region, 2);
                     }
                 } else {
@@ -162,10 +162,10 @@ public class RegionCodeService {
                 log.info("API 응답: {}", response);
                 
                 if (response != null && !response.isEmpty()) {
-                    List<RegionDto> regions = parseRegions(response);
+                    List<RegionDTO> regions = parseRegions(response);
                     log.info("파싱된 지역 정보: {}", regions);
                     
-                    for (RegionDto region : regions) {
+                    for (RegionDTO region : regions) {
                         saveRegion(region, 3);
                     }
                 } else {
@@ -196,7 +196,7 @@ public class RegionCodeService {
      * 지역 정보를 데이터베이스에 저장합니다.
      * 이미 존재하는 경우 정보를 업데이트합니다.
      */
-    private void saveRegion(RegionDto dto, int level) {
+    private void saveRegion(RegionDTO dto, int level) {
         log.info("\n=== 지역 정보 저장 시작 ===");
         log.info("저장할 지역: {} (레벨: {})", dto.getCortarName(), level);
           
@@ -283,13 +283,13 @@ public class RegionCodeService {
     }
     
     /**
-     * JSON 응답을 파싱하여 RegionDto 리스트로 변환합니다.
+     * JSON 응답을 파싱하여 RegionDTO 리스트로 변환합니다.
      * 
      * @param jsonResponse 파싱할 JSON 문자열
-     * @return RegionDto 리스트
+     * @return RegionDTO 리스트
      */
-    public List<RegionDto> parseRegions(String jsonResponse) {
-        List<RegionDto> regions = new ArrayList<>();
+    public List<RegionDTO> parseRegions(String jsonResponse) {
+        List<RegionDTO> regions = new ArrayList<>();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(jsonResponse);
@@ -297,7 +297,7 @@ public class RegionCodeService {
 
             if (regionsNode.isArray()) {
                 for (JsonNode regionNode : regionsNode) {
-                    RegionDto region = RegionDto.builder()
+                    RegionDTO region = RegionDTO.builder()
                             .cortarNo(regionNode.path("cortarNo").asLong())
                             .cortarName(regionNode.path("cortarName").asText())
                             .centerLat(regionNode.path("centerLat").asDouble())

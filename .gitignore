@@ -42,3 +42,4 @@ application.properties
 db/Dockerfile
 logs
 src/main/resources/proxy-list.txt
+src/.cursor/rules/oop.mdc

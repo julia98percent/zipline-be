@@ -9,7 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
-public class RegionDto {
+public class RegionDTO {
     private Long cortarNo;
     private String cortarName;
     private Double centerLat;
