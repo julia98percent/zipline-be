@@ -20,9 +20,6 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     
     List<Region> findByLevel(Integer level);
     
-    @Query("SELECT r FROM Region r WHERE r.level = 3 AND CONCAT(r.cortarNo, '') LIKE CONCAT(:parentCortarNo, '%')")
-    List<Region> findLevel3RegionsByParentCortarNo(@Param("parentCortarNo") Long parentCortarNo);
-    
     @Query("SELECT r FROM Region r WHERE r.level = :level " +
            "AND (r.naverLastCrawledAt < :cutoffDate " +
            "OR r.naverStatus != 'COMPLETED')")
@@ -33,16 +30,10 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     @Query("SELECT r.cortarNo FROM Region r WHERE r.level = :level " +
            "AND (r.naverLastCrawledAt < :cutoffDate " +
            "OR r.naverStatus != 'COMPLETED')")
-    Page<Long> findCortarNosNeedingUpdate(
+    Page<Long> findRegionsNeedingUpdateForNaverWithPage(
                     @Param("level") int level,
                     @Param("cutoffDate") LocalDateTime cutoffDate,
                     Pageable pageable);
-    
-    @Query("SELECT r FROM Region r WHERE r.level = :level AND CONCAT(r.cortarNo, '') LIKE :pattern")
-    List<Region> findByLevelAndCortarNoPattern(@Param("level") Integer level, @Param("pattern") String pattern);
-    
-    @Query("SELECT r FROM Region r WHERE CONCAT(r.cortarNo, '') LIKE :pattern")
-    List<Region> findByCortarNoPattern(@Param("pattern") String pattern);
     
     @Query("SELECT r FROM Region r WHERE CONCAT(r.cortarNo, '') LIKE CONCAT(:parentCortarNo, '%')")
     List<Region> findByParentCortarNo(@Param("parentCortarNo") Long parentCortarNo);

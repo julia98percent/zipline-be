@@ -50,7 +50,7 @@ public class NaverArticleService {
                 PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
                 log.info("페이지 요청: {}", pageRequest);
                 
-                Page<Long> regionPage = regionRepository.findCortarNosNeedingUpdate(level, cutoffDate, pageRequest);
+                Page<Long> regionPage = regionRepository.findRegionsNeedingUpdateForNaverWithPage(level, cutoffDate, pageRequest);
                 log.info("조회된 지역 수: {}", regionPage.getContent().size());
                 
                 if (regionPage.isEmpty()) {
