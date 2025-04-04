@@ -33,6 +33,8 @@ public class Survey {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long uid;
 
+	private String title;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_uid")
 	private User user;
@@ -46,7 +48,8 @@ public class Survey {
 	private LocalDateTime createdAt;
 	private LocalDateTime deletedAt;
 
-	public Survey(User user, SurveyStatus status, LocalDateTime createdAt, LocalDateTime deletedAt) {
+	public Survey(String title, User user, SurveyStatus status, LocalDateTime createdAt, LocalDateTime deletedAt) {
+		this.title = title;
 		this.user = user;
 		this.status = status;
 		this.createdAt = createdAt;

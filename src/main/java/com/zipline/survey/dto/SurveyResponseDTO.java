@@ -13,6 +13,7 @@ import lombok.Getter;
 public class SurveyResponseDTO {
 	private Long id;
 	private Long userId;
+	private String title;
 	private String status;
 	private LocalDateTime createdAt;
 	private List<QuestionResponseDTO> questions;
@@ -20,6 +21,7 @@ public class SurveyResponseDTO {
 	private SurveyResponseDTO(Survey survey, List<QuestionResponseDTO> questions) {
 		this.id = survey.getUid();
 		this.userId = survey.getUser().getUid();
+		this.title = survey.getTitle();
 		this.status = survey.getStatus().name();
 		this.createdAt = survey.getCreatedAt();
 		this.questions = questions;
