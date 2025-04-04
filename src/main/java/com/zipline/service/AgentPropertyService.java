@@ -11,7 +11,9 @@ import com.zipline.dto.AgentPropertyResponseDTO;
 import com.zipline.entity.AgentProperty;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
+import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.UserNotFoundException;
+import com.zipline.global.exception.custom.agentProperty.PropertyNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
 import com.zipline.repository.AgentPropertyRepository;
 import com.zipline.repository.CustomerRepository;
@@ -26,6 +28,16 @@ public class AgentPropertyService {
 	private final AgentPropertyRepository agentPropertyRepository;
 	private final UserRepository userRepository;
 	private final CustomerRepository customerRepository;
+
+	@Transactional(readOnly = true)
+	public AgentPropertyResponseDTO getProperty(Long propertyUid, Long userUid) {
+		AgentProperty agentProperty = agentPropertyRepository.findById(propertyUid)
+			.orElseThrow(() -> new PropertyNotFoundException("해당 매물을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+
+		if (!agentProperty.getUser().getUid().equals(userUid))
+			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+		return AgentPropertyResponseDTO.of(agentProperty);
+	}
 
 	@Transactional
 	public AgentPropertyResponseDTO registerProperty(AgentPropertyRequestDTO agentPropertyRequestDTO, Long userUid) {
