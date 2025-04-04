@@ -17,9 +17,9 @@ import com.zipline.dto.PageRequestDTO;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
 import com.zipline.global.common.response.ApiResponse;
+import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
-import com.zipline.global.exception.custom.customer.PermissionDeniedException;
 import com.zipline.repository.CustomerRepository;
 import com.zipline.repository.UserRepository;
 
