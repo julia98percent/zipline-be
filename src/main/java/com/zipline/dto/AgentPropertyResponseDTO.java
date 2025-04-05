@@ -15,7 +15,6 @@ import lombok.Getter;
 @Builder
 public class AgentPropertyResponseDTO {
 
-	private Long customer;
 	private String address;
 	private String dong;
 	private String roadName;
@@ -41,7 +40,6 @@ public class AgentPropertyResponseDTO {
 
 	public static AgentPropertyResponseDTO of(AgentProperty property) {
 		return AgentPropertyResponseDTO.builder()
-			.customer(property.getCustomer().getUid())
 			.address(property.getAddress())
 			.dong(property.getAddress1())
 			.roadName(property.getAddress2())

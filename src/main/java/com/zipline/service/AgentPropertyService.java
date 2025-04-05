@@ -47,36 +47,38 @@ public class AgentPropertyService {
 		Customer customer = customerRepository.findById(agentPropertyRequestDTO.getCustomerUid())
 			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
-		AgentProperty agentProperty = agentPropertyRequestDTO.toEntity(loginedUser, false, customer,
-			LocalDateTime.now(),
-			null, null);
+		AgentProperty agentProperty = AgentProperty.builder()
+			.user(loginedUser)
+			.customer(customer)
+			.address(agentPropertyRequestDTO.getAddress())
+			/*.address1(agentPropertyRequestDTO.getDong())
+			.address2(agentPropertyRequestDTO.getRoadName())*/
+			.address3(agentPropertyRequestDTO.getExtraAddress()) // 상세 주소
+			.deposit(agentPropertyRequestDTO.getDeposit())
+			.monthlyRent(agentPropertyRequestDTO.getMonthlyRent())
+			.price(agentPropertyRequestDTO.getPrice())
+			.type(agentPropertyRequestDTO.getType())
+			.longitude(agentPropertyRequestDTO.getLongitude())
+			.latitude(agentPropertyRequestDTO.getLatitude())
+			.startDate(agentPropertyRequestDTO.getStartDate())
+			.endDate(agentPropertyRequestDTO.getEndDate())
+			.moveInDate(agentPropertyRequestDTO.getMoveInDate())
+			.realCategory(agentPropertyRequestDTO.getRealCategory())
+			.petsAllowed(agentPropertyRequestDTO.getPetsAllowed())
+			.floor(agentPropertyRequestDTO.getFloor())
+			.hasElevator(agentPropertyRequestDTO.getHasElevator())
+			.constructionYear(agentPropertyRequestDTO.getConstructionYear())
+			.parkingCapacity(agentPropertyRequestDTO.getParkingCapacity())
+			.netArea(agentPropertyRequestDTO.getNetArea())
+			.totalArea(agentPropertyRequestDTO.getTotalArea())
+			.details(agentPropertyRequestDTO.getDetails())
+			.isDeleted(false)
+			.createdAt(LocalDateTime.now())
+			.updatedAt(LocalDateTime.now())
+			.deletedAt(null)
+			.build();
 
 		AgentProperty save = agentPropertyRepository.save(agentProperty);
 		return AgentPropertyResponseDTO.of(save);
-	}
-
-	@Transactional
-	public AgentPropertyResponseDTO modifyProperty(AgentPropertyRequestDTO agentPropertyRequestDTO, Long propertyUid,
-		Long userUid) {
-		User loginedUser = userRepository.findById(userUid)
-			.orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-
-		AgentProperty agentProperty = agentPropertyRepository.findById(propertyUid)
-			.orElseThrow(() -> new PropertyNotFoundException("해당 매물을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-
-		Customer customer = customerRepository.findById(agentPropertyRequestDTO.getCustomerUid())
-			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-
-		if (!agentProperty.getUser().getUid().equals(userUid))
-			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
-
-		agentProperty.modifyProperty(agentPropertyRequestDTO, loginedUser, false, customer,
-			agentProperty.getCreatedAt(),
-			LocalDateTime.now(), null);
-
-		agentPropertyRepository.save(agentProperty);
-
-		return AgentPropertyResponseDTO.of(agentProperty);
-
 	}
 }
