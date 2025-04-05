@@ -31,7 +31,7 @@ public class AgentPropertyService {
 
 	@Transactional(readOnly = true)
 	public AgentPropertyResponseDTO getProperty(Long propertyUid, Long userUid) {
-		AgentProperty agentProperty = agentPropertyRepository.findById(propertyUid)
+		AgentProperty agentProperty = agentPropertyRepository.findByUidAndIsDeletedFalse(propertyUid)
 			.orElseThrow(() -> new PropertyNotFoundException("해당 매물을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
 		if (!agentProperty.getUser().getUid().equals(userUid))
@@ -61,7 +61,7 @@ public class AgentPropertyService {
 		User loginedUser = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
-		AgentProperty agentProperty = agentPropertyRepository.findById(propertyUid)
+		AgentProperty agentProperty = agentPropertyRepository.findByUidAndIsDeletedFalse(propertyUid)
 			.orElseThrow(() -> new PropertyNotFoundException("해당 매물을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
 		Customer customer = customerRepository.findById(agentPropertyRequestDTO.getCustomerUid())
@@ -77,6 +77,19 @@ public class AgentPropertyService {
 		agentPropertyRepository.save(agentProperty);
 
 		return AgentPropertyResponseDTO.of(agentProperty);
+	}
 
+	@Transactional
+	public void deleteProperty(Long propertyUid, Long userUid) {
+		AgentProperty agentProperty = agentPropertyRepository.findByUidAndIsDeletedFalse(propertyUid)
+			.orElseThrow(() -> new PropertyNotFoundException("해당 매물을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+
+		System.out.println("agentProperty = " + agentProperty); // null인지 확인
+		System.out.println("agentProperty.getUser() = " + agentProperty.getUser()); // 여기도
+
+		if (!agentProperty.getUser().getUid().equals(userUid))
+			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+
+		agentProperty.delete(LocalDateTime.now());
 	}
 }
