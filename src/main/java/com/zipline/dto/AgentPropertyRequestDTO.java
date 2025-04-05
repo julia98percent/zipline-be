@@ -2,8 +2,12 @@ package com.zipline.dto;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Year;
 
+import com.zipline.entity.AgentProperty;
+import com.zipline.entity.Customer;
+import com.zipline.entity.User;
 import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.enums.PropertyType;
 
@@ -24,6 +28,13 @@ public class AgentPropertyRequestDTO {
 	@Schema(description = "전체 주소", example = "서울특별시 강남구 삼성로85길 12", required = true)
 	@NotBlank
 	private String address;
+
+	@Schema(description = "동", example = "역삼동", required = true)
+	@NotBlank
+	private String dong;
+
+	@Schema(description = "도로명", example = "OO길")
+	private String roadName;
 
 	@Schema(description = "상세 주소", example = "301호")
 	private String extraAddress;
@@ -93,4 +104,39 @@ public class AgentPropertyRequestDTO {
 
 	@Schema(description = "기타 상세 사항", example = "풀옵션, 관리비 별도")
 	private String details;
+
+	public AgentProperty toEntity(User user, Boolean isDeleted, Customer customer, LocalDateTime createdAt,
+		LocalDateTime updatedAt,
+		LocalDateTime deletedAt) {
+		return AgentProperty.builder()
+			.user(user)
+			.customer(customer)
+			.address(address)
+			.address1(dong)
+			.address2(roadName)
+			.address3(extraAddress)
+			.deposit(deposit)
+			.monthlyRent(monthlyRent)
+			.price(price)
+			.type(type)
+			.longitude(longitude)
+			.latitude(latitude)
+			.startDate(startDate)
+			.endDate(endDate)
+			.moveInDate(moveInDate)
+			.realCategory(realCategory)
+			.petsAllowed(petsAllowed)
+			.floor(floor)
+			.hasElevator(hasElevator)
+			.constructionYear(constructionYear)
+			.parkingCapacity(parkingCapacity)
+			.netArea(netArea)
+			.totalArea(totalArea)
+			.details(details)
+			.isDeleted(isDeleted)
+			.createdAt(createdAt)
+			.updatedAt(updatedAt)
+			.deletedAt(deletedAt)
+			.build();
+	}
 }

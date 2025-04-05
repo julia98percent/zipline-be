@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/properties")
-public class PropertyController {
+public class AgentPropertyController {
 
 	private final AgentPropertyService agentPropertyService;
 
@@ -40,5 +40,16 @@ public class PropertyController {
 		agentPropertyService.registerProperty(agentPropertyRequestDTO, Long.parseLong(principal.getName()));
 		ApiResponse<Void> response = ApiResponse.create("매물 등록 성공");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	@PostMapping("{propertyUid}")
+	public ResponseEntity<ApiResponse<AgentPropertyResponseDTO>> modifyProperty(
+		@RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, @PathVariable Long propertyUid,
+		Principal principal) {
+		AgentPropertyResponseDTO propertyResponseDTO = agentPropertyService.modifyProperty(agentPropertyRequestDTO,
+			propertyUid,
+			Long.parseLong(principal.getName()));
+		ApiResponse<AgentPropertyResponseDTO> response = ApiResponse.ok("매물 상세 조회 성공", propertyResponseDTO);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }
