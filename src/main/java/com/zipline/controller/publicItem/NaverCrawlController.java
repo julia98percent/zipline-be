@@ -35,7 +35,7 @@ public class NaverCrawlController {
         return ResponseEntity.ok(ApiResponse.ok("레벨 " + 3 + " 매물 정보 수집이 시작되었습니다."));
     }
 
-    @GetMapping("/articles/region/{cortarNo}")
+    @GetMapping("/articles/{cortarNo}")
     public ResponseEntity<ApiResponse<Void>> crawlArticlesByRegion(@PathVariable Long cortarNo) {
         CompletableFuture.runAsync(() -> {
             crawlingStatusManager.executeWithLock(() -> {
