@@ -28,7 +28,7 @@ public class NaverMigrationController {
     public ResponseEntity<ApiResponse<Void>> startMigration() {
         CompletableFuture.runAsync(() -> {
             crawlingStatusManager.executeWithLock(() -> {
-                migrationService.scheduledMigration();
+                migrationService.NaverMigration();
                 return null;
             });
         });

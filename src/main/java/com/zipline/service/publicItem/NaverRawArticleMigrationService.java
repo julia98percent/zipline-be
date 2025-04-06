@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,8 +41,8 @@ public class NaverRawArticleMigrationService {
     //  * 마이그레이션이 필요한 모든 원본 매물 데이터를 처리합니다.
     //  * 스케줄링된 작업으로 실행됩니다.
     //  */
-    @Scheduled(fixedDelay = 300000) // 5분마다 실행
-    public void scheduledMigration() {
+
+    public void NaverMigration() {
         log.info("=== 네이버 원본 매물 데이터 마이그레이션 작업 시작 ===");
         try {
             // 1. 모든 지역 코드 조회
@@ -95,7 +94,7 @@ public class NaverRawArticleMigrationService {
             int totalProcessed = 0;
             int totalSuccess = 0;
             int totalFailed = 0;
-            int pageNumber = 0;
+            int pageNumber = (int) Math.ceil((double) pendingCount / BATCH_SIZE);
             boolean hasMoreData = true;
             
             // 페이징 처리로 모든 데이터 마이그레이션
