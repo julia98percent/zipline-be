@@ -30,7 +30,7 @@ public class PropertyController {
 		Principal principal) {
 		AgentPropertyResponseDTO propertyResponseDTO = agentPropertyService.getProperty(propertyUid,
 			Long.parseLong(principal.getName()));
-		ApiResponse<AgentPropertyResponseDTO> response = ApiResponse.ok("매물 상세 조회 성공", propertyResponseDTO);
+		ApiResponse<AgentPropertyResponseDTO> response = ApiResponse.ok("매물 조회 성공", propertyResponseDTO);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
