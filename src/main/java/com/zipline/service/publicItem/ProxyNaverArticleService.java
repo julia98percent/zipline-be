@@ -25,6 +25,9 @@ import com.zipline.dto.publicItem.PageResultDTO;
 import com.zipline.dto.publicItem.ProxyInfoDTO;
 import com.zipline.entity.publicItem.PropertyArticle;
 import com.zipline.entity.publicItem.Region;
+import com.zipline.entity.publicItem.enums.Platform;
+import com.zipline.entity.publicItem.enums.Category;
+import com.zipline.entity.publicItem.enums.CrawlStatus;
 import com.zipline.global.util.ProxyPool;
 import com.zipline.repository.publicItem.PropertyArticleRepository;
 import com.zipline.repository.publicItem.RegionRepository;
@@ -135,7 +138,7 @@ public class ProxyNaverArticleService {
         CrawlingStatusDTO status = CrawlingStatusDTO.initialize(regionName);
         regionStatuses.put(regionName, status);
         
-        region.setNaverStatus(Region.CrawlStatus.PROCESSING);
+        region.setNaverStatus(CrawlStatus.PROCESSING);
         region.setNaverLastCrawledAt(LocalDateTime.now());
         regionRepository.save(region);
         
@@ -192,14 +195,14 @@ public class ProxyNaverArticleService {
             }
             
             // 최종 상태 업데이트
-            region.setNaverStatus(Region.CrawlStatus.COMPLETED);
+            region.setNaverStatus(CrawlStatus.COMPLETED);
             log.info("[Thread-{}] [{}] 매물 정보 수집 완료 - 총 {}개 매물", 
                 Thread.currentThread().getId(), regionName, totalArticles.get());
             
         } catch (Exception e) {
             log.error("[Thread-{}] [{}] 매물 정보 수집 중 오류 발생: {}", 
                 Thread.currentThread().getId(), regionName, e.getMessage());
-            region.setNaverStatus(Region.CrawlStatus.FAILED);
+            region.setNaverStatus(CrawlStatus.FAILED);
         } finally {
             region.setNaverLastCrawledAt(LocalDateTime.now());
             regionRepository.save(region);
@@ -440,7 +443,7 @@ public class ProxyNaverArticleService {
                 PropertyArticle newArticle = new PropertyArticle();
                 newArticle.setArticleId(articleId);
                 newArticle.setRegionCode(String.valueOf(region.getCortarNo()));
-                newArticle.setPlatform(PropertyArticle.Platform.NAVER);
+                newArticle.setPlatform(Platform.NAVER);
                 newArticle.setPlatformUrl("https://new.land.naver.com/articles/" + articleId);
                 newArticle.setCreatedAt(LocalDateTime.now());
                 return newArticle;
@@ -455,15 +458,15 @@ public class ProxyNaverArticleService {
             String tradTpNm = articleNode.path("tradTpNm").asText();
             switch (tradTpNm) {
                 case "매매":
-                    article.setCategory(PropertyArticle.Category.SALE);
+                    article.setCategory(Category.SALE);
                     article.setPrice(articleNode.path("prc").asLong());
                     break;
                 case "전세":
-                    article.setCategory(PropertyArticle.Category.DEPOSIT);
+                    article.setCategory(Category.DEPOSIT);
                     article.setDeposit(articleNode.path("prc").asLong());
                     break;
                 case "월세":
-                    article.setCategory(PropertyArticle.Category.MONTHLY);
+                    article.setCategory(Category.MONTHLY);
                     article.setDeposit(articleNode.path("prc").asLong());
                     article.setMonthlyRent(articleNode.path("rentPrc").asLong());
                     break;

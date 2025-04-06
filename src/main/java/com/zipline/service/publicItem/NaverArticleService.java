@@ -12,6 +12,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.entity.publicItem.PropertyArticle;
 import com.zipline.entity.publicItem.Region;
+import com.zipline.entity.publicItem.enums.Platform;
+import com.zipline.entity.publicItem.enums.Category;
+import com.zipline.entity.publicItem.enums.CrawlStatus;
 import com.zipline.repository.publicItem.PropertyArticleRepository;
 import com.zipline.repository.publicItem.RegionRepository;
 import com.zipline.global.util.CoordinateUtil;
@@ -100,7 +103,7 @@ public class NaverArticleService {
                 .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
             
         // 상태 업데이트
-        region.setNaverStatus(Region.CrawlStatus.PROCESSING);
+        region.setNaverStatus(CrawlStatus.PROCESSING);
         region.setNaverLastCrawledAt(LocalDateTime.now());
         regionRepository.save(region);
         
@@ -139,14 +142,14 @@ public class NaverArticleService {
             }
             
             // 성공 상태 업데이트
-            region.setNaverStatus(Region.CrawlStatus.COMPLETED);
+            region.setNaverStatus(CrawlStatus.COMPLETED);
             region.setNaverLastCrawledAt(LocalDateTime.now());
             regionRepository.save(region);
             
             log.info("매물 정보 수집 완료 - 지역: {}, 총 {}개 매물", region.getCortarName(), totalArticles);
         } catch (Exception e) {
             log.error("매물 정보 수집 중 오류 발생: {}", e.getMessage());
-            region.setNaverStatus(Region.CrawlStatus.FAILED);
+            region.setNaverStatus(CrawlStatus.FAILED);
             region.setNaverLastCrawledAt(LocalDateTime.now());
             regionRepository.save(region);
         }
@@ -214,7 +217,7 @@ public class NaverArticleService {
                 article = new PropertyArticle();
                 article.setArticleId(articleId);
                 article.setRegionCode(String.valueOf(region.getCortarNo()));
-                article.setPlatform(PropertyArticle.Platform.NAVER);
+                article.setPlatform(Platform.NAVER);
                 article.setPlatformUrl("https://fin.land.naver.com/articles/" + articleId);
                 log.info("새로운 매물 정보 생성: {}", articleId);
             }
@@ -229,15 +232,15 @@ public class NaverArticleService {
             String tradTpNm = articleNode.path("tradTpNm").asText();
             switch (tradTpNm) {
                 case "매매":
-                    article.setCategory(PropertyArticle.Category.SALE);
+                    article.setCategory(Category.SALE);
                     article.setPrice(articleNode.path("prc").asLong());
                     break;
                 case "전세":
-                    article.setCategory(PropertyArticle.Category.DEPOSIT);
+                    article.setCategory(Category.DEPOSIT);
                     article.setDeposit(articleNode.path("prc").asLong());
                     break;
                 case "월세":
-                    article.setCategory(PropertyArticle.Category.MONTHLY);
+                    article.setCategory(Category.MONTHLY);
                     article.setMonthlyRent(articleNode.path("rentPrc").asLong());
                     break;
             }

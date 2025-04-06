@@ -19,6 +19,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import com.zipline.entity.publicItem.enums.CrawlStatus;
+
 /**
  * 지역 정보를 저장하는 엔티티
  * - 시/도, 시/군/구, 읍/면/동 계층 구조 관리
@@ -75,13 +77,4 @@ public class Region {
 
     @Column(name = "dabang_last_crawled_at")
     private LocalDateTime dabangLastCrawledAt;
-
-    public enum CrawlStatus {
-        NEW,         // 최초 생성 상태 (한 번도 크롤링되지 않음)
-        PENDING,     // 크롤링 대기 중
-        PROCESSING,  // 크롤링 진행 중
-        COMPLETED,   // 크롤링 완료
-        PARTIALLY_COMPLETED,  // 일부 페이지만 크롤링 완료
-        FAILED       // 크롤링 실패
-    }
 }

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.dto.publicItem.RegionDTO;
 import com.zipline.entity.publicItem.Region;
+import com.zipline.entity.publicItem.enums.CrawlStatus;
 import com.zipline.repository.publicItem.RegionRepository;
 import com.zipline.global.util.RandomSleepUtil;
 
@@ -211,9 +212,9 @@ public class RegionCodeService {
             region.setCortarNo(dto.getCortarNo());
             region.setCortarName(dto.getCortarName());
             region.setLevel(level);
-            region.setNaverStatus(Region.CrawlStatus.NEW);
-            region.setZigbangStatus(Region.CrawlStatus.NEW); 
-            region.setDabangStatus(Region.CrawlStatus.NEW); 
+            region.setNaverStatus(CrawlStatus.NEW);
+            region.setZigbangStatus(CrawlStatus.NEW); 
+            region.setDabangStatus(CrawlStatus.NEW); 
             log.info("새로운 지역 정보 생성: {}", region.getCortarName());
         }
         

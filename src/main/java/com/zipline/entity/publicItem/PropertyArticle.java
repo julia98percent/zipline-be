@@ -13,6 +13,9 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import com.zipline.entity.publicItem.enums.Category;
+import com.zipline.entity.publicItem.enums.Platform;
+
 @Entity
 @Table(name = "property_articles")
 @Getter
@@ -77,16 +80,4 @@ public class PropertyArticle {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    public enum Category {
-        SALE,       // 매매
-        DEPOSIT,    // 전세
-        MONTHLY     // 월세
-    }
-
-    public enum Platform {
-        NAVER,      // 네이버
-        ZIGBANG,    // 직방
-        DABANG      // 다방
-    }
 } 
