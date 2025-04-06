@@ -44,9 +44,6 @@ public class PropertyArticle {
     @Column(name = "building_type")
     private String buildingType;
 
-    @Column(name = "address")
-    private String address;
-
     @Column(name = "price")
     private Long price;
 
