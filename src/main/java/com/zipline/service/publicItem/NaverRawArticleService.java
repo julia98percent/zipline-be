@@ -33,14 +33,14 @@ public class NaverRawArticleService {
     private final ObjectMapper objectMapper;
     private final RegionRepository regionRepository;
     private final NaverRawArticleRepository naverRawArticleRepository;
-    
+
     private static final String BASE_URL = "https://m.land.naver.com/cluster/ajax/articleList";
     private static final int RECENT_DAYS = 2; // 최근 2일
     private static final int ZOOM_LEVEL = 12; // 줌 레벨
-    
+
     /**
      * 특정 레벨의 모든 지역에 대한 원본 매물 정보를 수집합니다.
-     * 
+     *
      * @param level 지역 레벨
      */
     public void crawlAndSaveRawArticlesByLevel(int level) {
@@ -48,11 +48,12 @@ public class NaverRawArticleService {
         try {
             LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
             log.info("수집 기준일: {}", cutoffDate);
-            
+
             // 페이징 처리를 위한 변수들
             int pageSize = 1;
             int pageNumber = 0;
             boolean hasMoreData = true;
+
             while (hasMoreData) {
                 PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
                 log.info("페이지 요청: {}", pageRequest);
@@ -65,23 +66,28 @@ public class NaverRawArticleService {
                     hasMoreData = false;
                     continue;
                 }
+
                 List<Long> cortarNos = regionPage.getContent();
                 log.info("배치 처리 중: 페이지 {}, 지역 수: {}", pageNumber + 1, cortarNos.size());
-                
+
                 // 각 지역에 대해 매물 정보 수집
                 for (Long cortarNo : cortarNos) {
                     try {
                         RandomSleepUtil.sleep(); // API 요청 전 대기
                         crawlAndSaveRawArticlesForRegion(cortarNo);
+
                         // 수집 완료 후 최종 수집 시간 업데이트
                         regionRepository.updateNaverLastCrawledAt(cortarNo, LocalDateTime.now());
+
                     } catch (Exception e) {
                         log.error("지역 코드 {} 처리 중 오류 발생: {}", cortarNo, e.getMessage());
                         // 필요시 재시도 로직 추가
                     }
                 }
+
                 // 다음 페이지로 이동
                 pageNumber++;
+
                 // 마지막 페이지인지 확인
                 hasMoreData = pageNumber < regionPage.getTotalPages();
             }
@@ -92,10 +98,10 @@ public class NaverRawArticleService {
             throw e;
         }
     }
-    
+
     /**
      * 특정 지역의 원본 매물 정보를 수집하고 저장합니다.
-     * 
+     *
      * @param cortarNo 지역 코드
      */
     @Transactional
@@ -105,9 +111,8 @@ public class NaverRawArticleService {
         Region region = regionRepository.findByCortarNo(cortarNo)
                 .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
             
-        // 상태 업데이트
-        region.setNaverStatus(CrawlStatus.PROCESSING);
-        region.setNaverLastCrawledAt(LocalDateTime.now());
+        // 상태 업데이트 - 기존 메서드 사용
+        region = region.updateNaverStatus(CrawlStatus.PROCESSING);
         regionRepository.save(region);
         
         try {
@@ -147,30 +152,30 @@ public class NaverRawArticleService {
                 }
             }
             
-            // 성공 상태 업데이트
-            region.setNaverStatus(CrawlStatus.COMPLETED);
-            region.setNaverLastCrawledAt(LocalDateTime.now());
+            // 성공 상태 업데이트 - 기존 메서드 사용
+            region = region.updateNaverStatus(CrawlStatus.COMPLETED);
             regionRepository.save(region);
             
             log.info("네이버 원본 매물 정보 수집 완료 - 지역: {}, 총 {}개 매물", region.getCortarName(), totalArticles);
         } catch (Exception e) {
             log.error("네이버 원본 매물 정보 수집 중 오류 발생: {}", e.getMessage());
-            region.setNaverStatus(CrawlStatus.FAILED);
-            region.setNaverLastCrawledAt(LocalDateTime.now());
+            
+            // 실패 상태 업데이트 - 기존 메서드 사용
+            region = region.updateNaverStatus(CrawlStatus.FAILED);
             regionRepository.save(region);
         }
     }
-    
+
     /**
      * 네이버 부동산 API를 위한 URL을 생성합니다.
-     * 
+     *
      * @param cortarNo 지역 코드
      * @param page 페이지 번호
      * @return API URL
      */
     private String buildApiUrl(Long cortarNo, int page) {
         Region region = regionRepository.findByCortarNo(cortarNo)
-            .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
+                .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
         
         // 중심 좌표로부터 지리적 범위 계산
         double[] bounds = CoordinateUtil.calculateBounds(
@@ -195,7 +200,8 @@ public class NaverRawArticleService {
             left
         );
         
-        return String.format("%s?itemId=&mapKey=&lgeo=&showR0=&rletTpCd=APT:OPST:VL:YR:DSD:ABYG:OBYG:JGC:JWJT:DDDGG:SGJT:HOJT:JGB:OR:GSW:SG:SMS:GJCG:GM:TJ:APTHGJ&tradTpCd=A1:B1:B2:B3&z=%d&lat=%.6f&lon=%.6f&btm=%.6f&lft=%.6f&top=%.6f&rgt=%.6f&cortarNo=%d&sort=rank&page=%d",
+        return String.format(
+            "%s?itemId=&mapKey=&lgeo=&showR0=&rletTpCd=APT:OPST:VL:YR:DSD:ABYG:OBYG:JGC:JWJT:DDDGG:SGJT:HOJT:JGB:OR:GSW:SG:SMS:GJCG:GM:TJ:APTHGJ&tradTpCd=A1:B1:B2:B3&z=%d&lat=%.6f&lon=%.6f&btm=%.6f&lft=%.6f&top=%.6f&rgt=%.6f&cortarNo=%d&sort=rank&page=%d",
             BASE_URL,
             ZOOM_LEVEL,
             region.getCenterLat(),
@@ -208,10 +214,10 @@ public class NaverRawArticleService {
             page
         );
     }
-    
+
     /**
      * 원본 매물 정보를 데이터베이스에 저장합니다.
-     * 
+     *
      * @param articleNode 매물 정보 JSON 노드
      * @param cortarNo 지역 코드
      */
@@ -223,20 +229,32 @@ public class NaverRawArticleService {
             
             NaverRawArticle rawArticle;
             if (existingArticle.isPresent()) {
-                rawArticle = existingArticle.get();
+                // 기존 객체를 가져와서 상태 초기화 메서드 사용
+                rawArticle = existingArticle.get().resetMigrationStatus();
+                rawArticle = NaverRawArticle.builder()
+                    .id(rawArticle.getId())
+                    .articleId(rawArticle.getArticleId())
+                    .cortarNo(rawArticle.getCortarNo())
+                    .rawData(articleNode.toString())
+                    .migrationStatus(rawArticle.getMigrationStatus())
+                    .migrationError(rawArticle.getMigrationError())
+                    .migratedAt(rawArticle.getMigratedAt())
+                    .createdAt(rawArticle.getCreatedAt())
+                    .build();
+                
                 log.info("기존 원본 매물 정보 업데이트: {}", articleId);
-                // 데이터가 업데이트되면 마이그레이션 상태를 초기화합니다
-                rawArticle.setMigrationStatus(MigrationStatus.PENDING);
             } else {
-                rawArticle = new NaverRawArticle();
-                rawArticle.setArticleId(articleId);
-                rawArticle.setCortarNo(cortarNo);
-                rawArticle.setMigrationStatus(MigrationStatus.PENDING);
+                // 빌더 패턴 사용하여 새 객체 생성
+                rawArticle = NaverRawArticle.builder()
+                    .articleId(articleId)
+                    .cortarNo(cortarNo)
+                    .rawData(articleNode.toString())
+                    .migrationStatus(MigrationStatus.PENDING)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+                    
                 log.info("새로운 원본 매물 정보 생성: {}", articleId);
             }
-            
-            // 전체 JSON 데이터를 문자열로 저장
-            rawArticle.setRawData(articleNode.toString());
             
             naverRawArticleRepository.save(rawArticle);
             log.info("원본 매물 정보 저장 완료: {}", articleId);
@@ -245,10 +263,10 @@ public class NaverRawArticleService {
             throw new RuntimeException("원본 매물 정보 저장 실패", e);
         }
     }
-    
+
     /**
      * 네이버 부동산 API에서 매물 정보를 가져옵니다.
-     * 
+     *
      * @param apiUrl API URL
      * @return API 응답 문자열
      */
@@ -256,6 +274,7 @@ public class NaverRawArticleService {
         try {
             java.net.URL url = new java.net.URL(apiUrl);
             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestProperty("Accept-Language", "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7");

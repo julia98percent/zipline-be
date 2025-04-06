@@ -1,87 +1,84 @@
 package com.zipline.entity.publicItem;
 
-
-import com.zipline.entity.publicItem.enums.MigrationStatus;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
-
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * 네이버 부동산 API에서 수집한 원본 매물 데이터를 저장하는 엔티티
- */
+import com.zipline.entity.publicItem.enums.MigrationStatus;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 @Entity
-@Table(name = "naver_raw_articles", indexes = {
-    @Index(name = "idx_cortar_no", columnList = "cortarNo"),
-    @Index(name = "idx_article_id", columnList = "articleId", unique = true),
-    @Index(name = "idx_migration_status", columnList = "migrationStatus")
-})
-@Data
+@Table(name = "naver_raw_articles")
+@Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class NaverRawArticle {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    /**
-     * 네이버 부동산 매물 ID
-     */
-    @Column(nullable = false)
+    @Column(name = "article_id")
     private String articleId;
     
-    /**
-     * 지역 코드 (코타르 번호)
-     */
-    @Column(nullable = false)
+    @Column(name = "cortar_no")
     private Long cortarNo;
     
-    /**
-     * 원본 JSON 데이터 (전체 응답)
-     */
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "raw_data", columnDefinition = "TEXT")
     private String rawData;
     
-    /**
-     * 데이터 마이그레이션 상태
-     */
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private MigrationStatus migrationStatus = MigrationStatus.PENDING;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
     
-    /**
-     * 마이그레이션 처리 시간
-     */
+    @Column(name = "migration_status")
+    @Enumerated(EnumType.STRING)
+    private MigrationStatus migrationStatus;
+    
+    @Column(name = "migration_error")
+    private String migrationError;
+    
+    @Column(name = "migrated_at")
     private LocalDateTime migratedAt;
     
     /**
-     * 마이그레이션 실패 메시지
+     * 마이그레이션 상태를 업데이트합니다.
      */
-    @Column(columnDefinition = "TEXT")
-    private String migrationError;
-    
-    /**
-     * 데이터 수집 시간
-     */
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-    
-    /**
-     * 데이터 업데이트 시간
-     */
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
-    
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+    public NaverRawArticle updateMigrationStatus(MigrationStatus status) {
+        this.migrationStatus = status;
+        this.migratedAt = LocalDateTime.now();
+        return this;
     }
     
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+    /**
+     * 마이그레이션 실패 상태로 업데이트합니다.
+     */
+    public NaverRawArticle markAsFailed(String errorMessage) {
+        this.migrationStatus = MigrationStatus.FAILED;
+        this.migrationError = errorMessage;
+        this.migratedAt = LocalDateTime.now();
+        return this;
     }
+    
+    /**
+     * 마이그레이션 상태를 초기화합니다.
+     */
+    public NaverRawArticle resetMigrationStatus() {
+        this.migrationStatus = MigrationStatus.PENDING;
+        this.migrationError = null;
+        this.migratedAt = null;
+        return this;
+    }
+    
 }

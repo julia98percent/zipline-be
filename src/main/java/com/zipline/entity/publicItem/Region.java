@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.zipline.entity.publicItem.enums.CrawlStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,9 +19,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import com.zipline.entity.publicItem.enums.CrawlStatus;
 
 /**
  * 지역 정보를 저장하는 엔티티
@@ -29,7 +28,6 @@ import com.zipline.entity.publicItem.enums.CrawlStatus;
 @Entity
 @Table(name = "regions")
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -77,4 +75,37 @@ public class Region {
 
     @Column(name = "dabang_last_crawled_at")
     private LocalDateTime dabangLastCrawledAt;
+    
+    /**
+     * 네이버 크롤링 상태를 업데이트합니다.
+     */
+    public Region updateNaverStatus(CrawlStatus status) {
+        this.naverStatus = status;
+        this.naverLastCrawledAt = LocalDateTime.now();
+        return this;
+    }
+    
+    /**
+     * 직방 크롤링 상태를 업데이트합니다.
+     */
+    public Region updateZigbangStatus(CrawlStatus status) {
+        this.zigbangStatus = status;
+        this.zigbangLastCrawledAt = LocalDateTime.now();
+        return this;
+    }
+    
+    /**
+     * 다방 크롤링 상태를 업데이트합니다.
+     */
+    public Region updateDabangStatus(CrawlStatus status) {
+        this.dabangStatus = status;
+        this.dabangLastCrawledAt = LocalDateTime.now();
+        return this;
+    }
+
+    public Region updateCoordinates(Double centerLat, Double centerLon) {
+        this.centerLat = centerLat;
+        this.centerLon = centerLon;
+        return this;
+    }
 }
