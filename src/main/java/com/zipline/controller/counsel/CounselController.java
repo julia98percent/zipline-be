@@ -36,7 +36,8 @@ public class CounselController {
 	}
 
 	@GetMapping("/counsels/{counselUid}")
-	public ResponseEntity<?> getCounsel(@PathVariable Long counselUid, Principal principal) {
+	public ResponseEntity<ApiResponse<CounselResponseDTO>> getCounsel(@PathVariable Long counselUid,
+		Principal principal) {
 		ApiResponse<CounselResponseDTO> response = counselService.getCounsel(counselUid,
 			Long.parseLong(principal.getName()));
 		return ResponseEntity.status(HttpStatus.OK).body(response);
