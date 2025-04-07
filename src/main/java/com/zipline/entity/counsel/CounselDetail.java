@@ -1,5 +1,7 @@
 package com.zipline.entity.counsel;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -28,9 +30,15 @@ public class CounselDetail {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Counsel counsel;
 
-	public CounselDetail(String question, String answer, Counsel counsel) {
+	private LocalDateTime createdAt;
+	private LocalDateTime deletedAt;
+
+	public CounselDetail(String question, String answer, Counsel counsel, LocalDateTime createdAt,
+		LocalDateTime deletedAt) {
 		this.question = question;
 		this.answer = answer;
 		this.counsel = counsel;
+		this.createdAt = createdAt;
+		this.deletedAt = deletedAt;
 	}
 }

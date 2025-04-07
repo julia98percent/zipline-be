@@ -2,6 +2,7 @@ package com.zipline.service.counsel;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
 import com.zipline.repository.CustomerRepository;
 import com.zipline.repository.UserRepository;
+import com.zipline.repository.counsel.CounselDetailRepository;
 import com.zipline.repository.counsel.CounselRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class CounselService {
 	private final CounselRepository counselRepository;
 	private final CustomerRepository customerRepository;
 	private final UserRepository userRepository;
+	private final CounselDetailRepository counselDetailRepository;
 
 	@Transactional
 	public ApiResponse<Map<String, Long>> createCounsel(Long customerUid, CounselCreateRequestDTO requestDTO,
@@ -41,10 +44,13 @@ public class CounselService {
 				HttpStatus.BAD_REQUEST));
 		User savedUser = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserNotFoundException("해당하는 사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-		Counsel counsel = new Counsel(requestDTO.getTitle(), requestDTO.getCounselDate(), LocalDateTime.now(),
+		LocalDateTime createdAt = LocalDateTime.now();
+		Counsel counsel = new Counsel(requestDTO.getTitle(), requestDTO.getCounselDate(), createdAt,
 			null, null, savedUser, savedCustomer);
 		for (CounselCreateRequestDTO.CounselDetailDTO counselDetailDTO : requestDTO.getCounselDetails()) {
-			counsel.addDetail(new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), counsel));
+			counsel.addDetail(
+				new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), counsel, createdAt,
+					null));
 		}
 
 		Counsel savedCounsel = counselRepository.save(counsel);
@@ -53,12 +59,16 @@ public class CounselService {
 
 	@Transactional(readOnly = true)
 	public ApiResponse<CounselResponseDTO> getCounsel(Long counselUid, Long userUid) {
-		Counsel savedCounsel = counselRepository.findById(counselUid)
+		Counsel savedCounsel = counselRepository.findByUidAndDeletedAtIsNull(counselUid)
 			.orElseThrow(() -> new CounselNotFoundException("해당하는 상담을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+
 		if (!savedCounsel.getUser().getUid().equals(userUid)) {
 			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
 		}
-		CounselResponseDTO counselResponseDTO = new CounselResponseDTO(savedCounsel);
+
+		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
+			counselUid);
+		CounselResponseDTO counselResponseDTO = new CounselResponseDTO(savedCounsel, savedCounselDetails);
 		return ApiResponse.ok("상담 상세 조회 성공", counselResponseDTO);
 	}
 }
