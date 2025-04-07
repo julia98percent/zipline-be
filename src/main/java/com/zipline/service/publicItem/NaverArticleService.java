@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zipline.entity.enums.CrawlStatus;
 import com.zipline.entity.publicItem.PropertyArticle;
 import com.zipline.entity.publicItem.Region;
-import com.zipline.entity.enums.CrawlStatus;
 import com.zipline.global.util.RandomSleepUtil;
 import com.zipline.repository.publicItem.PropertyArticleRepository;
 import com.zipline.repository.publicItem.RegionRepository;
@@ -71,8 +71,9 @@ public class NaverArticleService {
                         
                         // 수집 완료 후 최종 수집 시간 업데이트
                         regionRepository.updateNaverLastCrawledAt(cortarNo, LocalDateTime.now());
+                        log.info("지역 코드 {} 최종 수집 시간 업데이트 완료", cortarNo);
                     } catch (Exception e) {
-                        log.error("지역 코드 {} 처리 중 오류 발생: {}", cortarNo, e.getMessage());
+                        log.error("지역 코드 {} 처리 중 오류 발생: {}", cortarNo, e.getMessage(), e);
                         // 필요시 재시도 로직 추가
                     }
                 }
@@ -100,61 +101,77 @@ public class NaverArticleService {
         Region region = regionRepository.findByCortarNo(cortarNo)
                 .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
             
-        // 상태 업데이트 (세터 대신 메서드 사용)
-        regionRepository.save(region.updateNaverStatus(CrawlStatus.PROCESSING));
+        // 상태 업데이트 - 직접 리포지토리 메서드 사용
+        regionRepository.updateNaverStatus(cortarNo, CrawlStatus.PROCESSING);
+        log.info("지역 코드 {} 상태 업데이트: {}", cortarNo, CrawlStatus.PROCESSING);
+        
+        try {
             int page = 1;
             boolean hasMore = true;
             int totalArticles = 0;
             
             while (hasMore) {
-    String apiUrl = buildApiUrl(cortarNo, page);
-    log.info("API 요청 URL (페이지 {}): {}", page, apiUrl);
-    String response = getArticles(apiUrl);
-    if (response != null && !response.isEmpty()) {
-        try {
-            JsonNode root = objectMapper.readTree(response);
-            JsonNode articlesNode = root.path("body");
-            if (articlesNode.isArray()) {
-                for (JsonNode articleNode : articlesNode) {
-                    saveArticle(articleNode, region);
-                    totalArticles++;
+                String apiUrl = buildApiUrl(cortarNo, page);
+                log.info("API 요청 URL (페이지 {}): {}", page, apiUrl);
+                String response = getArticles(apiUrl);
+                if (response != null && !response.isEmpty()) {
+                    try {
+                        JsonNode root = objectMapper.readTree(response);
+                        JsonNode articlesNode = root.path("body");
+                        if (articlesNode.isArray()) {
+                            for (JsonNode articleNode : articlesNode) {
+                                saveArticle(articleNode, region);
+                                totalArticles++;
+                            }
+                        }
+                        // 더 많은 데이터가 있는지 확인
+                        hasMore = root.path("more").asBoolean();
+                        log.info("페이지 {} 처리 완료. 더 많은 데이터: {}", page, hasMore);
+                    } catch (Exception e) {
+                        log.error("JSON 파싱 중 오류 발생: {}", e.getMessage(), e);
+                        // 오류 발생 시 다음 페이지로 넘어가기
+                        hasMore = false;
+                    }
+                } else {
+                    log.error("API 응답이 비어있습니다.");
+                    hasMore = false;
                 }
+                page++;
             }
-            // 더 많은 데이터가 있는지 확인
-            hasMore = root.path("more").asBoolean();
-            log.info("페이지 {} 처리 완료. 더 많은 데이터: {}", page, hasMore);
-        } catch (Exception e) {
-            log.error("JSON 파싱 중 오류 발생: {}", e.getMessage());
-            // 오류 발생 시 다음 페이지로 넘어가기
-            hasMore = false;
-        }
-    }
-    page++;
-}
-
             
-            // 성공 상태 업데이트 (세터 대신 메서드 사용)
-            regionRepository.save(region.updateNaverStatus(CrawlStatus.COMPLETED));
+            // 성공 상태 업데이트 - 직접 리포지토리 메서드 사용
+            regionRepository.updateNaverStatus(cortarNo, CrawlStatus.COMPLETED);
+            log.info("지역 코드 {} 상태 업데이트: {}", cortarNo, CrawlStatus.COMPLETED);
             log.info("매물 정보 수집 완료 - 지역: {}, 총 {}개 매물", region.getCortarName(), totalArticles);
+        } catch (Exception e) {
+            log.error("매물 정보 수집 중 오류 발생: {}", e.getMessage(), e);
+            // 실패 상태 업데이트 - 직접 리포지토리 메서드 사용
+            regionRepository.updateNaverStatus(cortarNo, CrawlStatus.FAILED);
+            log.info("지역 코드 {} 상태 업데이트: {}", cortarNo, CrawlStatus.FAILED);
+        }
     }
 
     /**
      * 매물 정보를 저장합니다.
      */
     private void saveArticle(JsonNode articleNode, Region region) {
-        String articleId = articleNode.path("atclNo").asText();
-        
-        // 기존 매물 확인
-        Optional<PropertyArticle> existingArticle = propertyArticleRepository.findByArticleId(articleId);
-        
-        if (existingArticle.isPresent()) {
-            // 기존 매물 업데이트 로직 (필요시 구현)
-            log.debug("기존 매물 발견: {}", articleId);
-        } else {
-            // 새 매물 생성 (빌더 패턴 사용)
-            PropertyArticle article = PropertyArticle.createFromNaverArticle(articleNode, region);
-            propertyArticleRepository.save(article);
-            log.debug("새 매물 저장: {}", articleId);
+        try {
+            String articleId = articleNode.path("atclNo").asText();
+            
+            // 기존 매물 확인
+            Optional<PropertyArticle> existingArticle = propertyArticleRepository.findByArticleId(articleId);
+            
+            if (existingArticle.isPresent()) {
+                // 기존 매물 업데이트 로직 (필요시 구현)
+                log.debug("기존 매물 발견: {}", articleId);
+            } else {
+                // 새 매물 생성 (빌더 패턴 사용)
+                PropertyArticle article = PropertyArticle.createFromNaverArticle(articleNode, region);
+                propertyArticleRepository.save(article);
+                log.debug("새 매물 저장: {}", articleId);
+            }
+        } catch (Exception e) {
+            log.error("매물 저장 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
@@ -213,7 +230,7 @@ public class NaverArticleService {
                 return null;
             }
         } catch (Exception e) {
-            log.error("API 요청 중 오류 발생: {}", e.getMessage());
+            log.error("API 요청 중 오류 발생: {}", e.getMessage(), e);
             return null;
         }
     }

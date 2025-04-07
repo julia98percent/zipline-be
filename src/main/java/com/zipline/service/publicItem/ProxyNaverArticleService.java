@@ -16,17 +16,16 @@ import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.dto.publicItem.CrawlingStatusDTO;
 import com.zipline.dto.publicItem.PageResultDTO;
 import com.zipline.dto.publicItem.ProxyInfoDTO;
-import com.zipline.entity.publicItem.PropertyArticle;
-import com.zipline.entity.publicItem.Region;
 import com.zipline.entity.enums.CrawlStatus;
 import com.zipline.entity.enums.Platform;
+import com.zipline.entity.publicItem.PropertyArticle;
+import com.zipline.entity.publicItem.Region;
 import com.zipline.global.util.CoordinateUtil;
 import com.zipline.global.util.ProxyPool;
 import com.zipline.global.util.RandomSleepUtil;
@@ -61,7 +60,7 @@ public class ProxyNaverArticleService {
     private final ExecutorService executorService = Executors.newFixedThreadPool(MAX_CONCURRENT_REQUESTS);
     private final ConcurrentHashMap<String, CrawlingStatusDTO> regionStatuses = new ConcurrentHashMap<>();
 
-    @Value("${crawler.max-retry-count:10}")
+        @Value("${crawler.max-retry-count:10}")
     private int maxRetryCount;
 
     @Value("${crawler.retry-delay-ms:1000}")
@@ -137,9 +136,9 @@ public class ProxyNaverArticleService {
     CrawlingStatusDTO status = CrawlingStatusDTO.initialize(regionName);
     regionStatuses.put(regionName, status);
     
-    // 상태 업데이트 - 메서드 사용
-    region = region.updateNaverStatus(CrawlStatus.PROCESSING);
-    regionRepository.save(region);
+    // 상태 업데이트 - 직접 리포지토리 메서드 사용
+    regionRepository.updateNaverStatus(region.getCortarNo(), CrawlStatus.PROCESSING);
+    log.info("[Thread-{}] [{}] 상태 업데이트: {}", Thread.currentThread().getId(), regionName, CrawlStatus.PROCESSING);
     
     try {
         int currentPage = 1;
@@ -194,18 +193,17 @@ public class ProxyNaverArticleService {
             }
         }
         
-        // 최종 상태 업데이트 - 메서드 사용
-        region = region.updateNaverStatus(CrawlStatus.COMPLETED);
+        // 최종 상태 업데이트 - 직접 리포지토리 메서드 사용
+        regionRepository.updateNaverStatus(region.getCortarNo(), CrawlStatus.COMPLETED);
+        log.info("[Thread-{}] [{}] 상태 업데이트: {}", Thread.currentThread().getId(), regionName, CrawlStatus.COMPLETED);
         log.info("[Thread-{}] [{}] 매물 정보 수집 완료 - 총 {}개 매물", 
             Thread.currentThread().getId(), regionName, totalArticles.get());
     } catch (Exception e) {
         log.error("[Thread-{}] [{}] 매물 정보 수집 중 오류 발생: {}", 
-            Thread.currentThread().getId(), regionName, e.getMessage());
-        // 실패 상태 업데이트 - 메서드 사용
-        region = region.updateNaverStatus(CrawlStatus.FAILED);
-    } finally {
-        // 마지막 수집 시간 업데이트 - 이미 updateNaverStatus 메서드에서 처리됨
-        regionRepository.save(region);
+            Thread.currentThread().getId(), regionName, e.getMessage(), e);
+        // 실패 상태 업데이트 - 직접 리포지토리 메서드 사용
+        regionRepository.updateNaverStatus(region.getCortarNo(), CrawlStatus.FAILED);
+        log.info("[Thread-{}] [{}] 상태 업데이트: {}", Thread.currentThread().getId(), regionName, CrawlStatus.FAILED);
     }
 }
 
@@ -239,7 +237,6 @@ public class ProxyNaverArticleService {
         }
     }
     
-    @Transactional
     private int saveArticles(List<JsonNode> articles, Region region) {
         int count = 0;
         for (JsonNode article : articles) {
@@ -247,7 +244,7 @@ public class ProxyNaverArticleService {
                 saveArticle(article, region);
                 count++;
             } catch (Exception e) {
-                log.error("[Thread-{}] [{}] 매물 저장 중 오류 발생: {}", Thread.currentThread().getId(), region.getCortarName(), e.getMessage());
+                log.error("[Thread-{}] [{}] 매물 저장 중 오류 발생: {}", Thread.currentThread().getId(), region.getCortarName(), e.getMessage(), e);
             }
         }
         return count;
@@ -409,7 +406,7 @@ public class ProxyNaverArticleService {
                 lastException = e;
                 log.error("[Thread-{}] [프록시: {}] 요청 중 오류 발생: {}", 
                     Thread.currentThread().getId(), 
-                    proxy != null ? proxy.getKey() : "unknown", e.getMessage());
+                    proxy != null ? proxy.getKey() : "unknown", e.getMessage(), e);
                 if (proxy != null) {
                     proxyPool.markProxyAsFailed(proxy);
                 }
@@ -434,69 +431,67 @@ public class ProxyNaverArticleService {
             (lastException != null ? lastException.getMessage() : "알 수 없음"));
     }
     
-@Transactional
-private void saveArticle(JsonNode articleNode, Region region) {
-    try {
-        String articleId = articleNode.path("atclNo").asText();
-        Optional<PropertyArticle> existingArticleOpt = propertyArticleRepository.findByArticleId(articleId);
-        
-        PropertyArticle article;
-        if (existingArticleOpt.isPresent()) {
-            article = existingArticleOpt.get();
-        } else {
-            // 새 매물 생성 - 빌더 패턴 사용
-            article = PropertyArticle.createFrom(
-                articleId,
-                String.valueOf(region.getCortarNo()),
-                Platform.NAVER,
-                "https://new.land.naver.com/articles/" + articleId
-            );
-        }
-        
-        // 기본 정보 업데이트 - 메서드 사용
-        article = article.updateBasicInfo(
-            articleNode.path("atclNm").asText(),
-            articleNode.path("atclFetrDesc").asText(),
-            articleNode.path("rletTpNm").asText()
-        );
-        
-        // 위치 정보 업데이트 - 메서드 사용
-        article = article.updateLocation(
-            articleNode.path("lon").asDouble(),
-            articleNode.path("lat").asDouble()
-        );
-        
-        // 면적 정보 업데이트 - 메서드 사용
-        article = article.updateArea(
-            articleNode.path("spc1").asDouble(),
-            articleNode.path("spc2").asDouble()
-        );
-        
-        // 거래 유형 및 가격 정보 설정 - 메서드 사용
-        String tradTpNm = articleNode.path("tradTpNm").asText();
-        switch (tradTpNm) {
-            case "매매":
-                article = article.updateSalePrice(articleNode.path("prc").asLong());
-                break;
-            case "전세":
-                article = article.updateDepositPrice(articleNode.path("prc").asLong());
-                break;
-            case "월세":
-                article = article.updateMonthlyPrice(
-                    articleNode.path("prc").asLong(),
-                    articleNode.path("rentPrc").asLong()
+    private void saveArticle(JsonNode articleNode, Region region) {
+        try {
+            String articleId = articleNode.path("atclNo").asText();
+            Optional<PropertyArticle> existingArticleOpt = propertyArticleRepository.findByArticleId(articleId);
+            
+            PropertyArticle article;
+            if (existingArticleOpt.isPresent()) {
+                article = existingArticleOpt.get();
+            } else {
+                // 새 매물 생성 - 빌더 패턴 사용
+                article = PropertyArticle.createFrom(
+                    articleId,
+                    String.valueOf(region.getCortarNo()),
+                    Platform.NAVER,
+                    "https://new.land.naver.com/articles/" + articleId
                 );
-                break;
+            }
+            
+            // 기본 정보 업데이트 - 메서드 사용
+            article = article.updateBasicInfo(
+                articleNode.path("atclNm").asText(),
+                articleNode.path("atclFetrDesc").asText(),
+                articleNode.path("rletTpNm").asText()
+            );
+            
+            // 위치 정보 업데이트 - 메서드 사용
+            article = article.updateLocation(
+                articleNode.path("lon").asDouble(),
+                articleNode.path("lat").asDouble()
+            );
+            
+            // 면적 정보 업데이트 - 메서드 사용
+            article = article.updateArea(
+                articleNode.path("spc1").asDouble(),
+                articleNode.path("spc2").asDouble()
+            );
+            
+            // 거래 유형 및 가격 정보 설정 - 메서드 사용
+            String tradTpNm = articleNode.path("tradTpNm").asText();
+            switch (tradTpNm) {
+                case "매매":
+                    article = article.updateSalePrice(articleNode.path("prc").asLong());
+                    break;
+                case "전세":
+                    article = article.updateDepositPrice(articleNode.path("prc").asLong());
+                    break;
+                case "월세":
+                    article = article.updateMonthlyPrice(
+                        articleNode.path("prc").asLong(),
+                        articleNode.path("rentPrc").asLong()
+                    );
+                    break;
+            }
+            
+            propertyArticleRepository.save(article);
+        } catch (Exception e) {
+            log.error("[Thread-{}] [{}] 매물 정보 저장 중 오류 발생: {}", 
+                Thread.currentThread().getId(), region.getCortarName(), e.getMessage(), e);
+            throw new RuntimeException("매물 정보 저장 실패", e);
         }
-        
-        propertyArticleRepository.save(article);
-    } catch (Exception e) {
-        log.error("[Thread-{}] [{}] 매물 정보 저장 중 오류 발생: {}", 
-            Thread.currentThread().getId(), region.getCortarName(), e.getMessage(), e);
-        throw new RuntimeException("매물 정보 저장 실패", e);
     }
-}
-
 
     private void processPage(Region region, int page, boolean hasMore) {
         // 대기 시간을 페이지 처리 결과에 따라 동적으로 조정
@@ -511,4 +506,5 @@ private void saveArticle(JsonNode articleNode, Region region) {
             }
         }
     }
-} 
+}
+

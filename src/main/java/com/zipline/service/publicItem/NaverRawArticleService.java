@@ -7,14 +7,13 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zipline.entity.publicItem.NaverRawArticle;
-import com.zipline.entity.publicItem.Region;
 import com.zipline.entity.enums.CrawlStatus;
 import com.zipline.entity.enums.MigrationStatus;
+import com.zipline.entity.publicItem.NaverRawArticle;
+import com.zipline.entity.publicItem.Region;
 import com.zipline.global.util.CoordinateUtil;
 import com.zipline.global.util.RandomSleepUtil;
 import com.zipline.repository.publicItem.NaverRawArticleRepository;
@@ -75,12 +74,12 @@ public class NaverRawArticleService {
                     try {
                         RandomSleepUtil.sleep(); // API 요청 전 대기
                         crawlAndSaveRawArticlesForRegion(cortarNo);
-
+                        
                         // 수집 완료 후 최종 수집 시간 업데이트
                         regionRepository.updateNaverLastCrawledAt(cortarNo, LocalDateTime.now());
-
+                        log.info("지역 코드 {} 최종 수집 시간 업데이트 완료", cortarNo);
                     } catch (Exception e) {
-                        log.error("지역 코드 {} 처리 중 오류 발생: {}", cortarNo, e.getMessage());
+                        log.error("지역 코드 {} 처리 중 오류 발생: {}", cortarNo, e.getMessage(), e);
                         // 필요시 재시도 로직 추가
                     }
                 }
@@ -104,16 +103,12 @@ public class NaverRawArticleService {
      *
      * @param cortarNo 지역 코드
      */
-    @Transactional
     public void crawlAndSaveRawArticlesForRegion(Long cortarNo) {
         log.info("네이버 원본 매물 정보 수집 시작 - 지역 코드: {}", cortarNo);
         
-        Region region = regionRepository.findByCortarNo(cortarNo)
-                .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
-            
-        // 상태 업데이트 - 기존 메서드 사용
-        region = region.updateNaverStatus(CrawlStatus.PROCESSING);
-        regionRepository.save(region);
+        // 상태 업데이트 - 직접 리포지토리 메서드 사용
+        regionRepository.updateNaverStatus(cortarNo, CrawlStatus.PROCESSING);
+        log.info("지역 코드 {} 상태 업데이트: {}", cortarNo, CrawlStatus.PROCESSING);
         
         try {
             int page = 1;
@@ -122,6 +117,7 @@ public class NaverRawArticleService {
             
             // 해당 지역의 기존 마이그레이션 상태를 초기화
             naverRawArticleRepository.resetMigrationStatusForRegion(cortarNo, MigrationStatus.PENDING);
+            log.info("지역 코드 {} 마이그레이션 상태 초기화 완료", cortarNo);
             
             while (hasMore) {
                 String apiUrl = buildApiUrl(cortarNo, page);
@@ -152,17 +148,20 @@ public class NaverRawArticleService {
                 }
             }
             
-            // 성공 상태 업데이트 - 기존 메서드 사용
-            region = region.updateNaverStatus(CrawlStatus.COMPLETED);
-            regionRepository.save(region);
+            // 성공 상태 업데이트 - 직접 리포지토리 메서드 사용
+            regionRepository.updateNaverStatus(cortarNo, CrawlStatus.COMPLETED);
+            log.info("지역 코드 {} 상태 업데이트: {}", cortarNo, CrawlStatus.COMPLETED);
+            
+            Region region = regionRepository.findByCortarNo(cortarNo)
+                    .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
             
             log.info("네이버 원본 매물 정보 수집 완료 - 지역: {}, 총 {}개 매물", region.getCortarName(), totalArticles);
         } catch (Exception e) {
-            log.error("네이버 원본 매물 정보 수집 중 오류 발생: {}", e.getMessage());
+            log.error("네이버 원본 매물 정보 수집 중 오류 발생: {}", e.getMessage(), e);
             
-            // 실패 상태 업데이트 - 기존 메서드 사용
-            region = region.updateNaverStatus(CrawlStatus.FAILED);
-            regionRepository.save(region);
+            // 실패 상태 업데이트 - 직접 리포지토리 메서드 사용
+            regionRepository.updateNaverStatus(cortarNo, CrawlStatus.FAILED);
+            log.info("지역 코드 {} 상태 업데이트: {}", cortarNo, CrawlStatus.FAILED);
         }
     }
 
@@ -221,25 +220,24 @@ public class NaverRawArticleService {
      * @param articleNode 매물 정보 JSON 노드
      * @param cortarNo 지역 코드
      */
-    @Transactional
-    private void saveRawArticle(JsonNode articleNode, Long cortarNo) {
+    public void saveRawArticle(JsonNode articleNode, Long cortarNo) {
         try {
             String articleId = articleNode.path("atclNo").asText();
             Optional<NaverRawArticle> existingArticle = naverRawArticleRepository.findByArticleId(articleId);
             
             NaverRawArticle rawArticle;
             if (existingArticle.isPresent()) {
-                // 기존 객체를 가져와서 상태 초기화 메서드 사용
-                rawArticle = existingArticle.get().resetMigrationStatus();
+                // 기존 객체를 가져와서 상태 초기화
+                NaverRawArticle existing = existingArticle.get();
                 rawArticle = NaverRawArticle.builder()
-                    .id(rawArticle.getId())
-                    .articleId(rawArticle.getArticleId())
-                    .cortarNo(rawArticle.getCortarNo())
+                    .id(existing.getId())
+                    .articleId(existing.getArticleId())
+                    .cortarNo(existing.getCortarNo())
                     .rawData(articleNode.toString())
-                    .migrationStatus(rawArticle.getMigrationStatus())
-                    .migrationError(rawArticle.getMigrationError())
-                    .migratedAt(rawArticle.getMigratedAt())
-                    .createdAt(rawArticle.getCreatedAt())
+                    .migrationStatus(MigrationStatus.PENDING)
+                    .migrationError(null)
+                    .migratedAt(null)
+                    .createdAt(existing.getCreatedAt())
                     .build();
                 
                 log.info("기존 원본 매물 정보 업데이트: {}", articleId);
@@ -259,7 +257,7 @@ public class NaverRawArticleService {
             naverRawArticleRepository.save(rawArticle);
             log.info("원본 매물 정보 저장 완료: {}", articleId);
         } catch (Exception e) {
-            log.error("원본 매물 정보 저장 중 오류 발생: {}", e.getMessage());
+            log.error("원본 매물 정보 저장 중 오류 발생: {}", e.getMessage(), e);
             throw new RuntimeException("원본 매물 정보 저장 실패", e);
         }
     }
@@ -316,7 +314,7 @@ public class NaverRawArticleService {
                 return null;
             }
         } catch (Exception e) {
-            log.error("API 요청 중 오류 발생: {}", e.getMessage());
+            log.error("API 요청 중 오류 발생: {}", e.getMessage(), e);
             return null;
         }
     }
