@@ -31,7 +31,7 @@ public class NaverProxyRawArticleController {
     private final ProxyPool proxyPool;
     private final RegionRepository regionRepository;
 
-    @GetMapping("/all")
+    @GetMapping("articles/all")
     public ResponseEntity<ApiResponse<Void>> crawlAllRawArticleFromNaverWithProxy() {
         CompletableFuture.runAsync(() -> {
             crawlingStatusManager.executeWithLock(() -> {
@@ -42,7 +42,7 @@ public class NaverProxyRawArticleController {
         return ResponseEntity.ok(ApiResponse.ok("프록시를 통한 레벨 원본 매물 정보 수집이 시작되었습니다."));
     }
 
-    @GetMapping("/{cortarNo}")
+    @GetMapping("articles/{cortarNo}")
     public ResponseEntity<ApiResponse<Void>> crawlRawArticlesWithProxyByRegion(@PathVariable Long cortarNo) {
         CompletableFuture.runAsync(() -> {
             crawlingStatusManager.executeWithLock(() -> {
