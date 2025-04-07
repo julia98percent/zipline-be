@@ -49,7 +49,7 @@ public class AgentPropertyController {
 		AgentPropertyResponseDTO propertyResponseDTO = agentPropertyService.modifyProperty(agentPropertyRequestDTO,
 			propertyUid,
 			Long.parseLong(principal.getName()));
-		ApiResponse<AgentPropertyResponseDTO> response = ApiResponse.ok("매물 상세 조회 성공", propertyResponseDTO);
+		ApiResponse<AgentPropertyResponseDTO> response = ApiResponse.ok("매물 정보 수정 성공", propertyResponseDTO);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }
