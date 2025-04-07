@@ -1,20 +1,25 @@
 package com.zipline.survey.controller;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.survey.dto.SurveyCreateRequestDTO;
 import com.zipline.survey.dto.SurveyResponseDTO;
+import com.zipline.survey.dto.SurveySubmitRequestDTO;
 import com.zipline.survey.service.SurveyService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,5 +51,14 @@ public class SurveyController {
 	public ResponseEntity<ApiResponse<SurveyResponseDTO>> getSurvey(@PathVariable Long surveyUid) {
 		ApiResponse<SurveyResponseDTO> response = surveyService.getSurvey(surveyUid);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@PostMapping(value = "/surveys/{surveyUid}/submit", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,
+		MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<ApiResponse<Void>> submitSurvey(@PathVariable Long surveyUid,
+		@RequestPart(name = "requestDTO") List<SurveySubmitRequestDTO> requestDTO,
+		@RequestPart(name = "files", required = false) List<MultipartFile> files) {
+		ApiResponse<Void> response = surveyService.submitSurvey(surveyUid, requestDTO, files);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 }
