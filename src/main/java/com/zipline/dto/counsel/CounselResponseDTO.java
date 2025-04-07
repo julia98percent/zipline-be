@@ -16,11 +16,11 @@ public class CounselResponseDTO {
 	private List<CounselDetailResponseDTO> counselDetails;
 	private LocalDateTime counselDate;
 
-	public CounselResponseDTO(Counsel counsel) {
+	public CounselResponseDTO(Counsel counsel, List<CounselDetail> counselDetails) {
 		this.counselUid = counsel.getUid();
 		this.title = counsel.getTitle();
 		this.counselDate = counsel.getCounselDate();
-		this.counselDetails = counsel.getDetails()
+		this.counselDetails = counselDetails
 			.stream()
 			.map(CounselDetailResponseDTO::new)
 			.collect(Collectors.toList());
