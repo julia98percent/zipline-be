@@ -1,10 +1,10 @@
-package com.zipline.dto;
+package com.zipline.dto.agentProperty;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.Year;
 
-import com.zipline.entity.AgentProperty;
+import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.enums.PropertyType;
 
