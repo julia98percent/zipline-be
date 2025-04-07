@@ -40,7 +40,6 @@ public class AgentPropertyRequestDTO {
 	private String extraAddress;
 
 	@Schema(description = "보증금", example = "50000000", required = true)
-	@NotNull
 	@Positive
 	private BigInteger deposit;
 
