@@ -84,9 +84,6 @@ public class AgentPropertyService {
 		AgentProperty agentProperty = agentPropertyRepository.findByUidAndIsDeletedFalse(propertyUid)
 			.orElseThrow(() -> new PropertyNotFoundException("해당 매물을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
-		System.out.println("agentProperty = " + agentProperty); // null인지 확인
-		System.out.println("agentProperty.getUser() = " + agentProperty.getUser()); // 여기도
-
 		if (!agentProperty.getUser().getUid().equals(userUid))
 			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
 
