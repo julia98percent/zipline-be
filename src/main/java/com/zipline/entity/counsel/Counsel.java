@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "counsel")
+@Table(name = "counsels")
 @Entity
 public class Counsel {
 	@Id
