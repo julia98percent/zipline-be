@@ -1,4 +1,4 @@
-package com.zipline.dto;
+package com.zipline.dto.agentProperty;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -24,6 +24,13 @@ public class AgentPropertyRequestDTO {
 	@Schema(description = "전체 주소", example = "서울특별시 강남구 삼성로85길 12", required = true)
 	@NotBlank
 	private String address;
+
+	@Schema(description = "동", example = "역삼동", required = true)
+	@NotBlank
+	private String dong;
+
+	@Schema(description = "도로명", example = "OO길")
+	private String roadName;
 
 	@Schema(description = "상세 주소", example = "301호")
 	private String extraAddress;

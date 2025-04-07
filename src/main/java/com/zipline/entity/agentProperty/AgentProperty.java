@@ -1,10 +1,12 @@
-package com.zipline.entity;
+package com.zipline.entity.agentProperty;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 
+import com.zipline.entity.Customer;
+import com.zipline.entity.User;
 import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.enums.PropertyType;
 
@@ -123,5 +125,4 @@ public class AgentProperty {
 
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
-
 }
