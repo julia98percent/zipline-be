@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 
+import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
 import com.zipline.entity.enums.PropertyCategory;
@@ -125,4 +126,38 @@ public class AgentProperty {
 
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
+
+	public void modifyProperty(AgentPropertyRequestDTO dto, User user, Boolean isDeleted,
+		Customer customer, LocalDateTime createdAt,
+		LocalDateTime updatedAt, LocalDateTime deletedAt) {
+
+		this.user = user;
+		this.customer = customer;
+		this.address = dto.getAddress();
+		this.address1 = dto.getDong();
+		this.address2 = dto.getRoadName();
+		this.address3 = dto.getExtraAddress();
+		this.deposit = dto.getDeposit();
+		this.monthlyRent = dto.getMonthlyRent();
+		this.price = dto.getPrice();
+		this.type = dto.getType();
+		this.longitude = dto.getLongitude();
+		this.latitude = dto.getLatitude();
+		this.startDate = dto.getStartDate();
+		this.endDate = dto.getEndDate();
+		this.moveInDate = dto.getMoveInDate();
+		this.realCategory = dto.getRealCategory();
+		this.petsAllowed = dto.getPetsAllowed();
+		this.floor = dto.getFloor();
+		this.hasElevator = dto.getHasElevator();
+		this.constructionYear = dto.getConstructionYear();
+		this.parkingCapacity = dto.getParkingCapacity();
+		this.netArea = dto.getNetArea();
+		this.totalArea = dto.getTotalArea();
+		this.details = dto.getDetails();
+		this.isDeleted = isDeleted;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+		this.deletedAt = deletedAt;
+	}
 }

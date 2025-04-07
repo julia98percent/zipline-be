@@ -41,4 +41,15 @@ public class AgentPropertyController {
 		ApiResponse<Void> response = ApiResponse.create("매물 등록 성공");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
+
+	@PostMapping("{propertyUid}")
+	public ResponseEntity<ApiResponse<AgentPropertyResponseDTO>> modifyProperty(
+		@RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, @PathVariable Long propertyUid,
+		Principal principal) {
+		AgentPropertyResponseDTO propertyResponseDTO = agentPropertyService.modifyProperty(agentPropertyRequestDTO,
+			propertyUid,
+			Long.parseLong(principal.getName()));
+		ApiResponse<AgentPropertyResponseDTO> response = ApiResponse.ok("매물 정보 수정 성공", propertyResponseDTO);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
 }
