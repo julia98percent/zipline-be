@@ -1,13 +1,13 @@
-package com.zipline.dto;
+package com.zipline.dto.agentProperty;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 
-import com.zipline.entity.AgentProperty;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
+import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.enums.PropertyType;
 
@@ -40,7 +40,6 @@ public class AgentPropertyRequestDTO {
 	private String extraAddress;
 
 	@Schema(description = "보증금", example = "50000000", required = true)
-	@NotNull
 	@Positive
 	private BigInteger deposit;
 

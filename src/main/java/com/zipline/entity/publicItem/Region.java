@@ -1,8 +1,10 @@
-package com.zipline.entity;
+package com.zipline.entity.publicItem;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.zipline.entity.enums.CrawlStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,7 +19,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * 지역 정보를 저장하는 엔티티
@@ -27,7 +28,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "regions")
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -75,13 +75,37 @@ public class Region {
 
     @Column(name = "dabang_last_crawled_at")
     private LocalDateTime dabangLastCrawledAt;
+    
+    /**
+     * 네이버 크롤링 상태를 업데이트합니다.
+     */
+    public Region updateNaverStatus(CrawlStatus status) {
+        this.naverStatus = status;
+        this.naverLastCrawledAt = LocalDateTime.now();
+        return this;
+    }
+    
+    /**
+     * 직방 크롤링 상태를 업데이트합니다.
+     */
+    public Region updateZigbangStatus(CrawlStatus status) {
+        this.zigbangStatus = status;
+        this.zigbangLastCrawledAt = LocalDateTime.now();
+        return this;
+    }
+    
+    /**
+     * 다방 크롤링 상태를 업데이트합니다.
+     */
+    public Region updateDabangStatus(CrawlStatus status) {
+        this.dabangStatus = status;
+        this.dabangLastCrawledAt = LocalDateTime.now();
+        return this;
+    }
 
-    public enum CrawlStatus {
-        NEW,         // 최초 생성 상태 (한 번도 크롤링되지 않음)
-        PENDING,     // 크롤링 대기 중
-        PROCESSING,  // 크롤링 진행 중
-        COMPLETED,   // 크롤링 완료
-        PARTIALLY_COMPLETED,  // 일부 페이지만 크롤링 완료
-        FAILED       // 크롤링 실패
+    public Region updateCoordinates(Double centerLat, Double centerLon) {
+        this.centerLat = centerLat;
+        this.centerLon = centerLon;
+        return this;
     }
 }

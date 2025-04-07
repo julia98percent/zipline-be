@@ -21,16 +21,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.dto.publicItem.CrawlingStatusDTO;
+import com.zipline.dto.publicItem.NaverRawArticleDTO;
 import com.zipline.dto.publicItem.PageResultDTO;
 import com.zipline.dto.publicItem.ProxyInfoDTO;
-import com.zipline.entity.publicItem.PropertyArticle;
+import com.zipline.entity.publicItem.NaverRawArticle;
 import com.zipline.entity.publicItem.Region;
 import com.zipline.entity.enums.CrawlStatus;
-import com.zipline.entity.enums.Platform;
+import com.zipline.entity.enums.MigrationStatus;
 import com.zipline.global.util.CoordinateUtil;
 import com.zipline.global.util.ProxyPool;
 import com.zipline.global.util.RandomSleepUtil;
-import com.zipline.repository.publicItem.PropertyArticleRepository;
+import com.zipline.repository.publicItem.NaverRawArticleRepository;
 import com.zipline.repository.publicItem.RegionRepository;
 
 import lombok.Getter;
@@ -38,16 +39,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 네이버 부동산 매물 정보를 프록시를 통해 수집하는 서비스
+ * 네이버 부동산 API로부터 프록시를 통해 원본 매물 데이터를 수집하는 서비스
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ProxyNaverArticleService {
-
-    private final RegionRepository regionRepository;
-    private final PropertyArticleRepository propertyArticleRepository;
+public class ProxyNaverRawArticleService {
     private final ObjectMapper objectMapper;
+    private final RegionRepository regionRepository;
+    private final NaverRawArticleRepository naverRawArticleRepository;
+    
     @Getter
     private final ProxyPool proxyPool;
     
@@ -56,19 +57,24 @@ public class ProxyNaverArticleService {
     private static final String REFERER = "https://new.land.naver.com";
     private static final int CONNECT_TIMEOUT = 5000;
     private static final int READ_TIMEOUT = 10000;
-    private static final int ZOOM_LEVEL = 12;
+    private static final int ZOOM_LEVEL = 12; // 줌 레벨
     
     private final ExecutorService executorService = Executors.newFixedThreadPool(MAX_CONCURRENT_REQUESTS);
     private final ConcurrentHashMap<String, CrawlingStatusDTO> regionStatuses = new ConcurrentHashMap<>();
-
+    
     @Value("${crawler.max-retry-count:10}")
     private int maxRetryCount;
-
+    
     @Value("${crawler.retry-delay-ms:1000}")
     private long retryDelayMs;
-
-    public void crawlAndSaveArticlesByLevel(int level) {
-        log.info("[Thread-{}] === 프록시를 통한 레벨 {} 매물 정보 수집 시작 ===", Thread.currentThread().getId(), level);
+    
+    /**
+     * 특정 레벨의 모든 지역에 대한 원본 매물 정보를 수집합니다.
+     *
+     * @param level 지역 레벨
+     */
+    public void crawlAndSaveRawArticlesByLevel(int level) {
+        log.info("[Thread-{}] === 프록시를 통한 레벨 {} 네이버 원본 매물 정보 수집 시작 ===", Thread.currentThread().getId(), level);
         try {
             LocalDateTime cutoffDate = LocalDateTime.now().minusDays(7); // 일주일 전
             log.info("[Thread-{}] 수집 기준일: {}", Thread.currentThread().getId(), cutoffDate);
@@ -83,7 +89,7 @@ public class ProxyNaverArticleService {
             for (Region region : regionsToUpdate) {
                 CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                     try {
-                        crawlAndSaveArticlesForRegion(region);
+                        crawlAndSaveRawArticlesForRegion(region);
                     } catch (Exception e) {
                         log.error("[Thread-{}] [{}] 지역 처리 중 오류 발생: {}", Thread.currentThread().getId(), region.getCortarName(), e.getMessage(), e);
                     }
@@ -106,109 +112,105 @@ public class ProxyNaverArticleService {
             // 모든 지역 처리가 완료될 때까지 대기
             CompletableFuture.allOf(regionFutures.toArray(new CompletableFuture[0])).join();
             
-            log.info("[Thread-{}] === 프록시를 통한 레벨 {} 매물 정보 수집 완료 ===", Thread.currentThread().getId(), level);
+            log.info("[Thread-{}] === 프록시를 통한 레벨 {} 네이버 원본 매물 정보 수집 완료 ===", Thread.currentThread().getId(), level);
         } catch (Exception e) {
-            log.error("[Thread-{}] 매물 정보 수집 중 오류 발생: {}", Thread.currentThread().getId(), e.getMessage(), e);
+            log.error("[Thread-{}] 네이버 원본 매물 정보 수집 중 오류 발생: {}", Thread.currentThread().getId(), e.getMessage(), e);
             throw e;
         }
     }
-
+    
     /**
-     * 특정 지역의 매물 정보를 수집하고 저장합니다.
-     * 
+     * 특정 지역의 원본 매물 정보를 수집하고 저장합니다.
+     *
      * @param cortarNo 지역 코드
      */
-    public void crawlAndSaveArticlesForRegion(Long cortarNo) {
+    public void crawlAndSaveRawArticlesForRegion(Long cortarNo) {
         Region region = regionRepository.findByCortarNo(cortarNo)
             .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
-        crawlAndSaveArticlesForRegion(region);
+        crawlAndSaveRawArticlesForRegion(region);
     }
-
+    
     /**
-     * 특정 지역의 매물 정보를 수집하고 저장합니다.
-     * 
+     * 특정 지역의 원본 매물 정보를 수집하고 저장합니다.
+     *
      * @param region 지역 정보
      */
-   public void crawlAndSaveArticlesForRegion(Region region) {
-    String regionName = region.getCortarName();
-    log.info("[Thread-{}] \n[{}] 매물 정보 수집 시작", Thread.currentThread().getId(), regionName);
-    
-    // 크롤링 상태 초기화
-    CrawlingStatusDTO status = CrawlingStatusDTO.initialize(regionName);
-    regionStatuses.put(regionName, status);
-    
-    // 상태 업데이트 - 메서드 사용
-    region = region.updateNaverStatus(CrawlStatus.PROCESSING);
-    regionRepository.save(region);
-    
-    try {
-        int currentPage = 1;
-        boolean isRegionCompleted = false;
-        AtomicInteger totalArticles = new AtomicInteger(0);
+    public void crawlAndSaveRawArticlesForRegion(Region region) {
+        String regionName = region.getCortarName();
+        log.info("[Thread-{}] \n[{}] 네이버 원본 매물 정보 수집 시작", Thread.currentThread().getId(), regionName);
         
-        // 첫 페이지 처리
-        PageResultDTO firstPage = crawlPage(region.getCortarNo(), 1);
-        if (!firstPage.isSuccess()) {
-            throw new RuntimeException("첫 페이지 수집 실패: " + firstPage.getError());
-        }
+        // 크롤링 상태 초기화
+        CrawlingStatusDTO status = CrawlingStatusDTO.initialize(regionName);
+        regionStatuses.put(regionName, status);
         
-        totalArticles.addAndGet(saveArticles(firstPage.getArticles(), region));
-        processPage(region, 1, firstPage.isHasMore());
+        // 네이버 크롤링 상태 업데이트
+        regionRepository.save(region.updateNaverStatus(CrawlStatus.PROCESSING));
         
-        // 첫 페이지에 더 이상 데이터가 없으면 바로 종료
-        if (!firstPage.isHasMore()) {
-            isRegionCompleted = true;
-            log.info("[Thread-{}] [{}] 첫 페이지에 더 이상 데이터가 없어 수집 완료", 
-                Thread.currentThread().getId(), regionName);
-        }
-        
-        // 페이지 순차 처리
-        while (!isRegionCompleted) {
-            currentPage++;
-            PageResultDTO result = crawlPage(region.getCortarNo(), currentPage);
+        try {
+            int currentPage = 1;
+            boolean isRegionCompleted = false;
+            AtomicInteger totalArticles = new AtomicInteger(0);
             
-            if (result.isSuccess()) {
-                totalArticles.addAndGet(saveArticles(result.getArticles(), region));
-                log.info("[Thread-{}] [{}] 페이지 {} 처리 완료 (현재 {}개 매물) {}", 
-                    Thread.currentThread().getId(), regionName, currentPage, totalArticles.get(),
-                    result.isHasMore() ? "▶" : "■");
+            // 해당 지역의 기존 마이그레이션 상태를 초기화
+            naverRawArticleRepository.resetMigrationStatusForRegion(region.getCortarNo(), MigrationStatus.PENDING);
+            
+            // 첫 페이지 처리
+            PageResultDTO firstPage = crawlPage(region.getCortarNo(), 1);
+            if (!firstPage.isSuccess()) {
+                throw new RuntimeException("첫 페이지 수집 실패: " + firstPage.getError());
+            }
+            
+            totalArticles.addAndGet(saveRawArticles(firstPage.getArticles(), region.getCortarNo()));
+            processPage(region, 1, firstPage.isHasMore());
+            
+            // 첫 페이지에 더 이상 데이터가 없으면 바로 종료
+            if (!firstPage.isHasMore()) {
+                isRegionCompleted = true;
+                log.info("[Thread-{}] [{}] 첫 페이지에 더 이상 데이터가 없어 수집 완료", Thread.currentThread().getId(), regionName);
+            }
+            
+            // 페이지 순차 처리
+            while (!isRegionCompleted) {
+                currentPage++;
+                PageResultDTO result = crawlPage(region.getCortarNo(), currentPage);
                 
-                processPage(region, currentPage, result.isHasMore());
-                
-                if (!result.isHasMore()) {
-                    isRegionCompleted = true;
-                    log.info("[Thread-{}] [{}] 페이지 {}에서 더 이상 데이터가 없어 수집 완료", 
-                        Thread.currentThread().getId(), regionName, currentPage);
-                }
-            } else {
-                if (result.isProxyError()) {
-                    log.warn("[Thread-{}] [{}] 페이지 {} 프록시 오류: {}", 
-                        Thread.currentThread().getId(), regionName, currentPage, result.getError());
-                    // 프록시 오류 시 짧은 대기 후 재시도
-                    RandomSleepUtil.sleepShort();
+                if (result.isSuccess()) {
+                    totalArticles.addAndGet(saveRawArticles(result.getArticles(), region.getCortarNo()));
+                    log.info("[Thread-{}] [{}] 페이지 {} 처리 완료 (현재 {}개 매물) {}",
+                        Thread.currentThread().getId(), regionName, currentPage, totalArticles.get(),
+                        result.isHasMore() ? "▶" : "■");
+                    
+                    processPage(region, currentPage, result.isHasMore());
+                    
+                    if (!result.isHasMore()) {
+                        isRegionCompleted = true;
+                        log.info("[Thread-{}] [{}] 페이지 {}에서 더 이상 데이터가 없어 수집 완료",
+                            Thread.currentThread().getId(), regionName, currentPage);
+                    }
                 } else {
-                    log.warn("[Thread-{}] [{}] 페이지 {} 처리 실패 (스킵): {}", 
-                        Thread.currentThread().getId(), regionName, currentPage, result.getError());
-                    isRegionCompleted = true;
+                    if (result.isProxyError()) {
+                        log.warn("[Thread-{}] [{}] 페이지 {} 프록시 오류: {}",
+                            Thread.currentThread().getId(), regionName, currentPage, result.getError());
+                        // 프록시 오류 시 짧은 대기 후 재시도
+                        RandomSleepUtil.sleepShort();
+                    } else {
+                        log.warn("[Thread-{}] [{}] 페이지 {} 처리 실패 (스킵): {}",
+                            Thread.currentThread().getId(), regionName, currentPage, result.getError());
+                        isRegionCompleted = true;
+                    }
                 }
             }
+            
+            // 최종 상태 업데이트
+            regionRepository.save(region.updateNaverStatus(CrawlStatus.COMPLETED));
+            log.info("[Thread-{}] [{}] 네이버 원본 매물 정보 수집 완료 - 총 {}개 매물",
+                Thread.currentThread().getId(), regionName, totalArticles.get());
+        } catch (Exception e) {
+            log.error("[Thread-{}] [{}] 네이버 원본 매물 정보 수집 중 오류 발생: {}",
+                Thread.currentThread().getId(), regionName, e.getMessage());
+            regionRepository.save(region.updateNaverStatus(CrawlStatus.FAILED));
         }
-        
-        // 최종 상태 업데이트 - 메서드 사용
-        region = region.updateNaverStatus(CrawlStatus.COMPLETED);
-        log.info("[Thread-{}] [{}] 매물 정보 수집 완료 - 총 {}개 매물", 
-            Thread.currentThread().getId(), regionName, totalArticles.get());
-    } catch (Exception e) {
-        log.error("[Thread-{}] [{}] 매물 정보 수집 중 오류 발생: {}", 
-            Thread.currentThread().getId(), regionName, e.getMessage());
-        // 실패 상태 업데이트 - 메서드 사용
-        region = region.updateNaverStatus(CrawlStatus.FAILED);
-    } finally {
-        // 마지막 수집 시간 업데이트 - 이미 updateNaverStatus 메서드에서 처리됨
-        regionRepository.save(region);
     }
-}
-
     
     private PageResultDTO crawlPage(Long cortarNo, int page) {
         try {
@@ -220,51 +222,38 @@ public class ProxyNaverArticleService {
                 JsonNode articlesNode = root.path("body");
                 boolean hasMore = root.path("more").asBoolean();
                 
-                List<JsonNode> articles = articlesNode.isArray() ? 
-                    StreamSupport.stream(articlesNode.spliterator(), false)
-                        .collect(Collectors.toList()) : 
+                List<JsonNode> articles = articlesNode.isArray() ?
+                    StreamSupport.stream(articlesNode.spliterator(), false).collect(Collectors.toList()) :
                     Collections.emptyList();
                 
                 return PageResultDTO.success(page, articles, hasMore);
             }
-            
             return PageResultDTO.failure(page, "빈 응답", true);
-                
         } catch (Exception e) {
-            boolean isProxyError = e instanceof IOException || 
-                                 e.getMessage().contains("timeout") ||
-                                 e.getMessage().contains("connection");
-            
+            boolean isProxyError = e instanceof IOException ||
+                e.getMessage().contains("timeout") ||
+                e.getMessage().contains("connection");
             return PageResultDTO.failure(page, e.getMessage(), isProxyError);
         }
     }
     
     @Transactional
-    private int saveArticles(List<JsonNode> articles, Region region) {
+    private int saveRawArticles(List<JsonNode> articles, Long cortarNo) {
         int count = 0;
         for (JsonNode article : articles) {
             try {
-                saveArticle(article, region);
+                saveRawArticle(article, cortarNo);
                 count++;
             } catch (Exception e) {
-                log.error("[Thread-{}] [{}] 매물 저장 중 오류 발생: {}", Thread.currentThread().getId(), region.getCortarName(), e.getMessage());
+                log.error("[Thread-{}] 원본 매물 저장 중 오류 발생: {}", Thread.currentThread().getId(), e.getMessage());
             }
         }
         return count;
     }
-
-    private void handleRetry(Long cortarNo, int failedPage) {
-        try {
-            Thread.sleep(retryDelayMs);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.error("재시도 대기 중 인터럽트 발생", e);
-        }
-    }
-
+    
     /**
      * API URL을 생성하고 검증합니다.
-     * 
+     *
      * @param cortarNo 지역 코드
      * @param page 페이지 번호
      * @return 검증된 API URL
@@ -290,10 +279,9 @@ public class ProxyNaverArticleService {
             Thread.currentThread().getId(), region.getCortarName(),
             region.getCenterLat(),
             region.getCenterLon(),
-            top, right, bottom, left
-        );
+            top, right, bottom, left);
         
-        String url = String.format("%s?itemId=&mapKey=&lgeo=&showR0=" +
+                String url = String.format("%s?itemId=&mapKey=&lgeo=&showR0=" +
             "&rletTpCd=APT:OPST:VL:YR:DSD:ABYG:OBYG:JGC:JWJT:DDDGG:SGJT:HOJT:JGB:OR:GSW:SG:SMS:GJCG:GM:TJ:APTHGJ" +
             "&tradTpCd=A1:B1:B2:B3" +
             "&z=%d&lat=%.6f&lon=%.6f&btm=%.6f&lft=%.6f&top=%.6f&rgt=%.6f" +
@@ -307,8 +295,7 @@ public class ProxyNaverArticleService {
             top,
             right,
             cortarNo,
-            page
-        );
+            page);
         
         // URL 유효성 검증
         try {
@@ -324,7 +311,7 @@ public class ProxyNaverArticleService {
         }
         
         // 필수 파라미터 검증
-        if (!url.contains("cortarNo=") || !url.contains("page=") || 
+        if (!url.contains("cortarNo=") || !url.contains("page=") ||
             !url.contains("lat=") || !url.contains("lon=")) {
             log.error("[Thread-{}] [{}] 필수 파라미터 누락: {}", Thread.currentThread().getId(), region.getCortarName(), url);
             throw new RuntimeException("필수 파라미터가 누락되었습니다");
@@ -345,6 +332,7 @@ public class ProxyNaverArticleService {
             try {
                 // 프록시 풀에서 다음 프록시 가져오기 (로테이션)
                 proxy = proxyPool.getNextAvailableProxy();
+                
                 if (proxy == null) {
                     log.warn("사용 가능한 프록시가 없습니다. 프록시 풀을 새로고침합니다.");
                     proxyPool.refreshProxyPool();
@@ -400,19 +388,21 @@ public class ProxyNaverArticleService {
                         return response.toString();
                     }
                 } else {
-                    log.warn("[Thread-{}] [프록시: {}] 응답 실패. 응답 코드: {}", 
+                    log.warn("[Thread-{}] [프록시: {}] 응답 실패. 응답 코드: {}",
                         Thread.currentThread().getId(), proxy.getKey(), responseCode);
                     proxyPool.markProxyAsFailed(proxy);
                     retryCount++;
                 }
             } catch (Exception e) {
                 lastException = e;
-                log.error("[Thread-{}] [프록시: {}] 요청 중 오류 발생: {}", 
-                    Thread.currentThread().getId(), 
+                log.error("[Thread-{}] [프록시: {}] 요청 중 오류 발생: {}",
+                    Thread.currentThread().getId(),
                     proxy != null ? proxy.getKey() : "unknown", e.getMessage());
+                
                 if (proxy != null) {
                     proxyPool.markProxyAsFailed(proxy);
                 }
+                
                 retryCount++;
             }
             
@@ -420,7 +410,7 @@ public class ProxyNaverArticleService {
                 try {
                     // 재시도 횟수에 따라 대기 시간을 점진적으로 증가
                     long delay = retryDelayMs * (1 + retryCount);
-                    log.info("[Thread-{}] {}초 후 재시도... (시도 {}/{})", 
+                    log.info("[Thread-{}] {}초 후 재시도... (시도 {}/{})",
                         Thread.currentThread().getId(), delay/1000, retryCount, maxRetryCount);
                     Thread.sleep(delay);
                 } catch (InterruptedException e) {
@@ -430,74 +420,46 @@ public class ProxyNaverArticleService {
             }
         }
         
-        throw new RuntimeException("프록시를 통한 요청 실패. 마지막 오류: " + 
+        throw new RuntimeException("프록시를 통한 요청 실패. 마지막 오류: " +
             (lastException != null ? lastException.getMessage() : "알 수 없음"));
     }
     
+    /**
+ * 원본 매물 정보를 데이터베이스에 저장합니다.
+ *
+ * @param articleNode 매물 정보 JSON 노드
+ * @param cortarNo 지역 코드
+ */
 @Transactional
-private void saveArticle(JsonNode articleNode, Region region) {
+private void saveRawArticle(JsonNode articleNode, Long cortarNo) {
     try {
         String articleId = articleNode.path("atclNo").asText();
-        Optional<PropertyArticle> existingArticleOpt = propertyArticleRepository.findByArticleId(articleId);
+        Optional<NaverRawArticle> existingArticle = naverRawArticleRepository.findByArticleId(articleId);
         
-        PropertyArticle article;
-        if (existingArticleOpt.isPresent()) {
-            article = existingArticleOpt.get();
+        NaverRawArticle rawArticle;
+        if (existingArticle.isPresent()) {
+            // 기존 엔티티 업데이트
+            rawArticle = existingArticle.get();
+            log.info("[Thread-{}] 기존 원본 매물 정보 업데이트: {}", Thread.currentThread().getId(), articleId);
+            // 데이터가 업데이트되면 마이그레이션 상태를 초기화합니다
+            rawArticle = rawArticle.resetMigrationStatus();
         } else {
-            // 새 매물 생성 - 빌더 패턴 사용
-            article = PropertyArticle.createFrom(
-                articleId,
-                String.valueOf(region.getCortarNo()),
-                Platform.NAVER,
-                "https://new.land.naver.com/articles/" + articleId
-            );
+            // DTO를 통한 새 엔티티 생성
+            log.info("[Thread-{}] 새로운 원본 매물 정보 생성: {}", Thread.currentThread().getId(), articleId);
+            NaverRawArticleDTO dto = NaverRawArticleDTO.fromJsonNode(articleNode, cortarNo);
+            rawArticle = dto.toEntity();
         }
         
-        // 기본 정보 업데이트 - 메서드 사용
-        article = article.updateBasicInfo(
-            articleNode.path("atclNm").asText(),
-            articleNode.path("atclFetrDesc").asText(),
-            articleNode.path("rletTpNm").asText()
-        );
+        naverRawArticleRepository.save(rawArticle);
         
-        // 위치 정보 업데이트 - 메서드 사용
-        article = article.updateLocation(
-            articleNode.path("lon").asDouble(),
-            articleNode.path("lat").asDouble()
-        );
-        
-        // 면적 정보 업데이트 - 메서드 사용
-        article = article.updateArea(
-            articleNode.path("spc1").asDouble(),
-            articleNode.path("spc2").asDouble()
-        );
-        
-        // 거래 유형 및 가격 정보 설정 - 메서드 사용
-        String tradTpNm = articleNode.path("tradTpNm").asText();
-        switch (tradTpNm) {
-            case "매매":
-                article = article.updateSalePrice(articleNode.path("prc").asLong());
-                break;
-            case "전세":
-                article = article.updateDepositPrice(articleNode.path("prc").asLong());
-                break;
-            case "월세":
-                article = article.updateMonthlyPrice(
-                    articleNode.path("prc").asLong(),
-                    articleNode.path("rentPrc").asLong()
-                );
-                break;
-        }
-        
-        propertyArticleRepository.save(article);
+        log.info("[Thread-{}] 원본 매물 정보 저장 완료: {}", Thread.currentThread().getId(), articleId);
     } catch (Exception e) {
-        log.error("[Thread-{}] [{}] 매물 정보 저장 중 오류 발생: {}", 
-            Thread.currentThread().getId(), region.getCortarName(), e.getMessage(), e);
-        throw new RuntimeException("매물 정보 저장 실패", e);
+        log.error("[Thread-{}] 원본 매물 정보 저장 중 오류 발생: {}", Thread.currentThread().getId(), e.getMessage());
+        throw new RuntimeException("원본 매물 정보 저장 실패", e);
     }
 }
 
-
+    
     private void processPage(Region region, int page, boolean hasMore) {
         // 대기 시간을 페이지 처리 결과에 따라 동적으로 조정
         if (!hasMore) {
@@ -511,4 +473,4 @@ private void saveArticle(JsonNode articleNode, Region region) {
             }
         }
     }
-} 
+}

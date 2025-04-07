@@ -1,4 +1,4 @@
-package com.zipline.service;
+package com.zipline.service.publicItem;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -7,40 +7,48 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zipline.entity.PropertyArticle;
-import com.zipline.entity.Region;
-import com.zipline.repository.PropertyArticleRepository;
-import com.zipline.repository.RegionRepository;
-import com.zipline.util.CoordinateUtil;
-import com.zipline.util.RandomSleepUtil;
+import com.zipline.entity.publicItem.NaverRawArticle;
+import com.zipline.entity.publicItem.Region;
+import com.zipline.entity.enums.CrawlStatus;
+import com.zipline.entity.enums.MigrationStatus;
+import com.zipline.global.util.CoordinateUtil;
+import com.zipline.global.util.RandomSleepUtil;
+import com.zipline.repository.publicItem.NaverRawArticleRepository;
+import com.zipline.repository.publicItem.RegionRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 네이버 부동산 API로부터 원본 매물 데이터를 수집하는 서비스
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class NaverArticleService {
+public class NaverRawArticleService {
     private final ObjectMapper objectMapper;
     private final RegionRepository regionRepository;
-    private final PropertyArticleRepository propertyArticleRepository;
-    
+    private final NaverRawArticleRepository naverRawArticleRepository;
+
     private static final String BASE_URL = "https://m.land.naver.com/cluster/ajax/articleList";
     private static final int RECENT_DAYS = 2; // 최근 2일
     private static final int ZOOM_LEVEL = 12; // 줌 레벨
-    
+
     /**
-     * 특정 레벨의 모든 지역에 대한 매물 정보를 수집합니다.
+     * 특정 레벨의 모든 지역에 대한 원본 매물 정보를 수집합니다.
+     *
+     * @param level 지역 레벨
      */
-    public void crawlAndSaveArticlesByLevel(int level) {
-        log.info("=== 레벨 {} 매물 정보 수집 시작 ===", level);
+    public void crawlAndSaveRawArticlesByLevel(int level) {
+        log.info("=== 레벨 {} 네이버 원본 매물 정보 수집 시작 ===", level);
         try {
             LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
             log.info("수집 기준일: {}", cutoffDate);
-            
+
             // 페이징 처리를 위한 변수들
             int pageSize = 1;
             int pageNumber = 0;
@@ -50,7 +58,7 @@ public class NaverArticleService {
                 PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
                 log.info("페이지 요청: {}", pageRequest);
                 
-                Page<Long> regionPage = regionRepository.findCortarNosNeedingUpdate(level, cutoffDate, pageRequest);
+                Page<Long> regionPage = regionRepository.findRegionsNeedingUpdateForNaverWithPage(level, cutoffDate, pageRequest);
                 log.info("조회된 지역 수: {}", regionPage.getContent().size());
                 
                 if (regionPage.isEmpty()) {
@@ -66,7 +74,7 @@ public class NaverArticleService {
                 for (Long cortarNo : cortarNos) {
                     try {
                         RandomSleepUtil.sleep(); // API 요청 전 대기
-                        crawlAndSaveArticlesForRegion(cortarNo);
+                        crawlAndSaveRawArticlesForRegion(cortarNo);
 
                         // 수집 완료 후 최종 수집 시간 업데이트
                         regionRepository.updateNaverLastCrawledAt(cortarNo, LocalDateTime.now());
@@ -84,30 +92,36 @@ public class NaverArticleService {
                 hasMoreData = pageNumber < regionPage.getTotalPages();
             }
             
-            log.info("=== 레벨 {} 매물 정보 수집 완료 ===", level);
+            log.info("=== 레벨 {} 네이버 원본 매물 정보 수집 완료 ===", level);
         } catch (Exception e) {
-            log.error("매물 정보 수집 중 오류 발생: {}", e.getMessage(), e);
+            log.error("네이버 원본 매물 정보 수집 중 오류 발생: {}", e.getMessage(), e);
             throw e;
         }
     }
+
     /**
-     * 특정 지역의 매물 정보를 수집하고 저장합니다.
+     * 특정 지역의 원본 매물 정보를 수집하고 저장합니다.
+     *
+     * @param cortarNo 지역 코드
      */
-    public void crawlAndSaveArticlesForRegion(Long cortarNo) {
-        log.info("매물 정보 수집 시작 - 지역 코드: {}", cortarNo);
+    @Transactional
+    public void crawlAndSaveRawArticlesForRegion(Long cortarNo) {
+        log.info("네이버 원본 매물 정보 수집 시작 - 지역 코드: {}", cortarNo);
         
         Region region = regionRepository.findByCortarNo(cortarNo)
                 .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
             
-        // 상태 업데이트
-        region.setNaverStatus(Region.CrawlStatus.PROCESSING);
-        region.setNaverLastCrawledAt(LocalDateTime.now());
+        // 상태 업데이트 - 기존 메서드 사용
+        region = region.updateNaverStatus(CrawlStatus.PROCESSING);
         regionRepository.save(region);
         
         try {
             int page = 1;
             boolean hasMore = true;
             int totalArticles = 0;
+            
+            // 해당 지역의 기존 마이그레이션 상태를 초기화
+            naverRawArticleRepository.resetMigrationStatusForRegion(cortarNo, MigrationStatus.PENDING);
             
             while (hasMore) {
                 String apiUrl = buildApiUrl(cortarNo, page);
@@ -120,7 +134,7 @@ public class NaverArticleService {
                     
                     if (articlesNode.isArray()) {
                         for (JsonNode articleNode : articlesNode) {
-                            saveArticle(articleNode, region);
+                            saveRawArticle(articleNode, cortarNo);
                             totalArticles++;
                         }
                     }
@@ -131,33 +145,37 @@ public class NaverArticleService {
                     
                     if (hasMore) {
                         RandomSleepUtil.sleep(); // 다음 페이지 요청 전 대기
-                    page++;
+                        page++;
                     }
                 } else {
                     throw new RuntimeException("매물 목록이 비어있습니다.");
                 }
             }
             
-            // 성공 상태 업데이트
-            region.setNaverStatus(Region.CrawlStatus.COMPLETED);
-            region.setNaverLastCrawledAt(LocalDateTime.now());
+            // 성공 상태 업데이트 - 기존 메서드 사용
+            region = region.updateNaverStatus(CrawlStatus.COMPLETED);
             regionRepository.save(region);
             
-            log.info("매물 정보 수집 완료 - 지역: {}, 총 {}개 매물", region.getCortarName(), totalArticles);
+            log.info("네이버 원본 매물 정보 수집 완료 - 지역: {}, 총 {}개 매물", region.getCortarName(), totalArticles);
         } catch (Exception e) {
-            log.error("매물 정보 수집 중 오류 발생: {}", e.getMessage());
-            region.setNaverStatus(Region.CrawlStatus.FAILED);
-            region.setNaverLastCrawledAt(LocalDateTime.now());
+            log.error("네이버 원본 매물 정보 수집 중 오류 발생: {}", e.getMessage());
+            
+            // 실패 상태 업데이트 - 기존 메서드 사용
+            region = region.updateNaverStatus(CrawlStatus.FAILED);
             regionRepository.save(region);
         }
     }
-    
+
     /**
-     * API URL을 생성합니다.
+     * 네이버 부동산 API를 위한 URL을 생성합니다.
+     *
+     * @param cortarNo 지역 코드
+     * @param page 페이지 번호
+     * @return API URL
      */
     private String buildApiUrl(Long cortarNo, int page) {
         Region region = regionRepository.findByCortarNo(cortarNo)
-            .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
+                .orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
         
         // 중심 좌표로부터 지리적 범위 계산
         double[] bounds = CoordinateUtil.calculateBounds(
@@ -182,7 +200,8 @@ public class NaverArticleService {
             left
         );
         
-        return String.format("%s?itemId=&mapKey=&lgeo=&showR0=&rletTpCd=APT:OPST:VL:YR:DSD:ABYG:OBYG:JGC:JWJT:DDDGG:SGJT:HOJT:JGB:OR:GSW:SG:SMS:GJCG:GM:TJ:APTHGJ&tradTpCd=A1:B1:B2:B3&z=%d&lat=%.6f&lon=%.6f&btm=%.6f&lft=%.6f&top=%.6f&rgt=%.6f&cortarNo=%d&sort=rank&page=%d",
+        return String.format(
+            "%s?itemId=&mapKey=&lgeo=&showR0=&rletTpCd=APT:OPST:VL:YR:DSD:ABYG:OBYG:JGC:JWJT:DDDGG:SGJT:HOJT:JGB:OR:GSW:SG:SMS:GJCG:GM:TJ:APTHGJ&tradTpCd=A1:B1:B2:B3&z=%d&lat=%.6f&lon=%.6f&btm=%.6f&lft=%.6f&top=%.6f&rgt=%.6f&cortarNo=%d&sort=rank&page=%d",
             BASE_URL,
             ZOOM_LEVEL,
             region.getCenterLat(),
@@ -195,84 +214,67 @@ public class NaverArticleService {
             page
         );
     }
-    
+
     /**
-     * 매물 정보를 데이터베이스에 저장합니다.
+     * 원본 매물 정보를 데이터베이스에 저장합니다.
+     *
+     * @param articleNode 매물 정보 JSON 노드
+     * @param cortarNo 지역 코드
      */
-    private void saveArticle(JsonNode articleNode, Region region) {
-        log.info("\n=== 매물 정보 저장 시작 ===");
-        
+    @Transactional
+    private void saveRawArticle(JsonNode articleNode, Long cortarNo) {
         try {
             String articleId = articleNode.path("atclNo").asText();
-            Optional<PropertyArticle> existingArticle = propertyArticleRepository.findByArticleId(articleId);
+            Optional<NaverRawArticle> existingArticle = naverRawArticleRepository.findByArticleId(articleId);
             
-            PropertyArticle article;
+            NaverRawArticle rawArticle;
             if (existingArticle.isPresent()) {
-                article = existingArticle.get();
-                log.info("기존 매물 정보 업데이트: {}", articleId);
+                // 기존 객체를 가져와서 상태 초기화 메서드 사용
+                rawArticle = existingArticle.get().resetMigrationStatus();
+                rawArticle = NaverRawArticle.builder()
+                    .id(rawArticle.getId())
+                    .articleId(rawArticle.getArticleId())
+                    .cortarNo(rawArticle.getCortarNo())
+                    .rawData(articleNode.toString())
+                    .migrationStatus(rawArticle.getMigrationStatus())
+                    .migrationError(rawArticle.getMigrationError())
+                    .migratedAt(rawArticle.getMigratedAt())
+                    .createdAt(rawArticle.getCreatedAt())
+                    .build();
+                
+                log.info("기존 원본 매물 정보 업데이트: {}", articleId);
             } else {
-                article = new PropertyArticle();
-                article.setArticleId(articleId);
-                article.setRegionCode(String.valueOf(region.getCortarNo()));
-                article.setPlatform(PropertyArticle.Platform.NAVER);
-                article.setPlatformUrl("https://fin.land.naver.com/articles/" + articleId);
-                log.info("새로운 매물 정보 생성: {}", articleId);
+                // 빌더 패턴 사용하여 새 객체 생성
+                rawArticle = NaverRawArticle.builder()
+                    .articleId(articleId)
+                    .cortarNo(cortarNo)
+                    .rawData(articleNode.toString())
+                    .migrationStatus(MigrationStatus.PENDING)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+                    
+                log.info("새로운 원본 매물 정보 생성: {}", articleId);
             }
             
-            // 매물 정보 업데이트
-            article.setBuildingName(articleNode.path("atclNm").asText());
-            article.setDescription(articleNode.path("atclFetrDesc").asText());
-            article.setBuildingType(articleNode.path("rletTpNm").asText());
-            //article.setAddress(buildAddress(region)); 추후 사용하기로 결정시 만드들필요 있음
-            
-            // 거래 유형에 따른 가격 설정
-            String tradTpNm = articleNode.path("tradTpNm").asText();
-            switch (tradTpNm) {
-                case "매매":
-                    article.setCategory(PropertyArticle.Category.SALE);
-                    article.setPrice(articleNode.path("prc").asLong());
-                    break;
-                case "전세":
-                    article.setCategory(PropertyArticle.Category.DEPOSIT);
-                    article.setDeposit(articleNode.path("prc").asLong());
-                    break;
-                case "월세":
-                    article.setCategory(PropertyArticle.Category.MONTHLY);
-                    article.setMonthlyRent(articleNode.path("rentPrc").asLong());
-                    break;
-            }
-            
-            article.setLongitude(articleNode.path("lng").asDouble());
-            article.setLatitude(articleNode.path("lat").asDouble());
-            article.setSupplyArea(articleNode.path("spc1").asDouble());
-            article.setExclusiveArea(articleNode.path("spc2").asDouble());
-            article.setUpdatedAt(LocalDateTime.now());
-            
-            if (article.getCreatedAt() == null) {
-                article.setCreatedAt(LocalDateTime.now());
-            }
-            
-            PropertyArticle savedArticle = propertyArticleRepository.save(article);
-            log.info("저장된 매물 정보: articleId={}, buildingName={}, category={}, price={}, deposit={}, monthlyRent={}",
-                savedArticle.getArticleId(),
-                savedArticle.getBuildingName(),
-                savedArticle.getCategory(),
-                savedArticle.getPrice(),
-                savedArticle.getDeposit(),
-                savedArticle.getMonthlyRent());
-            log.info("=== 매물 정보 저장 완료 ===\n");
+            naverRawArticleRepository.save(rawArticle);
+            log.info("원본 매물 정보 저장 완료: {}", articleId);
         } catch (Exception e) {
-            log.error("매물 정보 저장 중 오류 발생: {}", e.getMessage());
+            log.error("원본 매물 정보 저장 중 오류 발생: {}", e.getMessage());
+            throw new RuntimeException("원본 매물 정보 저장 실패", e);
         }
     }
-    
+
     /**
      * 네이버 부동산 API에서 매물 정보를 가져옵니다.
+     *
+     * @param apiUrl API URL
+     * @return API 응답 문자열
      */
     private String getArticles(String apiUrl) {
         try {
             java.net.URL url = new java.net.URL(apiUrl);
             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestProperty("Accept-Language", "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7");
@@ -318,4 +320,4 @@ public class NaverArticleService {
             return null;
         }
     }
-} 
+}
