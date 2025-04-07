@@ -5,9 +5,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 
-import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
+import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
 import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.enums.PropertyType;
 

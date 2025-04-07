@@ -1,13 +1,18 @@
 package com.zipline.service.agentProperty;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
 import com.zipline.dto.agentProperty.AgentPropertyResponseDTO;
+import com.zipline.dto.AgentPropertyListResponseDTO;
+import com.zipline.dto.AgentPropertyListResponseDTO.PropertyResponseDTO;
+import com.zipline.dto.PageRequestDTO;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
 import com.zipline.entity.agentProperty.AgentProperty;
@@ -18,7 +23,6 @@ import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
 import com.zipline.repository.CustomerRepository;
 import com.zipline.repository.UserRepository;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -88,5 +92,16 @@ public class AgentPropertyService {
 			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
 
 		agentProperty.delete(LocalDateTime.now());
+	}
+
+	@Transactional(readOnly = true)
+	public AgentPropertyListResponseDTO getAgentPropertyList(PageRequestDTO pageRequestDTO, Long userUid) {
+		Page<AgentProperty> agentPropertyPage = agentPropertyRepository.findByUserUidAndIsDeleted(userUid, false,
+			pageRequestDTO.toPageable());
+		List<PropertyResponseDTO> agentPropertyResponseDTOList = agentPropertyPage.getContent().stream()
+			.map(PropertyResponseDTO::new)
+			.toList();
+
+		return new AgentPropertyListResponseDTO(agentPropertyResponseDTOList, agentPropertyPage);
 	}
 }

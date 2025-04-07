@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
 import com.zipline.dto.agentProperty.AgentPropertyResponseDTO;
+import com.zipline.dto.AgentPropertyListResponseDTO;
+import com.zipline.dto.PageRequestDTO;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.service.agentProperty.AgentPropertyService;
 
@@ -63,4 +64,16 @@ public class AgentPropertyController {
 		ApiResponse<Void> responseBody = ApiResponse.ok("매물 삭제 성공");
 		return ResponseEntity.ok(responseBody);
 	}
+
+	@GetMapping("")
+	public ResponseEntity<ApiResponse<AgentPropertyListResponseDTO>> getPropertyList(PageRequestDTO pageRequestDTO,
+		Principal principal) {
+		AgentPropertyListResponseDTO propertyListResponseDTO = agentPropertyService.getAgentPropertyList(pageRequestDTO,
+			Long.parseLong(
+				principal.getName()));
+
+		ApiResponse<AgentPropertyListResponseDTO> response = ApiResponse.ok("매물 목록 조회 성공", propertyListResponseDTO);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
 }
