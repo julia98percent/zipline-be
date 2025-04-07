@@ -1,4 +1,4 @@
-package com.zipline.util;
+package com.zipline.global.util;
 
 import java.util.function.Supplier;
 
