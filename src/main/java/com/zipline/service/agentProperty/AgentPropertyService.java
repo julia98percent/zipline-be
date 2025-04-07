@@ -41,13 +41,13 @@ public class AgentPropertyService {
 
 	@Transactional
 	public AgentPropertyResponseDTO registerProperty(AgentPropertyRequestDTO agentPropertyRequestDTO, Long userUid) {
-		User loginedUser = userRepository.findById(userUid)
+		User loggedInUser = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
 		Customer customer = customerRepository.findById(agentPropertyRequestDTO.getCustomerUid())
 			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
-		AgentProperty agentProperty = agentPropertyRequestDTO.toEntity(loginedUser, false, customer,
+		AgentProperty agentProperty = agentPropertyRequestDTO.toEntity(loggedInUser, false, customer,
 			LocalDateTime.now(),
 			null, null);
 
@@ -58,7 +58,7 @@ public class AgentPropertyService {
 	@Transactional
 	public AgentPropertyResponseDTO modifyProperty(AgentPropertyRequestDTO agentPropertyRequestDTO, Long propertyUid,
 		Long userUid) {
-		User loginedUser = userRepository.findById(userUid)
+		User loggedInUser = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
 		AgentProperty agentProperty = agentPropertyRepository.findById(propertyUid)
@@ -70,7 +70,7 @@ public class AgentPropertyService {
 		if (!agentProperty.getUser().getUid().equals(userUid))
 			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
 
-		agentProperty.modifyProperty(agentPropertyRequestDTO, loginedUser, false, customer,
+		agentProperty.modifyProperty(agentPropertyRequestDTO, loggedInUser, false, customer,
 			agentProperty.getCreatedAt(),
 			LocalDateTime.now(), null);
 
