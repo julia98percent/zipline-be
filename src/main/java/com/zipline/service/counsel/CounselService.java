@@ -1,4 +1,4 @@
-package com.zipline.consulation.service;
+package com.zipline.service.counsel;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -8,17 +8,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zipline.consulation.dto.CounselCreateRequestDTO;
-import com.zipline.consulation.entity.Counsel;
-import com.zipline.consulation.entity.CounselDetail;
-import com.zipline.consulation.repository.CounselRepository;
+import com.zipline.dto.counsel.CounselCreateRequestDTO;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
+import com.zipline.entity.counsel.Counsel;
+import com.zipline.entity.counsel.CounselDetail;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
 import com.zipline.repository.CustomerRepository;
 import com.zipline.repository.UserRepository;
+import com.zipline.repository.counsel.CounselRepository;
 
 import lombok.RequiredArgsConstructor;
 

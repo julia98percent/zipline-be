@@ -1,4 +1,4 @@
-package com.zipline.consulation.entity;
+package com.zipline.entity.counsel;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

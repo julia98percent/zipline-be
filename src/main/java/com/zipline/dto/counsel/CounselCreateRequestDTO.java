@@ -1,4 +1,4 @@
-package com.zipline.consulation.dto;
+package com.zipline.dto.counsel;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.zipline.consulation.controller;
+package com.zipline.controller.counsel;
 
 import java.security.Principal;
 import java.util.Map;
@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zipline.consulation.dto.CounselCreateRequestDTO;
-import com.zipline.consulation.service.CounselService;
+import com.zipline.dto.counsel.CounselCreateRequestDTO;
 import com.zipline.global.common.response.ApiResponse;
+import com.zipline.service.counsel.CounselService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
