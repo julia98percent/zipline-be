@@ -1,6 +1,7 @@
 package com.zipline.service.counsel;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.zipline.dto.counsel.CounselCreateRequestDTO;
+import com.zipline.dto.counsel.CounselModifyRequestDTO;
 import com.zipline.dto.counsel.CounselResponseDTO;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
@@ -70,5 +72,32 @@ public class CounselService {
 			counselUid);
 		CounselResponseDTO counselResponseDTO = new CounselResponseDTO(savedCounsel, savedCounselDetails);
 		return ApiResponse.ok("상담 상세 조회 성공", counselResponseDTO);
+	}
+
+	@Transactional
+	public ApiResponse<Map<String, Long>> modifyCounsel(Long counselUid, CounselModifyRequestDTO requestDTO,
+		Long userUid) {
+		Counsel savedCounsel = counselRepository.findByUidAndDeletedAtIsNull(counselUid)
+			.orElseThrow(() -> new CounselNotFoundException("해당하는 상담을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+
+		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
+			counselUid);
+		if (!savedCounsel.getUser().getUid().equals(userUid)) {
+			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+		}
+
+		LocalDateTime now = LocalDateTime.now();
+		savedCounsel.update(requestDTO.getTitle(), requestDTO.getCounselDate(), now);
+		savedCounselDetails.forEach(detail -> detail.delete(now));
+
+		List<CounselDetail> counselDetails = new ArrayList<>();
+		for (CounselModifyRequestDTO.CounselDetailDTO counselDetailDTO : requestDTO.getCounselDetails()) {
+			counselDetails.add(
+				new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), savedCounsel, now,
+					null));
+		}
+
+		counselDetailRepository.saveAll(counselDetails);
+		return ApiResponse.ok("상담 수정에 성공하였습니다.", Collections.singletonMap("counselUid", savedCounsel.getUid()));
 	}
 }

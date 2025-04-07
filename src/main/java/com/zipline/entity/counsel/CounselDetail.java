@@ -41,4 +41,8 @@ public class CounselDetail {
 		this.createdAt = createdAt;
 		this.deletedAt = deletedAt;
 	}
+
+	public void delete(LocalDateTime deletedAt) {
+		this.deletedAt = deletedAt;
+	}
 }
