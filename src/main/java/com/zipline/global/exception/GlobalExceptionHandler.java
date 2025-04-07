@@ -1,11 +1,13 @@
 package com.zipline.global.exception;
 
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import net.minidev.json.JSONObject;
 
@@ -45,6 +47,12 @@ public class GlobalExceptionHandler {
 		ExceptionResponseDTO response = ExceptionResponseDTO.of(HttpStatus.BAD_REQUEST,
 			e.getBindingResult().getFieldError().getDefaultMessage());
 		return ResponseEntity.status(e.getStatusCode()).body(response);
+	}
+
+	@ExceptionHandler({MaxUploadSizeExceededException.class, FileSizeLimitExceededException.class})
+	public ResponseEntity<ExceptionResponseDTO> handleException(RuntimeException e) {
+		ExceptionResponseDTO response = ExceptionResponseDTO.of(HttpStatus.PAYLOAD_TOO_LARGE, "파일의 크기가 너무 큽니다.");
+		return ResponseEntity.status(response.getCode()).body(response);
 	}
 
 	@ExceptionHandler(Exception.class)
