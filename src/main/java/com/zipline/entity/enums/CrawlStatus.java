@@ -1,4 +1,4 @@
-package com.zipline.entity.publicItem.enums;
+package com.zipline.entity.enums;
 
 public enum CrawlStatus {
     NEW,

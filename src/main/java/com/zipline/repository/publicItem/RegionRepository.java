@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
+import com.zipline.entity.enums.CrawlStatus;
 import com.zipline.entity.publicItem.Region;
 
 @Repository
@@ -106,7 +106,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     @Query("UPDATE Region r SET r.naverStatus = :status WHERE r.cortarNo = :cortarNo")
     void updateNaverStatus(
         @Param("cortarNo") Long cortarNo, 
-        @Param("status") com.zipline.entity.publicItem.enums.CrawlStatus status
+        @Param("status") CrawlStatus status
     );
     
     /**
@@ -116,7 +116,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     @Query("UPDATE Region r SET r.naverStatus = :status, r.naverLastCrawledAt = :lastCrawledAt WHERE r.cortarNo = :cortarNo")
     void updateNaverStatusAndLastCrawledAt(
         @Param("cortarNo") Long cortarNo, 
-        @Param("status") com.zipline.entity.publicItem.enums.CrawlStatus status,
+        @Param("status") CrawlStatus status,
         @Param("lastCrawledAt") LocalDateTime lastCrawledAt
     );
 }

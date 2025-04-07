@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.zipline.entity.publicItem.NaverRawArticle;
-import com.zipline.entity.publicItem.enums.MigrationStatus;
+import com.zipline.entity.enums.MigrationStatus;
 
 /**
  * 네이버 부동산 원본 데이터 저장소 인터페이스

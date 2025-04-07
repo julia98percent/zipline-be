@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.dto.publicItem.MigrationStatisticsDTO;
 import com.zipline.entity.publicItem.NaverRawArticle;
 import com.zipline.entity.publicItem.PropertyArticle;
-import com.zipline.entity.publicItem.enums.MigrationStatus;
+import com.zipline.entity.enums.MigrationStatus;
 import com.zipline.repository.publicItem.NaverRawArticleRepository;
 import com.zipline.repository.publicItem.PropertyArticleRepository;
 import com.zipline.repository.publicItem.RegionRepository;

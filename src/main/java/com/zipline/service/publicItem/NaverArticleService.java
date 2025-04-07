@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.entity.publicItem.PropertyArticle;
 import com.zipline.entity.publicItem.Region;
-import com.zipline.entity.publicItem.enums.CrawlStatus;
+import com.zipline.entity.enums.CrawlStatus;
 import com.zipline.global.util.RandomSleepUtil;
 import com.zipline.repository.publicItem.PropertyArticleRepository;
 import com.zipline.repository.publicItem.RegionRepository;

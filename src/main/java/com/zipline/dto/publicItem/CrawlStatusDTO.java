@@ -2,7 +2,7 @@ package com.zipline.dto.publicItem;
 
 import java.time.LocalDateTime;
 
-import com.zipline.entity.publicItem.enums.CrawlStatus;
+import com.zipline.entity.enums.CrawlStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

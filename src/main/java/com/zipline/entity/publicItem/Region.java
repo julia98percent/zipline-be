@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.zipline.entity.publicItem.enums.CrawlStatus;
+import com.zipline.entity.enums.CrawlStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

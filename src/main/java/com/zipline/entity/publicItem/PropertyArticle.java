@@ -3,8 +3,8 @@ package com.zipline.entity.publicItem;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.zipline.entity.publicItem.enums.Category;
-import com.zipline.entity.publicItem.enums.Platform;
+import com.zipline.entity.enums.Category;
+import com.zipline.entity.enums.Platform;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

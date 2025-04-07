@@ -2,7 +2,7 @@ package com.zipline.entity.publicItem;
 
 import java.time.LocalDateTime;
 
-import com.zipline.entity.publicItem.enums.MigrationStatus;
+import com.zipline.entity.enums.MigrationStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

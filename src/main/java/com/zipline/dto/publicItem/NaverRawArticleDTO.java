@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.zipline.entity.publicItem.NaverRawArticle;
-import com.zipline.entity.publicItem.enums.MigrationStatus;
+import com.zipline.entity.enums.MigrationStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
