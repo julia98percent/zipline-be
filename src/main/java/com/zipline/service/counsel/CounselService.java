@@ -9,11 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.zipline.dto.counsel.CounselCreateRequestDTO;
+import com.zipline.dto.counsel.CounselResponseDTO;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
 import com.zipline.entity.counsel.Counsel;
 import com.zipline.entity.counsel.CounselDetail;
 import com.zipline.global.common.response.ApiResponse;
+import com.zipline.global.exception.custom.CounselNotFoundException;
+import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
 import com.zipline.repository.CustomerRepository;
@@ -46,5 +49,16 @@ public class CounselService {
 
 		Counsel savedCounsel = counselRepository.save(counsel);
 		return ApiResponse.create("상담 생성에 성공하였습니다.", Collections.singletonMap("counselUid", savedCounsel.getUid()));
+	}
+
+	@Transactional(readOnly = true)
+	public ApiResponse<CounselResponseDTO> getCounsel(Long counselUid, Long userUid) {
+		Counsel savedCounsel = counselRepository.findById(counselUid)
+			.orElseThrow(() -> new CounselNotFoundException("해당하는 상담을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+		if (!savedCounsel.getUser().getUid().equals(userUid)) {
+			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+		}
+		CounselResponseDTO counselResponseDTO = new CounselResponseDTO(savedCounsel);
+		return ApiResponse.ok("상담 상세 조회 성공", counselResponseDTO);
 	}
 }
