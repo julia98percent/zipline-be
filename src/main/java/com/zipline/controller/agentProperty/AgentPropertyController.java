@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
 import com.zipline.dto.agentProperty.AgentPropertyResponseDTO;
-import com.zipline.dto.AgentPropertyListResponseDTO;
+
+import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO;
 import com.zipline.dto.PageRequestDTO;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.service.agentProperty.AgentPropertyService;
