@@ -44,7 +44,7 @@ public class Contract {
 	@Column(name = "status", nullable = false)
 	private ContractStatus status;
 
-	@Column(name = "isDeleted", nullable = false)
+	@Column(name = "is_deleted", nullable = false)
 	private Boolean isDeleted;
 
 	@Column(name = "created_at")

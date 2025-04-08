@@ -1,7 +1,8 @@
 package com.zipline.global.config;
 
 public enum S3Folder {
-	SURVEYS("surveys/");
+	SURVEYS("surveys/"),
+	CONTRACTS("contracts/");
 
 	private final String folderPrefix;
 

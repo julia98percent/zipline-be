@@ -2,7 +2,6 @@ package com.zipline.dto.contract;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.enums.ContractStatus;
@@ -33,9 +32,6 @@ public class ContractRequestDTO {
 
 	@Schema(description = "고객 UID", example = "1")
 	private Long customerUid;
-
-	@Schema(description = "계약 서류 URL 목록", example = "[\"https://example.com/file1.pdf\", \"https://example.com/file2.pdf\"]")
-	private List<String> documentUrls;
 
 	public Contract toEntity(Boolean isDeleted, LocalDateTime createdAt,
 		LocalDateTime updatedAt,

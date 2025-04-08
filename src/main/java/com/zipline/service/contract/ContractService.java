@@ -1,12 +1,12 @@
 package com.zipline.service.contract;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.zipline.dto.contract.ContractRequestDTO;
 import com.zipline.dto.contract.ContractResponseDTO;
@@ -15,9 +15,11 @@ import com.zipline.entity.User;
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.contract.ContractDocument;
 import com.zipline.entity.contract.CustomerContract;
+import com.zipline.global.config.S3Folder;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.contract.ContractNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
+import com.zipline.global.util.S3FileUploader;
 import com.zipline.repository.CustomerRepository;
 import com.zipline.repository.UserRepository;
 import com.zipline.repository.contract.ContractDocumentRepository;
@@ -35,6 +37,7 @@ public class ContractService {
 	private final ContractRepository contractRepository;
 	private final ContractDocumentRepository contractDocumentRepository;
 	private final CustomerContractRepository customerContractRepository;
+	private final S3FileUploader s3FileUploader;
 
 	@Transactional(readOnly = true)
 	public ContractResponseDTO getContract(Long contratUid) {
@@ -53,7 +56,8 @@ public class ContractService {
 	}
 
 	@Transactional
-	public ContractResponseDTO registerContract(ContractRequestDTO contractRequestDTO, Long userUid) {
+	public ContractResponseDTO registerContract(ContractRequestDTO contractRequestDTO, List<MultipartFile> files,
+		Long userUid) {
 		User savedUser = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
@@ -61,7 +65,7 @@ public class ContractService {
 			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
 		Contract contract = contractRequestDTO.toEntity(false, LocalDateTime.now(), null, null);
-		Contract save = contractRepository.save(contract);
+		Contract savedContract = contractRepository.save(contract);
 
 		CustomerContract customerContract = CustomerContract.builder()
 			.customer(customer)
@@ -69,18 +73,17 @@ public class ContractService {
 			.build();
 		customerContractRepository.save(customerContract);
 
-		List<String> savedUrls = new ArrayList<>();
-		if (contractRequestDTO.getDocumentUrls() != null) {
-			for (String url : contractRequestDTO.getDocumentUrls()) {
-				ContractDocument doc = ContractDocument.builder()
-					.contract(contract)
-					.documentUrl(url)
-					.build();
-				contractDocumentRepository.save(doc);
-				savedUrls.add(url);
-			}
+		List<String> uploadUrls = s3FileUploader.uploadContractFiles(files, S3Folder.CONTRACTS);
+
+		for (String url : uploadUrls) {
+			ContractDocument doc = ContractDocument.builder()
+				.contract(savedContract)
+				.documentUrl(url)
+				.build();
+			contractDocumentRepository.save(doc);
 		}
-		return ContractResponseDTO.of(contract, customer.getUid(), savedUrls);
+
+		return ContractResponseDTO.of(savedContract, customer.getUid(), uploadUrls);
 	}
 
 }
