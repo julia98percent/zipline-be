@@ -6,7 +6,7 @@ on:
     branches: ["dev"]
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: amazon-linux-2
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -52,12 +52,14 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           script: |
-            sudo apt-get update
-            sudo docker kill ${{ secrets.PROJECT_NAME }}
-            sudo docker rm -f ${{ secrets.PROJECT_NAME }}
-            sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
+            sudo yum update -y
+            sudo docker kill ${{ secrets.PROJECT_NAME }} || true
+            sudo docker rm -f ${{ secrets.PROJECT_NAME }} || true
+            sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }} || true
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
-            sudo docker run -d -p ${{ secrets.PORT }}:${{ secrets.PORT }} --name ${{ secrets.PROJECT_NAME }} \
+            # Run the container with all environment variables
+            sudo docker run -d -p ${{ secrets.PORT }}:${{ secrets.PORT }} \
+            --name ${{ secrets.PROJECT_NAME }} \
             -e PORT=${{ secrets.PORT }} \
             -e DB_PORT=${{ secrets.DB_PORT }} \
             -e DB_NAME=${{ secrets.DB_NAME }} \
@@ -72,7 +74,7 @@ jobs:
             -e AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }} \
             -e AWS_SEC_KEY=${{ secrets.AWS_SEC_KEY }} \
             -e AWS_STACK_VAL=${{ secrets.AWS_STACK_VAL }} \
-            -e FILE_ALLOWED_MEME_TYPES=${{ secrets.FILE_ALLOWED_MEME_TYPES }} \
+            -e FILE_ALLOWED_MEME_TYPES="${{ secrets.FILE_ALLOWED_MEME_TYPES }}" \
             -e JWT_ACC_EXPIRATION=${{ secrets.JWT_ACC_EXPIRATION }} \
             -e JWT_REF_EXPIRATION=${{ secrets.JWT_REF_EXPIRATION }} \
             -e MAX_USAGE_COUNT=${{ secrets.MAX_USAGE_COUNT }} \
@@ -85,12 +87,12 @@ jobs:
             -e PROXY_RETRY_COUNT=${{ secrets.PROXY_RETRY_COUNT }} \
             -e PROXY_RETRY_DELAY=${{ secrets.PROXY_RETRY_DELAY }} \
             -e PROXY_VALIDATION_TIMEOUT=${{ secrets.PROXY_VALIDATION_TIMEOUT }} \
-            -e PROXY_VALIDATION_URL=${{ secrets.PROXY_VALIDATION_URL }} \
+            -e PROXY_VALIDATION_URL="${{ secrets.PROXY_VALIDATION_URL }}" \
             -e REDIS_PORT=${{ secrets.REDIS_PORT }} \
             -e REDIS_URL=${{ secrets.REDIS_URL }} \
             -e SMS_API_KEY=${{ secrets.SMS_API_KEY }} \
             -e SMS_AUTH_KEY=${{ secrets.SMS_AUTH_KEY }} \
             -e SMS_SEC_KEY=${{ secrets.SMS_SEC_KEY }} \
-            -e SURVEY_DELIMITER=${{ secrets.SURVEY_DELIMITER }} \
+            -e SURVEY_DELIMITER="${{ secrets.SURVEY_DELIMITER }}" \
             -e SPRING_PROFILES_ACTIVE=dev \
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
