@@ -8,14 +8,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
-import com.zipline.dto.agentProperty.AgentPropertyResponseDTO;
 import com.zipline.dto.AgentPropertyListResponseDTO;
 import com.zipline.dto.AgentPropertyListResponseDTO.PropertyResponseDTO;
+import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
+import com.zipline.dto.agentProperty.AgentPropertyResponseDTO;
+
 import com.zipline.dto.PageRequestDTO;
+import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
-import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.agentProperty.PropertyNotFoundException;
