@@ -6,9 +6,11 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import com.zipline.global.exception.custom.ChoiceNotAllowedException;
 import com.zipline.global.exception.custom.QuestionNotFoundException;
 import com.zipline.global.exception.custom.QuestionTypeException;
 import com.zipline.survey.dto.SurveySubmitRequestDTO;
+import com.zipline.survey.entity.Choice;
 import com.zipline.survey.entity.Question;
 import com.zipline.survey.entity.SurveyAnswer;
 import com.zipline.survey.entity.SurveyResponse;
@@ -24,7 +26,9 @@ public class SurveyAnswerFactory {
 		if (question.getQuestionType() == QuestionType.SUBJECTIVE) {
 			return new SurveyAnswer(surveyResponse, question, requestDTO.getAnswer());
 		}
+
 		if (isChoiceQuestion(question.getQuestionType())) {
+			validateChoicesIds(question, requestDTO.getChoiceIds());
 			String choiceValue = String.join(",", requestDTO.getChoiceIds().stream()
 				.map(String::valueOf)
 				.collect(Collectors.toList()));
@@ -48,5 +52,17 @@ public class SurveyAnswerFactory {
 
 	private boolean isChoiceQuestion(QuestionType questionType) {
 		return questionType == QuestionType.MULTIPLE_CHOICE || questionType == QuestionType.SINGLE_CHOICE;
+	}
+
+	private void validateChoicesIds(Question question, List<Long> submittedChoiceIds) {
+		if (question.getQuestionType() == QuestionType.SINGLE_CHOICE && submittedChoiceIds.size() > 1) {
+			throw new ChoiceNotAllowedException("단일 선택 문항에는 하나의 선택지만 허용됩니다.", HttpStatus.BAD_REQUEST);
+		}
+		if (!question.getChoices().stream()
+			.map(Choice::getUid)
+			.collect(Collectors.toSet())
+			.containsAll(submittedChoiceIds)) {
+			throw new ChoiceNotAllowedException("올바르지 않은 선택지가 포함되어 있습니다.", HttpStatus.BAD_REQUEST);
+		}
 	}
 }
