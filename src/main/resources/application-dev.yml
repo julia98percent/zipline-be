@@ -16,7 +16,7 @@ spring:
   
   data:
     redis:
-      host: localhost
+      host: ${REDIS_URL}
       port: ${REDIS_PORT}
       type: SOCKS4
 
