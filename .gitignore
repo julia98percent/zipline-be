@@ -38,9 +38,10 @@ out/
 docker-compose.yml
 application.properties
 *.yaml
-*.yml
+application.yml
 db/Dockerfile
 logs
 src/main/resources/proxy-list.txt
 src/.cursor/rules/oop.mdc
 
+src/test/resources/application-test.yml
