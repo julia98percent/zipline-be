@@ -29,19 +29,19 @@ public class ProxyPool {
     private final ConcurrentHashMap<String, LocalDateTime> lastUsedTime = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Integer> usageCount = new ConcurrentHashMap<>();
     
-    @Value("${proxy.max-failures:3}")
+    @Value("${proxy.max-failures}")
     private int maxFailures;
     
-    @Value("${proxy.validation-timeout:5000}")
+    @Value("${proxy.validation-timeout}")
     private int validationTimeout;
     
-    @Value("${proxy.validation-url:https://www.google.com}")
+    @Value("${proxy.validation-url:https}")
     private String validationUrl;
     
-    @Value("${proxy.min-rotation-interval:300}")  // 5분
+    @Value("${proxy.min-rotation-interval}")  // 5분
     private int minRotationInterval;
     
-    @Value("${proxy.max-usage-count:10}")  // 최대 사용 횟수
+    @Value("${proxy.max-usage-count}")  // 최대 사용 횟수
     private int maxUsageCount;
     
     @PostConstruct
