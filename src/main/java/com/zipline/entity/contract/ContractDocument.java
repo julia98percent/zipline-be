@@ -30,6 +30,6 @@ public class ContractDocument {
 	@JoinColumn(name = "contract_uid", nullable = false)
 	private Contract contract;
 
-	@Column(name = "document_url", nullable = false, length = 255)
+	@Column(name = "document_url", nullable = false)
 	private String documentUrl;
 }

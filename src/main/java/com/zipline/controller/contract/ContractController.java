@@ -29,8 +29,10 @@ public class ContractController {
 	private final ContractService contractService;
 
 	@GetMapping("/{contractUid}")
-	public ResponseEntity<ApiResponse<ContractResponseDTO>> getContract(@PathVariable Long contractUid) {
-		ContractResponseDTO contractResponseDTO = contractService.getContract(contractUid);
+	public ResponseEntity<ApiResponse<ContractResponseDTO>> getContract(@PathVariable Long contractUid,
+		Principal principal) {
+		ContractResponseDTO contractResponseDTO = contractService.getContract(contractUid, Long.parseLong(
+			principal.getName()));
 		ApiResponse<ContractResponseDTO> response = ApiResponse.ok("계약 상세 조회 성공", contractResponseDTO);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}

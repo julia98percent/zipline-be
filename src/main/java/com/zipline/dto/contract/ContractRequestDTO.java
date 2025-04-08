@@ -3,6 +3,7 @@ package com.zipline.dto.contract;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.zipline.entity.User;
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.enums.ContractStatus;
 
@@ -33,7 +34,7 @@ public class ContractRequestDTO {
 	@Schema(description = "고객 UID", example = "1")
 	private Long customerUid;
 
-	public Contract toEntity(Boolean isDeleted, LocalDateTime createdAt,
+	public Contract toEntity(User user, Boolean isDeleted, LocalDateTime createdAt,
 		LocalDateTime updatedAt,
 		LocalDateTime deletedAt) {
 		return Contract.builder()
@@ -46,6 +47,7 @@ public class ContractRequestDTO {
 			.createdAt(createdAt)
 			.updatedAt(updatedAt)
 			.deletedAt(deletedAt)
+			.user(user)
 			.build();
 	}
 }

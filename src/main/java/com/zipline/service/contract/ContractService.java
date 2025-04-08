@@ -16,6 +16,7 @@ import com.zipline.entity.contract.Contract;
 import com.zipline.entity.contract.ContractDocument;
 import com.zipline.entity.contract.CustomerContract;
 import com.zipline.global.config.S3Folder;
+import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.contract.ContractNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
@@ -40,12 +41,15 @@ public class ContractService {
 	private final S3FileUploader s3FileUploader;
 
 	@Transactional(readOnly = true)
-	public ContractResponseDTO getContract(Long contratUid) {
+	public ContractResponseDTO getContract(Long contratUid, Long userUid) {
 		Contract contract = contractRepository.findByUidAndIsDeletedFalse(contratUid)
 			.orElseThrow(() -> new ContractNotFoundException("해당 계약을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
 		CustomerContract customerContract = customerContractRepository.findByContract(contract)
-			.orElseThrow(() -> new RuntimeException("해당 계약에 연결된 고객 정보가 없습니다."));
+			.orElseThrow(() -> new CustomerNotFoundException("해당 계약에 연결된 고객 정보가 없습니다.", HttpStatus.BAD_REQUEST));
+
+		if (!contract.getUser().getUid().equals(userUid))
+			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
 
 		List<ContractDocument> documents = contractDocumentRepository.findAllByContract(contract);
 		List<String> documentUrls = documents.stream()
@@ -64,7 +68,7 @@ public class ContractService {
 		Customer customer = customerRepository.findById(contractRequestDTO.getCustomerUid())
 			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
-		Contract contract = contractRequestDTO.toEntity(false, LocalDateTime.now(), null, null);
+		Contract contract = contractRequestDTO.toEntity(savedUser, false, LocalDateTime.now(), null, null);
 		Contract savedContract = contractRepository.save(contract);
 
 		CustomerContract customerContract = CustomerContract.builder()
