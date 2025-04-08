@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.survey.dto.SurveyCreateRequestDTO;
 import com.zipline.survey.dto.SurveyResponseDTO;
+import com.zipline.survey.dto.SurveyResponseDetailDTO;
 import com.zipline.survey.dto.SurveySubmitRequestDTO;
 import com.zipline.survey.service.SurveyService;
 
@@ -37,8 +38,8 @@ public class SurveyController {
 
 	private final SurveyService surveyService;
 
-	@PostMapping("/surveys")
 	@Operation(summary = "설문 생성", description = "새로운 설문을 생성합니다.")
+	@PostMapping("/surveys")
 	public ResponseEntity<ApiResponse<Map<String, Long>>> createSurvey(
 		@Valid @RequestBody SurveyCreateRequestDTO requestDTO,
 		Principal principal) {
@@ -47,12 +48,23 @@ public class SurveyController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
+	@Operation(summary = "설문 조회", description = "공인중개사가 생성한 설문을 조회합니다.")
 	@GetMapping("/surveys/{surveyUid}")
 	public ResponseEntity<ApiResponse<SurveyResponseDTO>> getSurvey(@PathVariable Long surveyUid) {
 		ApiResponse<SurveyResponseDTO> response = surveyService.getSurvey(surveyUid);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
+	@Operation(summary = "제출된 설문 결과 조회", description = "제출된 설문 결과를 조회합니다.")
+	@GetMapping("/surveys/responses/{surveyResponseUid}")
+	public ResponseEntity<ApiResponse<SurveyResponseDetailDTO>> getSubmittedSurvey(@PathVariable Long surveyResponseUid,
+		Principal principal) {
+		ApiResponse<SurveyResponseDetailDTO> response = surveyService.getSubmittedSurvey(surveyResponseUid,
+			Long.parseLong(principal.getName()));
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@Operation(summary = "설문 제출", description = "고객이 설문을 제출합니다.")
 	@PostMapping(value = "/surveys/{surveyUid}/submit", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,
 		MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<ApiResponse<Void>> submitSurvey(@PathVariable Long surveyUid,
