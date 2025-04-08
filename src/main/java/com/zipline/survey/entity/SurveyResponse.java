@@ -1,5 +1,7 @@
 package com.zipline.survey.entity;
 
+import java.time.LocalDateTime;
+
 import com.zipline.entity.Customer;
 
 import jakarta.persistence.Entity;
@@ -32,8 +34,11 @@ public class SurveyResponse {
 	@JoinColumn(name = "customer_uid")
 	private Customer customer;
 
-	public SurveyResponse(Survey survey, Customer customer) {
+	private LocalDateTime createdAt;
+
+	public SurveyResponse(Survey survey, Customer customer, LocalDateTime createdAt) {
 		this.survey = survey;
 		this.customer = customer;
+		this.createdAt = createdAt;
 	}
 }

@@ -85,7 +85,7 @@ public class SurveyService {
 		Survey savedSurvey = surveyRepository.findByUidAndStatus(surveyUid, SurveyStatus.ACTIVE)
 			.orElseThrow(() -> new SurveyNotFoundException("해당하는 설문이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
-		SurveyResponse surveyResponse = new SurveyResponse(savedSurvey, null);
+		SurveyResponse surveyResponse = new SurveyResponse(savedSurvey, null, LocalDateTime.now());
 		surveyResponseRepository.save(surveyResponse);
 		List<Question> questions = questionRepository.findAllBySurveyUidWithChoices(savedSurvey.getUid());
 
