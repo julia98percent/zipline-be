@@ -6,7 +6,7 @@ on:
     branches: ["dev"]
 jobs:
   test:
-    runs-on: amazon-linux-2
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
