@@ -15,6 +15,7 @@ import com.zipline.entity.User;
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.contract.ContractDocument;
 import com.zipline.entity.contract.CustomerContract;
+import com.zipline.global.exception.custom.Contract.ContractNotFoundException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
 import com.zipline.repository.CustomerRepository;
@@ -34,6 +35,22 @@ public class ContractService {
 	private final ContractRepository contractRepository;
 	private final ContractDocumentRepository contractDocumentRepository;
 	private final CustomerContractRepository customerContractRepository;
+
+	@Transactional(readOnly = true)
+	public ContractResponseDTO getContract(Long contratUid) {
+		Contract contract = contractRepository.findByUidAndIsDeletedFalse(contratUid)
+			.orElseThrow(() -> new ContractNotFoundException("해당 계약을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+
+		CustomerContract customerContract = customerContractRepository.findByContract(contract)
+			.orElseThrow(() -> new RuntimeException("해당 계약에 연결된 고객 정보가 없습니다."));
+
+		List<ContractDocument> documents = contractDocumentRepository.findAllByContract(contract);
+		List<String> documentUrls = documents.stream()
+			.map(ContractDocument::getDocumentUrl)
+			.toList();
+
+		return ContractResponseDTO.of(contract, customerContract.getUid(), documentUrls);
+	}
 
 	@Transactional
 	public ContractResponseDTO registerContract(ContractRequestDTO contractRequestDTO, Long userUid) {
