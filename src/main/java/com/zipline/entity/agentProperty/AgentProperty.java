@@ -127,11 +127,9 @@ public class AgentProperty {
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 
-	public void modifyProperty(AgentPropertyRequestDTO dto, User user, Boolean isDeleted,
-		Customer customer, LocalDateTime createdAt,
-		LocalDateTime updatedAt, LocalDateTime deletedAt) {
-
-		this.user = user;
+	public void modifyProperty(AgentPropertyRequestDTO dto,
+		Customer customer,
+		LocalDateTime updatedAt) {
 		this.customer = customer;
 		this.address = dto.getAddress();
 		this.address1 = dto.getDong();
@@ -155,10 +153,7 @@ public class AgentProperty {
 		this.netArea = dto.getNetArea();
 		this.totalArea = dto.getTotalArea();
 		this.details = dto.getDetails();
-		this.isDeleted = isDeleted;
-		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
-		this.deletedAt = deletedAt;
 	}
 
 	public void delete(LocalDateTime deletedAt) {
