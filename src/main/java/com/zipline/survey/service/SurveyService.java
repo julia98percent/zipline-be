@@ -15,12 +15,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.zipline.entity.User;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.global.config.S3Folder;
+import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.SurveyNotFoundException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.util.S3FileUploader;
 import com.zipline.repository.UserRepository;
 import com.zipline.survey.dto.SurveyCreateRequestDTO;
 import com.zipline.survey.dto.SurveyResponseDTO;
+import com.zipline.survey.dto.SurveyResponseDetailDTO;
 import com.zipline.survey.dto.SurveySubmitRequestDTO;
 import com.zipline.survey.entity.Choice;
 import com.zipline.survey.entity.Question;
@@ -85,7 +87,7 @@ public class SurveyService {
 		Survey savedSurvey = surveyRepository.findByUidAndStatus(surveyUid, SurveyStatus.ACTIVE)
 			.orElseThrow(() -> new SurveyNotFoundException("해당하는 설문이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
-		SurveyResponse surveyResponse = new SurveyResponse(savedSurvey, null);
+		SurveyResponse surveyResponse = new SurveyResponse(savedSurvey, null, LocalDateTime.now());
 		surveyResponseRepository.save(surveyResponse);
 		List<Question> questions = questionRepository.findAllBySurveyUidWithChoices(savedSurvey.getUid());
 
@@ -108,5 +110,22 @@ public class SurveyService {
 		allAnswers.addAll(fileAnswers);
 		surveyAnswerRepository.saveAll(allAnswers);
 		return ApiResponse.create("설문 제출에 성공하였습니다.");
+	}
+
+	@Transactional(readOnly = true)
+	public ApiResponse<SurveyResponseDetailDTO> getSubmittedSurvey(Long surveyResponseUid, Long userUid) {
+		SurveyResponse savedSurveyResponse = surveyResponseRepository.findSurveyResponseWithSurveyAndUserById(
+				surveyResponseUid)
+			.orElseThrow(() -> new SurveyNotFoundException("해당하는 설문 응답이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+
+		if (!savedSurveyResponse.getSurvey().getUser().getUid().equals(userUid)) {
+			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+		}
+
+		List<SurveyAnswer> surveyAnswers = surveyAnswerRepository.findByWithQuestionsAndChoicesSurveyResponseUid(
+			savedSurveyResponse.getUid());
+		SurveyResponseDetailDTO responseDTO = new SurveyResponseDetailDTO(savedSurveyResponse, surveyAnswers);
+
+		return ApiResponse.ok("설문 상세조회에 성공하였습니다.", responseDTO);
 	}
 }
