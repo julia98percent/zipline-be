@@ -17,6 +17,7 @@ import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO;
 import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO.PropertyResponseDTO;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
+
 import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.agentProperty.PropertyNotFoundException;
