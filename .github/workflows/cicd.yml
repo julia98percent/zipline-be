@@ -89,7 +89,7 @@ jobs:
             -e PROXY_VALIDATION_TIMEOUT=${{ secrets.PROXY_VALIDATION_TIMEOUT }} \
             -e PROXY_VALIDATION_URL="${{ secrets.PROXY_VALIDATION_URL }}" \
             -e REDIS_PORT=${{ secrets.REDIS_PORT }} \
-            -e REDIS_URL=${{ secrets.REDIS_URL }} \
+            -e REDIS_URL="${{ secrets.REDIS_URL }}" \
             -e SMS_API_KEY=${{ secrets.SMS_API_KEY }} \
             -e SMS_AUTH_KEY=${{ secrets.SMS_AUTH_KEY }} \
             -e SMS_SEC_KEY=${{ secrets.SMS_SEC_KEY }} \
