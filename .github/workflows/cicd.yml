@@ -57,8 +57,7 @@ jobs:
             sudo docker rm -f ${{ secrets.PROJECT_NAME }}
             sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
-            sudo docker run -p ${{ secrets.PORT }}:${{ secrets.PORT }} \
-            --name ${{ secrets.PROJECT_NAME }} \
+            sudo docker run -d -p ${{ secrets.PORT }}:${{ secrets.PORT }} --name ${{ secrets.PROJECT_NAME }} \
             -e PORT=${{ secrets.PORT }} \
             -e DB_PORT=${{ secrets.DB_PORT }} \
             -e DB_NAME=${{ secrets.DB_NAME }} \
@@ -94,4 +93,4 @@ jobs:
             -e SMS_SEC_KEY=${{ secrets.SMS_SEC_KEY }} \
             -e SURVEY_DELIMITER=${{ secrets.SURVEY_DELIMITER }} \
             -e SPRING_PROFILES_ACTIVE=dev \
-            -d ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}  
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
