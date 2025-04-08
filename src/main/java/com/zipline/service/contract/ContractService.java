@@ -79,13 +79,13 @@ public class ContractService {
 
 		List<String> uploadUrls = s3FileUploader.uploadContractFiles(files, S3Folder.CONTRACTS);
 
-		for (String url : uploadUrls) {
-			ContractDocument doc = ContractDocument.builder()
+		List<ContractDocument> documents = uploadUrls.stream()
+			.map(url -> ContractDocument.builder()
 				.contract(savedContract)
 				.documentUrl(url)
-				.build();
-			contractDocumentRepository.save(doc);
-		}
+				.build())
+			.toList();
+		contractDocumentRepository.saveAll(documents);
 
 		return ContractResponseDTO.of(savedContract, customer.getUid(), uploadUrls);
 	}
