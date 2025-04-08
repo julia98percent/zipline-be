@@ -91,7 +91,7 @@ public class UserService {
 		}
 
 		// 3. 권한 설정
-		List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_AGENT"));
+		List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getRole().name()));
 
 		// 4. 수동 인증 객체 생성
 		Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUid(), null, authorities);
