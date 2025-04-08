@@ -100,4 +100,20 @@ public class CounselService {
 		counselDetailRepository.saveAll(counselDetails);
 		return ApiResponse.ok("상담 수정에 성공하였습니다.", Collections.singletonMap("counselUid", savedCounsel.getUid()));
 	}
+
+	@Transactional
+	public ApiResponse<Void> deleteCounsel(Long counselUid, Long userUid) {
+		Counsel savedCounsel = counselRepository.findByUidAndDeletedAtIsNull(counselUid)
+			.orElseThrow(() -> new CounselNotFoundException("해당하는 상담을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+		if (!savedCounsel.getUser().getUid().equals(userUid)) {
+			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+		}
+		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
+			counselUid);
+		LocalDateTime deletedAt = LocalDateTime.now();
+		savedCounsel.delete(deletedAt);
+
+		savedCounselDetails.forEach(counselDetail -> counselDetail.delete(deletedAt));
+		return ApiResponse.ok("상담 삭제에 성공하였습니다.");
+	}
 }

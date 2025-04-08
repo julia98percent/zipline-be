@@ -68,4 +68,8 @@ public class Counsel {
 		this.counselDate = counselDate;
 		this.updatedAt = updatedAt;
 	}
+
+	public void delete(LocalDateTime deletedAt) {
+		this.deletedAt = deletedAt;
+	}
 }
