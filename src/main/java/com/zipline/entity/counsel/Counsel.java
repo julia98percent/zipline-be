@@ -62,4 +62,10 @@ public class Counsel {
 	public void addDetail(CounselDetail detail) {
 		this.details.add(detail);
 	}
+
+	public void update(String title, LocalDateTime counselDate, LocalDateTime updatedAt) {
+		this.title = title;
+		this.counselDate = counselDate;
+		this.updatedAt = updatedAt;
+	}
 }

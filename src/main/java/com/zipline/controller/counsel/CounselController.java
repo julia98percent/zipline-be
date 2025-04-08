@@ -8,12 +8,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zipline.dto.counsel.CounselCreateRequestDTO;
 import com.zipline.dto.counsel.CounselResponseDTO;
+import com.zipline.dto.counsel.CounselModifyRequestDTO;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.service.counsel.CounselService;
 
@@ -40,6 +42,16 @@ public class CounselController {
 		Principal principal) {
 		ApiResponse<CounselResponseDTO> response = counselService.getCounsel(counselUid,
 			Long.parseLong(principal.getName()));
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@PutMapping("/counsels/{counselUid}")
+	public ResponseEntity<ApiResponse<Map<String, Long>>> modifyCounsel(@PathVariable Long counselUid,
+		@Valid @RequestBody CounselModifyRequestDTO requestDTO, Principal principal) {
+
+		ApiResponse<Map<String, Long>> response = counselService.modifyCounsel(counselUid, requestDTO,
+			Long.parseLong(principal.getName()));
+
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }
