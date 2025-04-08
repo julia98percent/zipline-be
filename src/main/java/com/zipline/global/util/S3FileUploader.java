@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,6 +45,18 @@ public class S3FileUploader {
 			fileUrlMap.put(questionUid, uploadedUrl);
 		}
 		return fileUrlMap;
+	}
+
+	public List<String> uploadContractFiles(List<MultipartFile> files, S3Folder s3Folder) {
+		List<String> uploadedUrls = new ArrayList<>();
+
+		for (MultipartFile file : files) {
+			fileValidator.validateContractFile(file);
+			String uploadedUrl = uploadFile(file, s3Folder.getFolderPrefix());
+			uploadedUrls.add(uploadedUrl);
+		}
+
+		return uploadedUrls;
 	}
 
 	public String uploadFile(MultipartFile file, String folderPrefix) {

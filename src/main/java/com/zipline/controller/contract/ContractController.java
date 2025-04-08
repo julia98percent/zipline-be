@@ -1,15 +1,18 @@
 package com.zipline.controller.contract;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.zipline.dto.contract.ContractRequestDTO;
 import com.zipline.dto.contract.ContractResponseDTO;
@@ -26,16 +29,19 @@ public class ContractController {
 	private final ContractService contractService;
 
 	@GetMapping("/{contractUid}")
-	public ResponseEntity<ApiResponse<ContractResponseDTO>> getContract(@PathVariable Long contractUid) {
-		ContractResponseDTO contractResponseDTO = contractService.getContract(contractUid);
+	public ResponseEntity<ApiResponse<ContractResponseDTO>> getContract(@PathVariable Long contractUid,
+		Principal principal) {
+		ContractResponseDTO contractResponseDTO = contractService.getContract(contractUid, Long.parseLong(
+			principal.getName()));
 		ApiResponse<ContractResponseDTO> response = ApiResponse.ok("계약 상세 조회 성공", contractResponseDTO);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
-	@PostMapping("")
-	public ResponseEntity<ApiResponse<Void>> registerContract(@RequestBody ContractRequestDTO contractRequestDTO,
+	@PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<ApiResponse<Void>> registerContract(@RequestPart ContractRequestDTO contractRequestDTO,
+		@RequestPart List<MultipartFile> files,
 		Principal principal) {
-		contractService.registerContract(contractRequestDTO, Long.parseLong(principal.getName()));
+		contractService.registerContract(contractRequestDTO, files, Long.parseLong(principal.getName()));
 		ApiResponse<Void> response = ApiResponse.create("계약 등록 성공");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}

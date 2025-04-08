@@ -26,7 +26,7 @@ public class FileValidator {
 		this.ALLOWED_MIME_TYPES = new HashSet<>(allowedMimeTypes);
 	}
 
-	public void validateSurveyFile(MultipartFile file) {
+	public void validateMimeType(MultipartFile file) {
 		try {
 			String detect = tika.detect(file.getInputStream());
 			if (!ALLOWED_MIME_TYPES.contains(detect)) {
@@ -35,5 +35,13 @@ public class FileValidator {
 		} catch (IOException e) {
 			throw new FileUploadException("파일 MIME 타입 검증에 실패하였습니다.", HttpStatus.BAD_REQUEST);
 		}
+	}
+
+	public void validateSurveyFile(MultipartFile file) {
+		validateMimeType(file);
+	}
+
+	public void validateContractFile(MultipartFile file) {
+		validateMimeType(file);
 	}
 }

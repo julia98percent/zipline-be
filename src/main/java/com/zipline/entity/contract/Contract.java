@@ -3,13 +3,17 @@ package com.zipline.entity.contract;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.zipline.entity.User;
 import com.zipline.entity.enums.ContractStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -29,6 +33,10 @@ public class Contract {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long uid;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_uid", nullable = false)
+	private User user;
+
 	@Column
 	private String category;
 
@@ -44,7 +52,7 @@ public class Contract {
 	@Column(name = "status", nullable = false)
 	private ContractStatus status;
 
-	@Column(name = "isDeleted", nullable = false)
+	@Column(name = "is_deleted", nullable = false)
 	private Boolean isDeleted;
 
 	@Column(name = "created_at")
