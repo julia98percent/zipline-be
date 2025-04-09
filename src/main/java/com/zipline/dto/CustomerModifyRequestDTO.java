@@ -22,7 +22,6 @@ public class CustomerModifyRequestDTO {
 	private String phoneNo;
 
 	@Schema(description = "주소", example = "서울특별시 강남구 테헤란로")
-	@NotBlank(message = "주소는 필수 입력 항목입니다.")
 	private String address;
 
 	@Schema(description = "통신사", example = "SKT")
