@@ -57,10 +57,9 @@ jobs:
             sudo docker rm -f ${{ secrets.PROJECT_NAME }} || true
             sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }} || true
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
-            # Run the container with all environment variables
-            sudo docker run -d -p ${{ secrets.PORT }}:${{ secrets.PORT }} \
-            --name ${{ secrets.PROJECT_NAME }} \
-            --env-file <(cat <<EOL
+            
+            # 환경 파일 생성
+            cat << 'EOF' > /tmp/docker-env-vars
             PORT=${{ secrets.PORT }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_NAME=${{ secrets.DB_NAME }}
@@ -95,6 +94,13 @@ jobs:
             SMS_SEC_KEY=${{ secrets.SMS_SEC_KEY }}
             SURVEY_DELIMITER=${{ secrets.SURVEY_DELIMITER }}
             SPRING_PROFILES_ACTIVE=dev
-            EOL
-            ) \
+            EOF
+            
+            #환경 파일로 도커 실행 
+            sudo docker run -d -p ${{ secrets.PORT }}:${{ secrets.PORT }} \
+            --name ${{ secrets.PROJECT_NAME }} \
+            --env-file /tmp/docker-env-vars \
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
+            
+            # Clean up the environment file
+            rm /tmp/docker-env-vars
