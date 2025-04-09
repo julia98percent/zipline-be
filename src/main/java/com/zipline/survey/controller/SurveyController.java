@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.zipline.dto.PageRequestDTO;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.survey.dto.SurveyCreateRequestDTO;
 import com.zipline.survey.dto.SurveyResponseDTO;
 import com.zipline.survey.dto.SurveyResponseDetailDTO;
+import com.zipline.survey.dto.SurveyResponseListDTO;
 import com.zipline.survey.dto.SurveySubmitRequestDTO;
 import com.zipline.survey.service.SurveyService;
 
@@ -61,6 +63,15 @@ public class SurveyController {
 		Principal principal) {
 		ApiResponse<SurveyResponseDetailDTO> response = surveyService.getSubmittedSurvey(surveyResponseUid,
 			Long.parseLong(principal.getName()));
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@Operation(summary = "제출된 설문 리스트 조회", description = "제출된 설문 리스트를 조회합니다.")
+	@GetMapping("/surveys/responses")
+	public ResponseEntity<?> getSurveyResponses(PageRequestDTO pageRequestDTO, Principal principal) {
+		SurveyResponseListDTO result = surveyService.getSurveyResponses(pageRequestDTO,
+			Long.parseLong(principal.getName()));
+		ApiResponse<SurveyResponseListDTO> response = ApiResponse.ok("제출된 설문 리스트 조회에 성공하였습니다.", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 

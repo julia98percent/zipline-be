@@ -1,17 +1,22 @@
 package com.zipline.survey.service;
 
+import static com.zipline.survey.dto.SurveyResponseListDTO.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.zipline.dto.PageRequestDTO;
 import com.zipline.entity.User;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.global.config.S3Folder;
@@ -23,6 +28,7 @@ import com.zipline.repository.UserRepository;
 import com.zipline.survey.dto.SurveyCreateRequestDTO;
 import com.zipline.survey.dto.SurveyResponseDTO;
 import com.zipline.survey.dto.SurveyResponseDetailDTO;
+import com.zipline.survey.dto.SurveyResponseListDTO;
 import com.zipline.survey.dto.SurveySubmitRequestDTO;
 import com.zipline.survey.entity.Choice;
 import com.zipline.survey.entity.Question;
@@ -95,21 +101,46 @@ public class SurveyService {
 			.map(dto -> surveyAnswerFactory.createAnswer(dto, questions, surveyResponse))
 			.collect(Collectors.toList());
 
-		Map<Long, MultipartFile> questionUidFileMap = fileQuestionMapper.mapFilesToQuestions(files, questions);
-		Map<Long, String> questionUidUploadedUrlMap = s3FileUploader.uploadSurveyFiles(questionUidFileMap,
-			S3Folder.SURVEYS);
-
-		List<SurveyAnswer> fileAnswers = questionUidUploadedUrlMap.entrySet()
-			.stream()
-			.map(entry -> surveyAnswerFactory.createFileAnswer(entry.getKey(), entry.getValue(), questions,
-				surveyResponse))
-			.collect(Collectors.toList());
+		List<SurveyAnswer> fileAnswers = handleFileAnswers(files, questions, surveyResponse);
 
 		List<SurveyAnswer> allAnswers = new ArrayList<>();
 		allAnswers.addAll(generalAnswers);
 		allAnswers.addAll(fileAnswers);
 		surveyAnswerRepository.saveAll(allAnswers);
 		return ApiResponse.create("설문 제출에 성공하였습니다.");
+	}
+
+	@Transactional(readOnly = true)
+	public SurveyResponseListDTO getSurveyResponses(PageRequestDTO pageRequestDTO, Long userUid) {
+		Page<SurveyResponse> savedSurveyResponses = surveyResponseRepository.findBySurveyUserUid(userUid,
+			pageRequestDTO.toPageable());
+
+		List<Long> savedSurveyResponsesIds = savedSurveyResponses.getContent().stream()
+			.map(surveyResponse -> surveyResponse.getUid())
+			.collect(Collectors.toList());
+
+		List<SurveyAnswer> surveyAnswers = surveyAnswerRepository.findTop2ByResponseIdIn(savedSurveyResponsesIds);
+		Map<Long, List<SurveyAnswer>> groupedSurveyAnswers = surveyAnswers.stream()
+			.collect(Collectors.groupingBy(sa -> sa.getSurveyResponse().getUid()));
+
+		List<SurveyResponseListDataDTO> surveyResponseListDataDTOs = new ArrayList<>();
+		for (Long surveyResponseUid : groupedSurveyAnswers.keySet()) {
+			List<SurveyAnswer> answers = groupedSurveyAnswers.get(surveyResponseUid)
+				.stream()
+				.sorted(Comparator.comparing(surveyAnswer -> surveyAnswer.getUid()))
+				.collect(Collectors.toList());
+
+			surveyResponseListDataDTOs.add(
+				new SurveyResponseListDataDTO(surveyResponseUid, answers.get(0).getAnswer(), answers.get(1).getAnswer(),
+					answers.get(0).getSurveyResponse().getCreatedAt()));
+		}
+
+		surveyResponseListDataDTOs.sort(
+			Comparator.comparing(SurveyResponseListDataDTO::getSubmittedAt, Comparator.reverseOrder()));
+
+		SurveyResponseListDTO result = new SurveyResponseListDTO(surveyResponseListDataDTOs,
+			savedSurveyResponses);
+		return result;
 	}
 
 	@Transactional(readOnly = true)
@@ -127,5 +158,24 @@ public class SurveyService {
 		SurveyResponseDetailDTO responseDTO = new SurveyResponseDetailDTO(savedSurveyResponse, surveyAnswers);
 
 		return ApiResponse.ok("설문 상세조회에 성공하였습니다.", responseDTO);
+	}
+
+	private List<SurveyAnswer> handleFileAnswers(List<MultipartFile> files, List<Question> questions,
+		SurveyResponse surveyResponse) {
+
+		if (files == null || files.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		Map<Long, MultipartFile> questionUidFileMap = fileQuestionMapper.mapFilesToQuestions(files, questions);
+		Map<Long, String> questionUidUploadedUrlMap = s3FileUploader.uploadSurveyFiles(questionUidFileMap,
+			S3Folder.SURVEYS);
+
+		List<SurveyAnswer> fileAnswers = questionUidUploadedUrlMap.entrySet()
+			.stream()
+			.map(entry -> surveyAnswerFactory.createFileAnswer(entry.getKey(), entry.getValue(), questions,
+				surveyResponse))
+			.collect(Collectors.toList());
+		return fileAnswers;
 	}
 }
