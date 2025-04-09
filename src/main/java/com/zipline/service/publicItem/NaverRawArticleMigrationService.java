@@ -72,12 +72,13 @@ public class NaverRawArticleMigrationService {
             log.error("마이그레이션 작업 중 오류 발생: {}", e.getMessage(), e);
         }
     }
-
+    
     /**
      * 특정 지역의 모든 원본 매물 데이터를 마이그레이션합니다.
      *
      * @param cortarNo 지역 코드
      */
+    @Transactional(readOnly = true)
     public void migrateAllArticlesForRegion(Long cortarNo) {
         log.info("지역 코드 {} 원본 매물 데이터 마이그레이션 시작", cortarNo);
         try {
@@ -94,7 +95,7 @@ public class NaverRawArticleMigrationService {
             int totalProcessed = 0;
             int totalSuccess = 0;
             int totalFailed = 0;
-            int pageNumber = (int) Math.ceil((double) pendingCount / BATCH_SIZE);
+            int pageNumber = 0; // Fixed: 0에서 시작
             boolean hasMoreData = true;
             
             // 페이징 처리로 모든 데이터 마이그레이션
@@ -120,7 +121,7 @@ public class NaverRawArticleMigrationService {
                         log.error("매물 ID {} 마이그레이션 중 오류 발생: {}", 
                             rawArticle.getArticleId(), e.getMessage());
                         rawArticle.markAsFailed(e.getMessage());
-                        naverRawArticleRepository.save(rawArticle);
+                        naverRawArticleRepository.save(rawArticle); //메서드 체이닝해제
                         totalFailed++;
                     }
                     totalProcessed++;
@@ -149,7 +150,7 @@ public class NaverRawArticleMigrationService {
             log.error("지역 코드 {} 마이그레이션 작업 중 오류 발생: {}", cortarNo, e.getMessage(), e);
         }
     }
-
+    
     /**
      * 특정 지역의 원본 매물 데이터를 마이그레이션합니다.
      * (기존 메서드 - 하위 호환성 유지)
@@ -160,6 +161,7 @@ public class NaverRawArticleMigrationService {
         migrateAllArticlesForRegion(cortarNo);
     }
 
+    
     /**
      * 단일 원본 매물 데이터를 마이그레이션합니다.
      *
@@ -188,7 +190,7 @@ public class NaverRawArticleMigrationService {
             
             // 마이그레이션 성공 상태 업데이트
             rawArticle.updateMigrationStatus(MigrationStatus.COMPLETED);
-            naverRawArticleRepository.save(rawArticle);
+            naverRawArticleRepository.save(rawArticle); // 메서드 체이닝 해제
             
             log.info("매물 ID {} 마이그레이션 완료", rawArticle.getArticleId());
         } catch (Exception e) {
@@ -197,10 +199,11 @@ public class NaverRawArticleMigrationService {
             throw new RuntimeException("매물 마이그레이션 실패: " + e.getMessage(), e);
         }
     }
-
+    
     /**
      * 실패한 마이그레이션을 재시도합니다.
      */
+    @Transactional(readOnly = true)
     public void retryFailedMigrations() {
         log.info("=== 실패한 마이그레이션 재시도 시작 ===");
         try {
@@ -233,7 +236,7 @@ public class NaverRawArticleMigrationService {
                     pageNumber + 1, batchSize, totalProcessed + batchSize, failedCount);
                     
                 for (NaverRawArticle rawArticle : failedArticles) {
-                    // 마이그레이션 상태 초기화
+                    // 마이그레이션 상태 초기화 - 메서드 분리
                     rawArticle.resetMigrationStatus();
                     naverRawArticleRepository.save(rawArticle);
                     
@@ -271,12 +274,13 @@ public class NaverRawArticleMigrationService {
             log.error("실패한 마이그레이션 재시도 중 오류 발생: {}", e.getMessage(), e);
         }
     }
-
+    
     /**
      * 특정 지역의 실패한 마이그레이션을 재시도합니다.
      *
      * @param cortarNo 지역 코드
      */
+    @Transactional(readOnly = true)
     public void retryFailedMigrationsForRegion(Long cortarNo) {
         log.info("=== 지역 {} 실패한 마이그레이션 재시도 시작 ===", cortarNo);
         try {
@@ -295,8 +299,8 @@ public class NaverRawArticleMigrationService {
             int totalFailed = 0;
             int pageNumber = 0;
             boolean hasMoreData = true;
-
-                        while (hasMoreData) {
+            
+            while (hasMoreData) {
                 PageRequest pageRequest = PageRequest.of(pageNumber, BATCH_SIZE);
                 Page<NaverRawArticle> failedArticles = naverRawArticleRepository
                     .findByCortarNoAndMigrationStatus(cortarNo, MigrationStatus.FAILED, pageRequest);
@@ -311,15 +315,18 @@ public class NaverRawArticleMigrationService {
                     cortarNo, pageNumber + 1, batchSize, totalProcessed + batchSize, failedCount);
                     
                 for (NaverRawArticle rawArticle : failedArticles) {
-                    // 마이그레이션 상태 초기화 (setter 대신 메서드 사용)
-                    naverRawArticleRepository.save(rawArticle.resetMigrationStatus());
+                    // 마이그레이션 상태 초기화 - 메서드 분리
+                    rawArticle.resetMigrationStatus();
+                    naverRawArticleRepository.save(rawArticle);
+                    
                     try {
                         migrateRawArticle(rawArticle);
                         totalSuccess++;
                     } catch (Exception e) {
                         log.error("매물 ID {} 재시도 중 오류 발생: {}", 
                             rawArticle.getArticleId(), e.getMessage());
-                        naverRawArticleRepository.save(rawArticle.markAsFailed(e.getMessage()));
+                        rawArticle.markAsFailed(e.getMessage());
+                        naverRawArticleRepository.save(rawArticle);
                         totalFailed++;
                     }
                     totalProcessed++;
@@ -336,7 +343,7 @@ public class NaverRawArticleMigrationService {
             log.error("지역 {} 실패한 마이그레이션 재시도 중 오류 발생: {}", cortarNo, e.getMessage(), e);
         }
     }
-
+    
     /**
      * 특정 지역의 모든 원본 데이터를 마이그레이션 대기 상태로 초기화합니다.
      *
@@ -351,8 +358,9 @@ public class NaverRawArticleMigrationService {
             int count = 0;
             
             for (NaverRawArticle article : articles) {
-                // setter 대신 메서드 사용
-                naverRawArticleRepository.save(article.resetMigrationStatus());
+                // 메서드 분리
+                article.resetMigrationStatus();
+                naverRawArticleRepository.save(article);
                 count++;
             }
             
@@ -363,7 +371,8 @@ public class NaverRawArticleMigrationService {
             throw new RuntimeException("마이그레이션 상태 초기화 실패", e);
         }
     }
-    
+   
+  	    
     /**
      * 특정 지역의 모든 원본 데이터를 마이그레이션 대기 상태로 초기화하고 즉시 마이그레이션합니다.
      *
@@ -399,7 +408,7 @@ public class NaverRawArticleMigrationService {
             throw new RuntimeException("마이그레이션 상태 초기화 및 즉시 마이그레이션 실패", e);
         }
     }
-    
+   
     /**
      * 마이그레이션 통계 정보를 반환합니다.
      *
@@ -412,21 +421,18 @@ public class NaverRawArticleMigrationService {
             long failedCount = naverRawArticleRepository.countByMigrationStatus(MigrationStatus.FAILED);
             long totalCount = pendingCount + completedCount + failedCount;
             
-            return MigrationStatisticsDTO.builder()
-                .totalArticles(totalCount)
-                .pendingArticles(pendingCount)
-                .completedArticles(completedCount)
-                .failedArticles(failedCount)
-                .completionRate(totalCount > 0 ? (double) completedCount / totalCount * 100 : 0)
-                .failureRate(totalCount > 0 ? (double) failedCount / totalCount * 100 : 0)
-                .timestamp(LocalDateTime.now())
-                .build();
+         return MigrationStatisticsDTO.of(
+            totalCount,
+            pendingCount,
+            completedCount,
+            failedCount
+        );
         } catch (Exception e) {
             log.error("마이그레이션 통계 정보 조회 중 오류 발생: {}", e.getMessage(), e);
             throw new RuntimeException("마이그레이션 통계 정보 조회 실패", e);
         }
     }
-    
+   
     /**
      * 특정 지역의 마이그레이션 통계 정보를 반환합니다.
      *
@@ -443,20 +449,16 @@ public class NaverRawArticleMigrationService {
                 cortarNo, MigrationStatus.FAILED);
             long totalCount = pendingCount + completedCount + failedCount;
             
-            return MigrationStatisticsDTO.builder()
-                .regionCode(cortarNo)
-                .totalArticles(totalCount)
-                .pendingArticles(pendingCount)
-                .completedArticles(completedCount)
-                .failedArticles(failedCount)
-                .completionRate(totalCount > 0 ? (double) completedCount / totalCount * 100 : 0)
-                .failureRate(totalCount > 0 ? (double) failedCount / totalCount * 100 : 0)
-                .timestamp(LocalDateTime.now())
-                .build();
+        return MigrationStatisticsDTO.ofRegion(
+            cortarNo,
+            totalCount,
+            pendingCount,
+            completedCount,
+            failedCount
+        );
         } catch (Exception e) {
             log.error("지역 {} 마이그레이션 통계 정보 조회 중 오류 발생: {}", cortarNo, e.getMessage(), e);
             throw new RuntimeException("마이그레이션 통계 정보 조회 실패", e);
         }
     }
 }
-
