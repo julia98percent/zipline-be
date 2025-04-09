@@ -73,7 +73,6 @@ public class PropertyArticleViewController {
                 .page(page)
                 .size(size)
                 .build();
-
         PropertyArticlePageResponseDTO response = propertyArticleViewService.searchPropertyArticles(searchDTO);
         return ResponseEntity.ok(response);
     }
@@ -93,24 +92,6 @@ public class PropertyArticleViewController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
         
         PropertyArticlePageResponseDTO response = propertyArticleViewService.getPropertyArticlesByRegion(regionCode, pageable);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 매물 상세 정보 조회 API (시스템 ID 기준)
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<PropertyArticleViewDTO> getPropertyArticleById(@PathVariable Long id) {
-        PropertyArticleViewDTO response = propertyArticleViewService.getPropertyArticleById(id);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 매물 상세 정보 조회 API (플랫폼 매물 ID 기준)
-     */
-    @GetMapping("/article/{articleId}")
-    public ResponseEntity<PropertyArticleViewDTO> getPropertyArticleByArticleId(@PathVariable String articleId) {
-        PropertyArticleViewDTO response = propertyArticleViewService.getPropertyArticleByArticleId(articleId);
         return ResponseEntity.ok(response);
     }
 }
