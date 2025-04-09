@@ -95,15 +95,7 @@ public class SurveyService {
 			.map(dto -> surveyAnswerFactory.createAnswer(dto, questions, surveyResponse))
 			.collect(Collectors.toList());
 
-		Map<Long, MultipartFile> questionUidFileMap = fileQuestionMapper.mapFilesToQuestions(files, questions);
-		Map<Long, String> questionUidUploadedUrlMap = s3FileUploader.uploadSurveyFiles(questionUidFileMap,
-			S3Folder.SURVEYS);
-
-		List<SurveyAnswer> fileAnswers = questionUidUploadedUrlMap.entrySet()
-			.stream()
-			.map(entry -> surveyAnswerFactory.createFileAnswer(entry.getKey(), entry.getValue(), questions,
-				surveyResponse))
-			.collect(Collectors.toList());
+		List<SurveyAnswer> fileAnswers = handleFileAnswers(files, questions, surveyResponse);
 
 		List<SurveyAnswer> allAnswers = new ArrayList<>();
 		allAnswers.addAll(generalAnswers);
@@ -127,5 +119,24 @@ public class SurveyService {
 		SurveyResponseDetailDTO responseDTO = new SurveyResponseDetailDTO(savedSurveyResponse, surveyAnswers);
 
 		return ApiResponse.ok("설문 상세조회에 성공하였습니다.", responseDTO);
+	}
+
+	private List<SurveyAnswer> handleFileAnswers(List<MultipartFile> files, List<Question> questions,
+		SurveyResponse surveyResponse) {
+
+		if (files == null || files.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		Map<Long, MultipartFile> questionUidFileMap = fileQuestionMapper.mapFilesToQuestions(files, questions);
+		Map<Long, String> questionUidUploadedUrlMap = s3FileUploader.uploadSurveyFiles(questionUidFileMap,
+			S3Folder.SURVEYS);
+
+		List<SurveyAnswer> fileAnswers = questionUidUploadedUrlMap.entrySet()
+			.stream()
+			.map(entry -> surveyAnswerFactory.createFileAnswer(entry.getKey(), entry.getValue(), questions,
+				surveyResponse))
+			.collect(Collectors.toList());
+		return fileAnswers;
 	}
 }
