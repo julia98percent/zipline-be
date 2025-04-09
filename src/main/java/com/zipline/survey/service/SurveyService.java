@@ -68,7 +68,7 @@ public class SurveyService {
 			survey.getQuestions().add(question);
 		});
 		surveyRepository.save(survey);
-		user.setUrl(String.valueOf(survey.getUid()), survey);
+		user.setUrl(String.valueOf(survey.getUid()));
 		return ApiResponse.create("설문 등록 완료", Collections.singletonMap("surveyURL", survey.getUid()));
 	}
 
@@ -96,7 +96,7 @@ public class SurveyService {
 		survey.getQuestions().add(phoneQuestion);
 
 		surveyRepository.save(survey);
-		user.setUrl(String.valueOf(survey.getUid()), survey);
+		user.setUrl(String.valueOf(survey.getUid()));
 	}
 
 	@Transactional(readOnly = true)
