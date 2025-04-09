@@ -87,11 +87,8 @@ public class User {
 		this.noticeMonth = dto.getNoticeMonth();
 	}
 
-	public void setUrl(String url) {
+	public void setUrl(String url, Survey survey) {
 		this.url = url;
-	}
-
-	public void setDefaultSurvey(Survey survey) {
 		this.defaultSurvey = survey;
 	}
 }
