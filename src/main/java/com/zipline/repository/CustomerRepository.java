@@ -14,6 +14,6 @@ import com.zipline.entity.Customer;
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 	Optional<Customer> findByUidAndIsDeletedFalse(Long customerUid);
 
-	@Query("SELECT c FROM Customer c WHERE c.user.uid = :userUID AND c.isDeleted = :isDeleted order by c.uid")
+	@Query("SELECT c FROM Customer c WHERE c.user.uid = :userUID AND c.isDeleted = :isDeleted order by c.uid DESC")
 	Page<Customer> findByUserUidAndIsDeleted(Long userUID, boolean isDeleted, Pageable pageable);
 }
