@@ -14,7 +14,7 @@ import com.zipline.entity.agentProperty.AgentProperty;
 public interface AgentPropertyRepository extends JpaRepository<AgentProperty, Long> {
 	Optional<AgentProperty> findByUidAndIsDeletedFalse(Long propertyUid);
 
-	@Query("SELECT a FROM AgentProperty a WHERE a.user.uid = :userUID AND a.isDeleted = :isDeleted ORDER BY a.uid")
+	@Query("SELECT a FROM AgentProperty a WHERE a.user.uid = :userUID AND a.isDeleted = :isDeleted ORDER BY a.uid DESC")
 	Page<AgentProperty> findByUserUidAndIsDeleted(Long userUID, boolean isDeleted, Pageable pageable);
 
 	Page<AgentProperty> findByCustomerUidAndUserUidAndDeletedAtIsNullOrderByCreatedAtDesc(Long customerUid,
