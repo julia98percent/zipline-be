@@ -45,3 +45,4 @@ src/main/resources/proxy-list.txt
 src/.cursor/rules/oop.mdc
 
 src/test/resources/application-test.yml
+src/main/resources/app/config/proxy-list.txt
