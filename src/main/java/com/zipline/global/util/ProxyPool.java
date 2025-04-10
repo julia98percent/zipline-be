@@ -56,7 +56,7 @@ public class ProxyPool {
     
     private void loadProxies() {
         try {
-            ClassPathResource resource = new ClassPathResource("proxy-list.txt");
+            ClassPathResource resource = new ClassPathResource("app/config/proxy-list.txt");
             List<String> lines = new BufferedReader(
                 new InputStreamReader(resource.getInputStream())
             ).lines()
