@@ -33,6 +33,7 @@ public class ContractListResponseDTO {
 		private Long uid;
 		private String customerName;
 		private String category;
+		private LocalDate contractDate;
 		private LocalDate contractStartDate;
 		private LocalDate contractEndDate;
 		private ContractStatus status;
@@ -41,6 +42,7 @@ public class ContractListResponseDTO {
 			this.uid = customerContract.getContract().getUid();
 			this.customerName = customerContract.getCustomer().getName();
 			this.category = customerContract.getContract().getCategory();
+			this.contractDate = customerContract.getContract().getContractDate();
 			this.contractStartDate = customerContract.getContract().getContractStartDate();
 			this.contractEndDate = customerContract.getContract().getContractEndDate();
 			this.status = customerContract.getContract().getStatus();
