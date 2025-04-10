@@ -14,14 +14,17 @@ import com.zipline.dto.CustomerListResponseDTO.CustomerResponseDTO;
 import com.zipline.dto.CustomerModifyRequestDTO;
 import com.zipline.dto.CustomerRegisterRequestDTO;
 import com.zipline.dto.PageRequestDTO;
+import com.zipline.dto.counsel.CounselListResponseDTO;
 import com.zipline.entity.Customer;
 import com.zipline.entity.User;
+import com.zipline.entity.counsel.Counsel;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
 import com.zipline.repository.CustomerRepository;
 import com.zipline.repository.UserRepository;
+import com.zipline.repository.counsel.CounselRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +36,7 @@ public class CustomerService {
 
 	private final CustomerRepository customerRepository;
 	private final UserRepository userRepository;
+	private final CounselRepository counselRepository;
 
 	@Transactional
 	public ApiResponse<Void> registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUID) {
@@ -106,5 +110,13 @@ public class CustomerService {
 		}
 
 		return new CustomerDetailResponseDTO(savedCustomer);
+	}
+
+	@Transactional(readOnly = true)
+	public List<CounselListResponseDTO> getCustomerCounsels(Long customerUid, Long userUid) {
+		List<Counsel> savedCounsels = counselRepository.findByCustomerUidAndUserUidAndDeletedAtIsNullOrderByCreatedAtDesc(
+			customerUid, userUid);
+
+		return savedCounsels.stream().map(CounselListResponseDTO::new).toList();
 	}
 }

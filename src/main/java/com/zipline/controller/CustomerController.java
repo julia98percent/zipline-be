@@ -1,6 +1,7 @@
 package com.zipline.controller;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import com.zipline.dto.CustomerListResponseDTO;
 import com.zipline.dto.CustomerModifyRequestDTO;
 import com.zipline.dto.CustomerRegisterRequestDTO;
 import com.zipline.dto.PageRequestDTO;
+import com.zipline.dto.counsel.CounselListResponseDTO;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.service.CustomerService;
 
@@ -57,6 +59,15 @@ public class CustomerController {
 		ApiResponse<Void> response = customerService.registerCustomer(customerRegisterRequestDTO,
 			Long.parseLong(principal.getName()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	@GetMapping("/customers/{customerUid}/counsels")
+	public ResponseEntity<ApiResponse<List<CounselListResponseDTO>>> getCustomerCounsels(@PathVariable Long customerUid,
+		Principal principal) {
+		List<CounselListResponseDTO> result = customerService.getCustomerCounsels(customerUid,
+			Long.parseLong(principal.getName()));
+		ApiResponse<List<CounselListResponseDTO>> response = ApiResponse.ok("상담 내역 조회 성공", result);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	@PutMapping("/customers/{customerUid}")
