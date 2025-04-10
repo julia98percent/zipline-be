@@ -12,7 +12,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 import org.springframework.stereotype.Component;
 
 import com.zipline.dto.publicItem.ProxyInfoDTO;
@@ -54,15 +56,13 @@ public class ProxyPool {
         }
     }
     
+
     private void loadProxies() {
         try {
-            ClassPathResource resource = new ClassPathResource("app/config/proxy-list.txt");
-            List<String> lines = new BufferedReader(
-                new InputStreamReader(resource.getInputStream())
-            ).lines()
-             .filter(line -> !line.trim().isEmpty())
-             .collect(Collectors.toList());
-            
+            Path filePath = Paths.get("$HOME/app/config/proxy-list.txt");
+            List<String> lines = Files.lines(filePath)
+                .filter(line -> !line.trim().isEmpty())
+                .collect(Collectors.toList());
             for (String line : lines) {
                 try {
                     ProxyInfoDTO proxy = ProxyInfoDTO.fromString(line.trim());
