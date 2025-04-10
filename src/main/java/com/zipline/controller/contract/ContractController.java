@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.zipline.dto.PageRequestDTO;
+import com.zipline.dto.contract.ContractListResponseDTO;
 import com.zipline.dto.contract.ContractRequestDTO;
 import com.zipline.dto.contract.ContractResponseDTO;
 import com.zipline.global.common.response.ApiResponse;
@@ -44,5 +46,16 @@ public class ContractController {
 		contractService.registerContract(contractRequestDTO, files, Long.parseLong(principal.getName()));
 		ApiResponse<Void> response = ApiResponse.create("계약 등록 성공");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	@GetMapping("")
+	public ResponseEntity<ApiResponse<ContractListResponseDTO>> getContractList(PageRequestDTO pageRequestDTO,
+		Principal principal) {
+		Long userUid = Long.parseLong(principal.getName());
+
+		ContractListResponseDTO responseDto = contractService.getContractList(pageRequestDTO, userUid);
+		ApiResponse<ContractListResponseDTO> response = ApiResponse.ok("계약 목록 조회 성공", responseDto);
+
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }

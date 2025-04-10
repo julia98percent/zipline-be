@@ -1,13 +1,19 @@
 package com.zipline.service.contract;
 
+import static java.util.stream.Collectors.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.zipline.dto.PageRequestDTO;
+import com.zipline.dto.contract.ContractListResponseDTO;
+import com.zipline.dto.contract.ContractListResponseDTO.ContractListDTO;
 import com.zipline.dto.contract.ContractRequestDTO;
 import com.zipline.dto.contract.ContractResponseDTO;
 import com.zipline.entity.Customer;
@@ -56,7 +62,7 @@ public class ContractService {
 			.map(ContractDocument::getDocumentUrl)
 			.toList();
 
-		return ContractResponseDTO.of(contract, customerContract.getUid(), documentUrls);
+		return ContractResponseDTO.of(contract, customerContract.getCustomer().getName(), documentUrls);
 	}
 
 	@Transactional
@@ -87,7 +93,20 @@ public class ContractService {
 			.toList();
 		contractDocumentRepository.saveAll(documents);
 
-		return ContractResponseDTO.of(savedContract, customer.getUid(), uploadUrls);
+		return ContractResponseDTO.of(savedContract, customer.getName(), uploadUrls);
+	}
+
+	@Transactional(readOnly = true)
+	public ContractListResponseDTO getContractList(PageRequestDTO pageRequestDTO, Long userUid) {
+		Page<Contract> contractPage = contractRepository.findByUserUidAndIsDeleted(userUid, false,
+			pageRequestDTO.toPageable());
+		List<Contract> content = contractPage.getContent();
+		List<Long> contractIds = content.stream().map(c -> c.getUid()).collect(toList());
+		List<CustomerContract> inContractUids = customerContractRepository.findInContractUids(contractIds);
+		List<ContractListDTO> contractList = inContractUids.stream()
+			.map(cc -> new ContractListDTO(cc))
+			.toList();
+		return new ContractListResponseDTO(contractList, contractPage);
 	}
 
 }
