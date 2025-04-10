@@ -8,10 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.zipline.dto.CustomerDetailResponseDTO;
 import com.zipline.dto.CustomerListResponseDTO;
 import com.zipline.dto.CustomerListResponseDTO.CustomerResponseDTO;
 import com.zipline.dto.CustomerModifyRequestDTO;
-import com.zipline.dto.CustomerModifyResponseDTO;
 import com.zipline.dto.CustomerRegisterRequestDTO;
 import com.zipline.dto.PageRequestDTO;
 import com.zipline.entity.Customer;
@@ -45,7 +45,7 @@ public class CustomerService {
 	}
 
 	@Transactional
-	public ApiResponse<CustomerModifyResponseDTO> modifyCustomer(Long customerUid,
+	public ApiResponse<CustomerDetailResponseDTO> modifyCustomer(Long customerUid,
 		CustomerModifyRequestDTO customerModifyRequestDTO, Long userUID) {
 
 		Customer savedCustomer = customerRepository.findByUidAndIsDeletedFalse(customerUid)
@@ -66,8 +66,8 @@ public class CustomerService {
 			customerModifyRequestDTO.getMinPrice(),
 			customerModifyRequestDTO.getMinDeposit(), customerModifyRequestDTO.getMaxDeposit(), LocalDateTime.now());
 
-		CustomerModifyResponseDTO customerModifyResponseDTO = new CustomerModifyResponseDTO(savedCustomer);
-		return ApiResponse.ok("고객 수정에 성공하였습니다.", customerModifyResponseDTO);
+		CustomerDetailResponseDTO customerDetailResponseDTO = new CustomerDetailResponseDTO(savedCustomer);
+		return ApiResponse.ok("고객 수정에 성공하였습니다.", customerDetailResponseDTO);
 	}
 
 	@Transactional
@@ -94,5 +94,17 @@ public class CustomerService {
 		CustomerListResponseDTO result = new CustomerListResponseDTO(customerResponseDTOList, customerPage);
 
 		return ApiResponse.ok("고객 목록 조회에 성공하였습니다.", result);
+	}
+
+	@Transactional(readOnly = true)
+	public CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid) {
+		Customer savedCustomer = customerRepository.findByUidAndIsDeletedFalse(customerUid)
+			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객 정보가 없습니다.", HttpStatus.BAD_REQUEST));
+
+		if (!savedCustomer.getUser().getUid().equals(userUid)) {
+			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+		}
+
+		return new CustomerDetailResponseDTO(savedCustomer);
 	}
 }
