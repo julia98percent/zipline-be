@@ -78,6 +78,33 @@ public class SurveyService {
 		return ApiResponse.create("설문 등록 완료", Collections.singletonMap("surveyURL", survey.getUid()));
 	}
 
+	@Transactional
+	public void createDefaultSurveyForUser(User user) {     //default questions
+		Survey survey = new Survey("기본 설문지", user, SurveyStatus.ACTIVE, LocalDateTime.now(), null);
+
+		Question nameQuestion = new Question(
+			"이름",
+			QuestionType.SUBJECTIVE,
+			"고객님의 이름을 입력해주세요.",
+			true,
+			survey
+		);
+
+		Question phoneQuestion = new Question(
+			"전화번호",
+			QuestionType.SUBJECTIVE,
+			"고객님의 전화번호를 입력해주세요.",
+			true,
+			survey
+		);
+
+		survey.getQuestions().add(nameQuestion);
+		survey.getQuestions().add(phoneQuestion);
+
+		surveyRepository.save(survey);
+		user.setUrl(String.valueOf(survey.getUid()));
+	}
+
 	@Transactional(readOnly = true)
 	public ApiResponse<SurveyResponseDTO> getSurvey(Long surveyUID) {
 		Survey savedSurvey = surveyRepository.findByUidAndStatus(surveyUID, SurveyStatus.ACTIVE)

@@ -23,6 +23,7 @@ import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.jwt.ErrorCode;
 import com.zipline.global.jwt.TokenProvider;
 import com.zipline.repository.UserRepository;
+import com.zipline.survey.service.SurveyService;
 
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final TokenProvider tokenProvider;
 	private final RedisTemplate<String, String> redisTemplate;
+	private final SurveyService surveyService;
 
 	@Transactional(readOnly = true)
 	public UserResponseDTO findById(Long uid) {
@@ -70,6 +72,7 @@ public class UserService {
 			.build();
 
 		userRepository.save(user);
+		surveyService.createDefaultSurveyForUser(user);
 		return UserResponseDTO.of(user);
 	}
 
