@@ -16,4 +16,7 @@ public interface AgentPropertyRepository extends JpaRepository<AgentProperty, Lo
 
 	@Query("SELECT a FROM AgentProperty a WHERE a.user.uid = :userUID AND a.isDeleted = :isDeleted ORDER BY a.uid")
 	Page<AgentProperty> findByUserUidAndIsDeleted(Long userUID, boolean isDeleted, Pageable pageable);
+
+	Page<AgentProperty> findByCustomerUidAndUserUidAndDeletedAtIsNullOrderByCreatedAtDesc(Long customerUid,
+		Long userUid, Pageable pageable);
 }

@@ -19,6 +19,7 @@ import com.zipline.dto.CustomerListResponseDTO;
 import com.zipline.dto.CustomerModifyRequestDTO;
 import com.zipline.dto.CustomerRegisterRequestDTO;
 import com.zipline.dto.PageRequestDTO;
+import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO;
 import com.zipline.dto.counsel.CounselListResponseDTO;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.service.CustomerService;
@@ -49,6 +50,16 @@ public class CustomerController {
 		CustomerDetailResponseDTO result = customerService.getCustomer(customerUid,
 			Long.parseLong(principal.getName()));
 		ApiResponse<CustomerDetailResponseDTO> response = ApiResponse.ok("회원 상세 정보 조회에 성공하였습니다.", result);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@GetMapping("/customers/{customerUid}/properties")
+	public ResponseEntity<ApiResponse<AgentPropertyListResponseDTO>> getCustomerProperties(
+		@PathVariable("customerUid") Long customerUid,
+		PageRequestDTO pageRequestDTO, Principal principal) {
+		AgentPropertyListResponseDTO result = customerService.getCustomerProperties(customerUid,
+			pageRequestDTO, Long.parseLong(principal.getName()));
+		ApiResponse<AgentPropertyListResponseDTO> response = ApiResponse.ok("매물 내역 조회 성공", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
