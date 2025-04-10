@@ -7,7 +7,7 @@ import com.zipline.entity.Customer;
 import lombok.Getter;
 
 @Getter
-public class CustomerModifyResponseDTO {
+public class CustomerDetailResponseDTO {
 	private Long uid;
 	private String name;
 	private String phoneNo;
@@ -26,7 +26,7 @@ public class CustomerModifyResponseDTO {
 	private BigInteger minDeposit;
 	private BigInteger maxDeposit;
 
-	public CustomerModifyResponseDTO(Customer customer) {
+	public CustomerDetailResponseDTO(Customer customer) {
 		this.uid = customer.getUid();
 		this.name = customer.getName();
 		this.phoneNo = customer.getPhoneNo();
