@@ -32,9 +32,24 @@ public String saveFile(MultipartFile file){
     // 파일 내용 유효성 검사
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
         String line;
+        int lineNumber = 0;
         while ((line = reader.readLine()) != null) {
-            if (!line.matches("\\b(?:\\d{1,3}\\.){3}\\d{1,3}:\\d+\\b")) {
-                throw new WrongTextFormateException("잘못된 파일 형식입니다. 각 줄은 ip:port 형식이어야 합니다", HttpStatus.BAD_REQUEST);
+            lineNumber++;
+            // 공백을 제거하기 위해 라인 트림
+            String trimmedLine = line.trim();
+            // 빈 라인 건너뛰기
+            if (trimmedLine.isEmpty()) {
+                continue;
+            }
+            // 보이지 않는 문자 제거 및 공백 정규화
+            trimmedLine = trimmedLine.replaceAll("\\s+", "").replaceAll("[\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}]", "");
+            // 정리 후 빈 라인이면 건너뛰기
+            if (trimmedLine.isEmpty()) {
+                continue;
+            }
+            // 더 유연한 IP:PORT 검증 패턴
+            if (!trimmedLine.matches("^(?:\\d{1,3}\\.){3}\\d{1,3}:\\d+$")) {
+                throw new WrongTextFormateException("Invalid file format. Line " + lineNumber + " must be in ip:port format: '" + line + "'", HttpStatus.BAD_REQUEST);
             }
         }
     } catch (IOException e) {
