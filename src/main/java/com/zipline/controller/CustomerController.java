@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zipline.dto.CustomerDetailResponseDTO;
 import com.zipline.dto.CustomerListResponseDTO;
 import com.zipline.dto.CustomerModifyRequestDTO;
-import com.zipline.dto.CustomerModifyResponseDTO;
 import com.zipline.dto.CustomerRegisterRequestDTO;
 import com.zipline.dto.PageRequestDTO;
 import com.zipline.global.common.response.ApiResponse;
@@ -41,6 +41,15 @@ public class CustomerController {
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
+	@GetMapping("/customers/{customerUid}")
+	public ResponseEntity<ApiResponse<CustomerDetailResponseDTO>> getCustomer(
+		@PathVariable("customerUid") Long customerUid, Principal principal) {
+		CustomerDetailResponseDTO result = customerService.getCustomer(customerUid,
+			Long.parseLong(principal.getName()));
+		ApiResponse<CustomerDetailResponseDTO> response = ApiResponse.ok("회원 상세 정보 조회에 성공하였습니다.", result);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
 	@PostMapping("/customers")
 	public ResponseEntity<ApiResponse<Void>> registerCustomer(
 		@Valid @RequestBody CustomerRegisterRequestDTO customerRegisterRequestDTO, Principal principal) {
@@ -51,10 +60,10 @@ public class CustomerController {
 	}
 
 	@PutMapping("/customers/{customerUid}")
-	public ResponseEntity<ApiResponse<CustomerModifyResponseDTO>> modifyCustomer(@PathVariable Long customerUid,
+	public ResponseEntity<ApiResponse<CustomerDetailResponseDTO>> modifyCustomer(@PathVariable Long customerUid,
 		@Valid @RequestBody CustomerModifyRequestDTO customerModifyRequestDTO, Principal principal) {
 
-		ApiResponse<CustomerModifyResponseDTO> response = customerService.modifyCustomer(
+		ApiResponse<CustomerDetailResponseDTO> response = customerService.modifyCustomer(
 			customerUid, customerModifyRequestDTO, Long.parseLong(principal.getName()));
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
