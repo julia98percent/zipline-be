@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
-import com.zipline.entity.contract.Contract;
 import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.enums.ContractStatus;
 
@@ -38,13 +37,13 @@ public class ContractListResponseDTO {
 		private LocalDate contractEndDate;
 		private ContractStatus status;
 
-		public ContractListDTO(Contract contract, CustomerContract customerContract) {
-			this.uid = contract.getUid();
+		public ContractListDTO(CustomerContract customerContract) {
+			this.uid = customerContract.getContract().getUid();
 			this.customerName = customerContract.getCustomer().getName();
-			this.category = contract.getCategory();
-			this.contractStartDate = contract.getContractStartDate();
-			this.contractEndDate = contract.getContractEndDate();
-			this.status = contract.getStatus();
+			this.category = customerContract.getContract().getCategory();
+			this.contractStartDate = customerContract.getContract().getContractStartDate();
+			this.contractEndDate = customerContract.getContract().getContractEndDate();
+			this.status = customerContract.getContract().getStatus();
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package com.zipline.service.contract;
 
+import static java.util.stream.Collectors.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.zipline.dto.PageRequestDTO;
 import com.zipline.dto.contract.ContractListResponseDTO;
+import com.zipline.dto.contract.ContractListResponseDTO.ContractListDTO;
 import com.zipline.dto.contract.ContractRequestDTO;
 import com.zipline.dto.contract.ContractResponseDTO;
 import com.zipline.entity.Customer;
@@ -93,19 +96,16 @@ public class ContractService {
 		return ContractResponseDTO.of(savedContract, customer.getName(), uploadUrls);
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	public ContractListResponseDTO getContractList(PageRequestDTO pageRequestDTO, Long userUid) {
 		Page<Contract> contractPage = contractRepository.findByUserUidAndIsDeleted(userUid, false,
 			pageRequestDTO.toPageable());
-
-		List<ContractListResponseDTO.ContractListDTO> contractList = contractPage.getContent().stream()
-			.map(contract -> {
-				CustomerContract customerContract = customerContractRepository.findByContract(contract)
-					.orElseThrow(() -> new RuntimeException("해당 계약에 연결된 고객 정보가 없습니다."));
-				return new ContractListResponseDTO.ContractListDTO(contract, customerContract);
-			})
+		List<Contract> content = contractPage.getContent();
+		List<Long> contractIds = content.stream().map(c -> c.getUid()).collect(toList());
+		List<CustomerContract> inContractUids = customerContractRepository.findInContractUids(contractIds);
+		List<ContractListDTO> contractList = inContractUids.stream()
+			.map(cc -> new ContractListDTO(cc))
 			.toList();
-
 		return new ContractListResponseDTO(contractList, contractPage);
 	}
 
