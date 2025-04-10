@@ -16,17 +16,17 @@ public class ContractResponseDTO {
 	private LocalDate contractStartDate;
 	private LocalDate contractEndDate;
 	private String status;
-	private Long customerUid;
+	private String customerName;
 	private List<String> documentUrls;
 
-	public static ContractResponseDTO of(Contract contract, Long customerUid, List<String> documentUrls) {
+	public static ContractResponseDTO of(Contract contract, String customerName, List<String> documentUrls) {
 		return ContractResponseDTO.builder()
 			.uid(contract.getUid())
 			.category(contract.getCategory())
 			.contractStartDate(contract.getContractStartDate())
 			.contractEndDate(contract.getContractEndDate())
 			.status(contract.getStatus().name())
-			.customerUid(customerUid)
+			.customerName(customerName)
 			.documentUrls(documentUrls)
 			.build();
 	}

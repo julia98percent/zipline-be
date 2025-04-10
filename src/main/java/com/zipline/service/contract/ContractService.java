@@ -3,11 +3,14 @@ package com.zipline.service.contract;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.zipline.dto.PageRequestDTO;
+import com.zipline.dto.contract.ContractListResponseDTO;
 import com.zipline.dto.contract.ContractRequestDTO;
 import com.zipline.dto.contract.ContractResponseDTO;
 import com.zipline.entity.Customer;
@@ -56,7 +59,7 @@ public class ContractService {
 			.map(ContractDocument::getDocumentUrl)
 			.toList();
 
-		return ContractResponseDTO.of(contract, customerContract.getUid(), documentUrls);
+		return ContractResponseDTO.of(contract, customerContract.getCustomer().getName(), documentUrls);
 	}
 
 	@Transactional
@@ -87,7 +90,23 @@ public class ContractService {
 			.toList();
 		contractDocumentRepository.saveAll(documents);
 
-		return ContractResponseDTO.of(savedContract, customer.getUid(), uploadUrls);
+		return ContractResponseDTO.of(savedContract, customer.getName(), uploadUrls);
+	}
+
+	@Transactional
+	public ContractListResponseDTO getContractList(PageRequestDTO pageRequestDTO, Long userUid) {
+		Page<Contract> contractPage = contractRepository.findByUserUidAndIsDeleted(userUid, false,
+			pageRequestDTO.toPageable());
+
+		List<ContractListResponseDTO.ContractListDTO> contractList = contractPage.getContent().stream()
+			.map(contract -> {
+				CustomerContract customerContract = customerContractRepository.findByContract(contract)
+					.orElseThrow(() -> new RuntimeException("해당 계약에 연결된 고객 정보가 없습니다."));
+				return new ContractListResponseDTO.ContractListDTO(contract, customerContract);
+			})
+			.toList();
+
+		return new ContractListResponseDTO(contractList, contractPage);
 	}
 
 }
