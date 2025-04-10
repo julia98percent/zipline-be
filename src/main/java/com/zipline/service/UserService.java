@@ -23,6 +23,8 @@ import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.jwt.ErrorCode;
 import com.zipline.global.jwt.TokenProvider;
 import com.zipline.repository.UserRepository;
+import com.zipline.survey.entity.Survey;
+import com.zipline.survey.repository.SurveyRepository;
 import com.zipline.survey.service.SurveyService;
 
 import io.jsonwebtoken.JwtException;
@@ -35,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
 	private final UserRepository userRepository;
+	private final SurveyRepository surveyRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final TokenProvider tokenProvider;
 	private final RedisTemplate<String, String> redisTemplate;
@@ -44,8 +47,10 @@ public class UserService {
 	public UserResponseDTO findById(Long uid) {
 		User user = userRepository.findById(uid)
 			.orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다. id=" + uid, HttpStatus.BAD_REQUEST));
+		Survey survey = surveyRepository.findFirstByUserOrderByCreatedAtDesc(user)
+			.orElseThrow(() -> new RuntimeException("해당 유저의 설문이 존재하지 않습니다."));
 
-		return UserResponseDTO.of(user);
+		return UserResponseDTO.userSurvey(user, survey);
 	}
 
 	@Transactional
