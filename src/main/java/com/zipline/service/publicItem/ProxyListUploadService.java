@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 @Service
 public class ProxyListUploadService {
 
-    private static final String UPLOAD_DIR = "/app/config/";
+    private static final String UPLOAD_DIR = "$HOME/app/config/";
 
 public String saveFile(MultipartFile file){
     boolean isNewFile = false;
@@ -75,7 +75,7 @@ public String saveFile(MultipartFile file){
         Files.write(filePath, file.getBytes());
     } catch (IOException e) {
         throw new FileSaveException("파일 저장 중 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR);
-    } 
+    }
     return isNewFile ? "proxy-list.txt 파일이 성공적으로 생성되었습니다" : "proxy-list.txt 파일이 성공적으로 업데이트 되었습니다";
 }
 }
