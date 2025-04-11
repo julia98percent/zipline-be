@@ -16,4 +16,7 @@ public interface CustomerContractRepository extends JpaRepository<CustomerContra
 	List<CustomerContract> findInContractUids(List<Long> contractIds);
 
 	Optional<CustomerContract> findByContract(Contract contract);
+
+	@Query("SELECT cc FROM CustomerContract cc WHERE cc.customer.uid = :customerUid AND cc.contract.user.uid =:userUid ORDER BY cc.contract.contractDate DESC")
+	List<CustomerContract> findByCustomerUidAndUserUid(Long customerUid, Long userUid);
 }

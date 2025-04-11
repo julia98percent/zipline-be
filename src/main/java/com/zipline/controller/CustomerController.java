@@ -20,6 +20,7 @@ import com.zipline.dto.CustomerModifyRequestDTO;
 import com.zipline.dto.CustomerRegisterRequestDTO;
 import com.zipline.dto.PageRequestDTO;
 import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO;
+import com.zipline.dto.contract.ContractListResponseDTO;
 import com.zipline.dto.counsel.CounselListResponseDTO;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.service.CustomerService;
@@ -78,6 +79,15 @@ public class CustomerController {
 		List<CounselListResponseDTO> result = customerService.getCustomerCounsels(customerUid,
 			Long.parseLong(principal.getName()));
 		ApiResponse<List<CounselListResponseDTO>> response = ApiResponse.ok("상담 내역 조회 성공", result);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@GetMapping("/customers/{customerUid}/contracts")
+	public ResponseEntity<ApiResponse<List<ContractListResponseDTO.ContractListDTO>>> getCustomerContracts(
+		@PathVariable Long customerUid, Principal principal) {
+		List<ContractListResponseDTO.ContractListDTO> result = customerService.getCustomerContracts(
+			customerUid, Long.parseLong(principal.getName()));
+		ApiResponse<List<ContractListResponseDTO.ContractListDTO>> response = ApiResponse.ok("계약 목록 조회 성공", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
