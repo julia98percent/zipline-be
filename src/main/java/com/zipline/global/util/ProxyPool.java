@@ -59,7 +59,7 @@ public class ProxyPool {
 
     private void loadProxies() {
         try {
-            Path filePath = Paths.get("$HOME/app/config/proxy-list.txt");
+            Path filePath = Paths.get("/src/main/resource/app/config/proxy-list.txt");
             List<String> lines = Files.lines(filePath)
                 .filter(line -> !line.trim().isEmpty())
                 .collect(Collectors.toList());

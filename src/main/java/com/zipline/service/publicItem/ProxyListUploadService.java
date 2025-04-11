@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 @Service
 public class ProxyListUploadService {
 
-    private static final String UPLOAD_DIR = "$HOME/app/config/";
+private static final String UPLOAD_DIR = "src/main/java/resource/app/config/";
 
 public String saveFile(MultipartFile file){
     boolean isNewFile = false;
