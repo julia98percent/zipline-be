@@ -1,0 +1,19 @@
+dependencies {
+    implementation project(':common')
+    
+    // Rate Limiting
+    implementation 'com.bucket4j:bucket4j-core:8.10.1'
+    
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+bootJar {
+    enabled = true
+    archiveFileName = 'crawler.jar'
+    mainClass.set('com.zipline.CrawlerServerApplication')
+}
+
+springBoot {
+    mainClass.set('com.zipline.CrawlerServerApplication')
+}

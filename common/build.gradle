@@ -1,0 +1,61 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+
+dependencies {
+    // Spring Boot Starters
+    api 'org.springframework.boot:spring-boot-starter-web'
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    api 'org.springframework.boot:spring-boot-starter-security'
+    api 'org.springframework.boot:spring-boot-starter-validation'
+    api 'org.springframework.boot:spring-boot-starter-data-redis'
+    api 'org.springframework.boot:spring-boot-starter-webflux'
+    
+    // OpenAPI Documentation
+    api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+    api 'org.webjars:webjars-locator-core:0.52'
+    api 'org.webjars:swagger-ui:5.2.0'
+    api 'org.webjars:webjars-locator:0.47'
+    
+    // JWT
+    api 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    
+    // AWS
+    api 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    api 'com.amazonaws:aws-java-sdk-secretsmanager:1.12.429'
+    
+    // Jackson
+    api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    api 'net.minidev:json-smart:2.4.10'
+    
+    // QueryDSL
+    api 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    
+    // Database
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    
+    // Utility
+    api 'org.apache.tika:tika-core:2.9.3'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+def querydslDir = "build/generated/querydsl"
+
+tasks.withType(JavaCompile) {
+    options.generatedSourceOutputDirectory = file(querydslDir)
+}
+
+clean {
+    delete file(querydslDir)
+}

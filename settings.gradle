@@ -1,1 +1,10 @@
-rootProject.name = 'zipline-backend'
+rootProject.name = 'zipline'
+include 'common'
+include 'apiserver'
+include 'crawlerserver'
+
+// API 서버 하위 모듈 (아래는 추후 진행될 추가적인 모듈화에 대한  예제입니다)
+//include 'apiserver:controller'
+//include 'apiserver:service'
+//indclude 'apiserver:domain'
+//include 'apiserver:repository'
