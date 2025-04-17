@@ -2,6 +2,7 @@ package com.zipline.controller;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +22,11 @@ import com.zipline.dto.CustomerRegisterRequestDTO;
 import com.zipline.dto.PageRequestDTO;
 import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO;
 import com.zipline.dto.contract.ContractListResponseDTO;
+import com.zipline.dto.counsel.CounselCreateRequestDTO;
 import com.zipline.dto.counsel.CounselListResponseDTO;
 import com.zipline.global.common.response.ApiResponse;
 import com.zipline.service.CustomerService;
+import com.zipline.service.counsel.CounselService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CustomerController {
 
 	private final CustomerService customerService;
+	private final CounselService counselService;
 
 	@GetMapping("/customers")
 	public ResponseEntity<ApiResponse<CustomerListResponseDTO>> getCustomers(PageRequestDTO pageRequestDTO,
@@ -105,5 +109,13 @@ public class CustomerController {
 		ApiResponse<Void> response = customerService.deleteCustomer(customerUid,
 			Long.parseLong(principal.getName()));
 		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@PostMapping("/customers/{customerUid}/counsels")
+	public ResponseEntity<ApiResponse<Map<String, Long>>> createCounsel(@PathVariable Long customerUid,
+		@Valid @RequestBody CounselCreateRequestDTO requestDTO, Principal principal) {
+		ApiResponse<Map<String, Long>> response = counselService.createCounsel(customerUid, requestDTO,
+			Long.parseLong(principal.getName()));
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 }

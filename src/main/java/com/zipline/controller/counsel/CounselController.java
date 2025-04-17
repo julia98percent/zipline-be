@@ -8,13 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zipline.dto.counsel.CounselCreateRequestDTO;
 import com.zipline.dto.counsel.CounselModifyRequestDTO;
 import com.zipline.dto.counsel.CounselResponseDTO;
 import com.zipline.global.common.response.ApiResponse;
@@ -29,14 +27,6 @@ import lombok.RequiredArgsConstructor;
 public class CounselController {
 
 	private final CounselService counselService;
-
-	@PostMapping("/customers/{customerUid}/counsels")
-	public ResponseEntity<ApiResponse<Map<String, Long>>> createCounsel(@PathVariable Long customerUid,
-		@Valid @RequestBody CounselCreateRequestDTO requestDTO, Principal principal) {
-		ApiResponse<Map<String, Long>> response = counselService.createCounsel(customerUid, requestDTO,
-			Long.parseLong(principal.getName()));
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
 
 	@GetMapping("/counsels/{counselUid}")
 	public ResponseEntity<ApiResponse<CounselResponseDTO>> getCounsel(@PathVariable Long counselUid,
