@@ -22,18 +22,18 @@ import lombok.extern.slf4j.Slf4j;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	@ExceptionHandler(JwtException.class)
-	public ResponseEntity<String> handleJwtException(JwtException e) {
-		log.error(e.getMessage(), e);
-		ErrorCode errorCode = JwtExceptionMessageToErrorCode(e.getMessage());
-		JSONObject jsonObject = ApiResponse.jsonOf(errorCode);
-
-		return ResponseEntity.status(errorCode.getHttpStatus())
-			.contentType(MediaType.APPLICATION_JSON)
-			.body(jsonObject.toJSONString());
-
-	}
-
+	// @ExceptionHandler(JwtException.class)
+	// public ResponseEntity<String> handleJwtException(JwtException e) {
+	// 	log.error(e.getMessage(), e);
+	// 	ErrorCode errorCode = JwtExceptionMessageToErrorCode(e.getMessage());
+	// 	JSONObject jsonObject = ApiResponse.jsonOf(errorCode);
+	//
+	// 	return ResponseEntity.status(errorCode.getHttpStatus())
+	// 		.contentType(MediaType.APPLICATION_JSON)
+	// 		.body(jsonObject.toJSONString());
+	//
+	// }
+	//
 	@ExceptionHandler(BaseException.class)
 	public ResponseEntity<ExceptionResponseDTO> handleException(BaseException e) {
 		log.error(e.getMessage(), e);

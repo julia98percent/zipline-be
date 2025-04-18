@@ -75,7 +75,7 @@ public class ProxyNaverRawArticleService {
     public void crawlAndSaveRawArticlesByLevel(int level) {
         log.info("[Thread-{}] === 프록시를 통한 레벨 {} 네이버 원본 매물 정보 수집 시작 ===", Thread.currentThread().getId(), level);
         try {
-            LocalDateTime cutoffDate = LocalDateTime.now().minusDays(7); // 일주일 전
+            LocalDateTime cutoffDate = LocalDateTime.now().minusDays(14); // 이주일 전
             log.info("[Thread-{}] 수집 기준일: {}", Thread.currentThread().getId(), cutoffDate);
             
             List<Region> regionsToUpdate = regionRepository.findRegionsNeedingUpdateForNaver(level, cutoffDate);

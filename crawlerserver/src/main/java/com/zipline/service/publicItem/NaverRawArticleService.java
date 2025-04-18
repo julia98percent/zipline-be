@@ -34,7 +34,7 @@ public class NaverRawArticleService {
     private final NaverRawArticleRepository naverRawArticleRepository;
 
     private static final String BASE_URL = "https://m.land.naver.com/cluster/ajax/articleList";
-    private static final int RECENT_DAYS = 2; // 최근 2일
+    private static final int RECENT_DAYS = 14; // 최근 2일
     private static final int ZOOM_LEVEL = 12; // 줌 레벨
 
     /**

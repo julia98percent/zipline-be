@@ -1,11 +1,15 @@
 dependencies {
     implementation project(':common')
     
-    // Rate Limiting
-    implementation 'com.bucket4j:bucket4j-core:8.10.1'
     
+    // 귀속된 프로젝트 의존성 추가
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.7.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
 }
 
 bootJar {

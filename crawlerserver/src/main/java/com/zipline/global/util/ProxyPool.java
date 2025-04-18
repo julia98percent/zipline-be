@@ -46,6 +46,12 @@ public class ProxyPool {
     @Value("${proxy.max-usage-count}")  // 최대 사용 횟수
     private int maxUsageCount;
     
+    @Value("${proxy.upload.dir:/app/config}")
+    private String uploadDir;
+    
+    @Value("${proxy.upload.file-name:proxy-list.txt}")
+    private String proxyList;
+
     @PostConstruct
     public void init() {
         try {
@@ -59,7 +65,7 @@ public class ProxyPool {
 
     private void loadProxies() {
         try {
-            Path filePath = Paths.get(System.getProperty("user.dir")).resolve("config/proxy-list.txt");
+            Path filePath = Paths.get(uploadDir).resolve(proxyList);
             List<String> lines = Files.lines(filePath)
                 .filter(line -> !line.trim().isEmpty())
                 .collect(Collectors.toList());
