@@ -62,7 +62,3 @@ jar {
     enabled = true
 }
 
-// Disable spring-boot-plugin in root project
-springBoot {
-    mainClass.set('com.zipline.ApiServerApplication')
-}
