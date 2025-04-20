@@ -6,11 +6,10 @@ apiserver/.classpath
 apiserver/.factorypath
 apiserver/.project
 apiserver/src/main/resources/app/config/proxy-list.txt
-apiserver/src/main/resources/application.yml
 apiserver/src/test/resources/application-test.yml
-config/proxy-list.txt
-config/settings.yml
 apiserver/.idea
 apiserver/.settings
 apiserver/bin
-crawlerserver/src/main/resources/application.yml
+.idea
+apiserver/controller/src/main/resources/application.yml
+crawlerserver/controller/src/main/resources/application.yml

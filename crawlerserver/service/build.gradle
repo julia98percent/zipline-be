@@ -1,0 +1,16 @@
+dependencies {
+    implementation project(':crawlerserver:infrastructure')
+    implementation project(':crawlerserver:domain')
+    implementation project(':crawlerserver:common')
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
