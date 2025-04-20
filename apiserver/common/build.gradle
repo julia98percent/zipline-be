@@ -15,7 +15,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     
     // OpenAPI Documentation
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
     
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
