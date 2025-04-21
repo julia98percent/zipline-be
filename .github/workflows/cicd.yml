@@ -89,7 +89,7 @@ jobs:
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver
             
             cat << 'EOF' > /tmp/apiserver-env-vars
-            PORT=${{ secrets.PORT_API }}
+            PORT_API=${{ secrets.PORT_API }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_NAME=${{ secrets.DB_NAME }}
             DB_URL=${{ secrets.DB_URL }}
@@ -116,7 +116,7 @@ jobs:
             EOF
             
             cat << 'EOF' > /tmp/crawlerserver-env-vars
-            PORT=${{ secrets.PORT_CRAWLER }}
+            PORT_CRAWLER=${{ secrets.PORT_CRAWLER }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_NAME=${{ secrets.DB_NAME }}
             DB_URL=${{ secrets.DB_URL }}
