@@ -84,7 +84,6 @@ jobs:
             sudo docker rm -f apiserver crawlerserver || true
             sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/apiserver ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver || true
             
-            # Pull new images
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/apiserver
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver
             
@@ -133,6 +132,10 @@ jobs:
             PROXY_RETRY_DELAY=${{ secrets.PROXY_RETRY_DELAY }}
             PROXY_VALIDATION_TIMEOUT=${{ secrets.PROXY_VALIDATION_TIMEOUT }}
             PROXY_VALIDATION_URL=${{ secrets.PROXY_VALIDATION_URL }}
+            PROXY_UPLOAD_DIR=${{ secrets.PROXY_UPLOAD_DIR }}
+            PROXY_UPLOAD_FILE_NAME=${{ secrets.PROXY_UPLOAD_FILE_NAME }}
+            PROXY_UPLOAD_MAX_FILE_SIZE=${{ secrets.PROXY_UPLOAD_MAX_FILE_SIZE }}
+            PROXY_UPLOAD_MAX_LINES=${{ secrets.PROXY_UPLOAD_MAX_LINES }}
             MAX_HTTP_TOMCAT_FORM_POST_SIZE=${{ secrets.MAX_HTTP_TOMCAT_FORM_POST_SIZE }}
             SPRING_PROFILES_ACTIVE=dev
             EOF
