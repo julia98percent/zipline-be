@@ -1,13 +1,12 @@
 FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
 
-COPY gradlew .
-COPY gradle gradle
-COPY settings.gradle .
-COPY build.gradle .
-COPY apiserver apiserver
-
-RUN chmod +x gradlew
+COPY gradle ./gradle
+COPY gradlew ./
+COPY settings.gradle ./
+COPY build.gradle ./
+COPY apiserver ./apiserver
+RUN chmod +x ./gradlew
 RUN ./gradlew apiserver:bootJar --no-daemon
 
 FROM eclipse-temurin:17-jre

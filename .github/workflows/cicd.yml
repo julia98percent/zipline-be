@@ -1,9 +1,11 @@
 name: Java CI/CD Pipeline
+
 on:
   push:
     branches: [ main, dev ]
   pull_request:
     branches: [ main, dev ]
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -52,13 +54,13 @@ jobs:
       
       # Build and Push API Server Docker Image
       - name: Docker Image Build - API Server
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/apiserver -f apiserver/Dockerfile ./apiserver
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/apiserver -f apiserver/Dockerfile .
       - name: DockerHub Push - API Server
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/apiserver
       
       # Build and Push Crawler Server Docker Image  
       - name: Docker Image Build - Crawler Server
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver -f crawlerserver/Dockerfile ./crawlerserver
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver -f crawlerserver/Dockerfile .
       - name: DockerHub Push - Crawler Server
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver
       
