@@ -22,7 +22,7 @@ spring:
       max-file-size: 10MB
       max-request-size: 100MB
 server:
-  port: ${PORT}
+  port: ${PORT_API}
   tomcat:
     max-http-form-post-size: ${MAX_HTTP_TOMCAT_FORM_POST_SIZE}
 jwt:
