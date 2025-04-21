@@ -11,7 +11,7 @@ import com.zipline.dto.contract.ContractResponseDTO;
 
 public interface ContractService {
 
-	ContractResponseDTO getContract(Long contratUid, Long userUid);
+	ContractResponseDTO getContract(Long contractUid, Long userUid);
 
 	ContractResponseDTO registerContract(ContractRequestDTO contractRequestDTO, List<MultipartFile> files,
 		Long userUid);
