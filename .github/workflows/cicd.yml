@@ -1,9 +1,9 @@
-name: CI/CD
+name: Java CI/CD Pipeline
 on:
   push:
-    branches: ["dev"]
+    branches: [ main, dev ]
   pull_request:
-    branches: ["dev"]
+    branches: [ main, dev ]
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -32,19 +32,37 @@ jobs:
         with:
           java-version: "17"
           distribution: "temurin"
-      - name: Grant execute permission for gradlew and build
+      - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Gradle clean build
-        run: ./gradlew clean build -x test
+      
+      # Build API Server
+      - name: Build API Server
+        run: ./gradlew apiserver:clean apiserver:build -x test
+      
+      # Build Crawler Server
+      - name: Build Crawler Server
+        run: ./gradlew crawlerserver:clean crawlerserver:build -x test
+      
+      # Login to DockerHub
       - name: DockerHub Login
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-      - name: Docker Image Build
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }} .
-      - name: DockerHub Push
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
+      
+      # Build and Push API Server Docker Image
+      - name: Docker Image Build - API Server
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/apiserver -f apiserver/Dockerfile ./apiserver
+      - name: DockerHub Push - API Server
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/apiserver
+      
+      # Build and Push Crawler Server Docker Image  
+      - name: Docker Image Build - Crawler Server
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver -f crawlerserver/Dockerfile ./crawlerserver
+      - name: DockerHub Push - Crawler Server
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver
+      
+      # Deploy to EC2
       - name: SSH Remote Commands
         uses: appleboy/ssh-action@master
         with:
@@ -53,14 +71,19 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             sudo yum update -y
-            sudo docker kill ${{ secrets.PROJECT_NAME }} || true
-            sudo docker rm -f ${{ secrets.PROJECT_NAME }} || true
-            sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }} || true
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
             
-            # 환경 파일 생성
-            cat << 'EOF' > /tmp/docker-env-vars
-            PORT=${{ secrets.PORT }}
+            # Stop and remove existing containers
+            sudo docker kill apiserver crawlerserver || true
+            sudo docker rm -f apiserver crawlerserver || true
+            sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/apiserver ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver || true
+            
+            # Pull new images
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/apiserver
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver
+            
+            # Create environment file for API Server
+            cat << 'EOF' > /tmp/apiserver-env-vars
+            PORT=${{ secrets.API_PORT }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_NAME=${{ secrets.DB_NAME }}
             DB_URL=${{ secrets.DB_URL }}
@@ -76,6 +99,23 @@ jobs:
             FILE_ALLOWED_MEME_TYPES=${{ secrets.FILE_ALLOWED_MEME_TYPES }}
             JWT_ACC_EXPIRATION=${{ secrets.JWT_ACC_EXPIRATION }}
             JWT_REF_EXPIRATION=${{ secrets.JWT_REF_EXPIRATION }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            REDIS_URL=${{ secrets.REDIS_URL }}
+            SMS_API_KEY=${{ secrets.SMS_API_KEY }}
+            SMS_AUTH_KEY=${{ secrets.SMS_AUTH_KEY }}
+            SMS_SEC_KEY=${{ secrets.SMS_SEC_KEY }}
+            SURVEY_DELIMITER=${{ secrets.SURVEY_DELIMITER }}
+            SPRING_PROFILES_ACTIVE=dev
+            EOF
+            
+            # Create environment file for Crawler Server
+            cat << 'EOF' > /tmp/crawlerserver-env-vars
+            PORT=${{ secrets.CRAWLER_PORT }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_URL=${{ secrets.DB_URL }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             MAX_USAGE_COUNT=${{ secrets.MAX_USAGE_COUNT }}
             MIN_ROATION_INTERVAL=${{ secrets.MIN_ROATION_INTERVAL }}
             PROXY_CLEANUP_INTERVAL=${{ secrets.PROXY_CLEANUP_INTERVAL }}
@@ -87,20 +127,20 @@ jobs:
             PROXY_RETRY_DELAY=${{ secrets.PROXY_RETRY_DELAY }}
             PROXY_VALIDATION_TIMEOUT=${{ secrets.PROXY_VALIDATION_TIMEOUT }}
             PROXY_VALIDATION_URL=${{ secrets.PROXY_VALIDATION_URL }}
-            REDIS_PORT=${{ secrets.REDIS_PORT }}
-            REDIS_URL=${{ secrets.REDIS_URL }}
-            SMS_API_KEY=${{ secrets.SMS_API_KEY }}
-            SMS_AUTH_KEY=${{ secrets.SMS_AUTH_KEY }}
-            SMS_SEC_KEY=${{ secrets.SMS_SEC_KEY }}
-            SURVEY_DELIMITER=${{ secrets.SURVEY_DELIMITER }}
             SPRING_PROFILES_ACTIVE=dev
             EOF
             
-            #환경 파일로 도커 실행 
-            sudo docker run -d -p ${{ secrets.PORT }}:${{ secrets.PORT }} \
-            --name ${{ secrets.PROJECT_NAME }} \
-            --env-file /tmp/docker-env-vars \
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
+            # Run API Server
+            sudo docker run -d -p ${{ secrets.API_PORT }}:${{ secrets.API_PORT }} \
+            --name apiserver \
+            --env-file /tmp/apiserver-env-vars \
+            ${{ secrets.DOCKERHUB_USERNAME }}/apiserver
             
-            # Clean up the environment file
-            rm /tmp/docker-env-vars
+            # Run Crawler Server  
+            sudo docker run -d -p ${{ secrets.CRAWLER_PORT }}:${{ secrets.CRAWLER_PORT }} \
+            --name crawlerserver \
+            --env-file /tmp/crawlerserver-env-vars \
+            ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver
+            
+            # Clean up environment files
+            rm /tmp/apiserver-env-vars /tmp/crawlerserver-env-vars

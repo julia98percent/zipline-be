@@ -1,0 +1,55 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://${DB_URL}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+        format_sql: true
+  data:
+    redis:
+      host: ${REDIS_URL}
+      port: ${REDIS_PORT}
+      type: SOCKS4
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+server:
+  port: ${PORT}
+  tomcat:
+    max-http-form-post-size: ${MAX_HTTP_TOMCAT_FORM_POST_SIZE}
+jwt:
+  secret: ${JWT_SECRET}
+  accessToken:
+    expiration: ${JWT_ACC_EXPIRATION}
+  refreshToken:
+    expiration: ${JWT_REF_EXPIRATION}
+aws:
+  region: ${AWS_REGION}
+  credentials:
+    access-key: ${AWS_ACC_KEY}
+    secret-key: ${AWS_SEC_KEY}
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+sms:
+  api-key: ${SMS_API_KEY}
+  secret-key: ${SMS_SEC_KEY}
+  auth-method: ${SMS_AUTH_KEY}
+cloud:
+  aws:
+    stack:
+      auto: ${AWS_STACK_VAL}
+survey:
+  questionUid-delimiter: ${SURVEY_DELIMITER}
+file:
+  allowed-mime-types: ${FILE_ALLOWED_MEME_TYPES} 
+

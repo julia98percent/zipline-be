@@ -1,0 +1,24 @@
+dependencies {
+    implementation project(':crawlerserver:domain')
+    implementation project(':crawlerserver:service')
+    implementation project(':crawlerserver:controller')
+    implementation project(':crawlerserver:infrastructure')
+    implementation project(':crawlerserver:common')
+
+    
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.7.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+bootJar {
+    enabled = true
+    archiveFileName = 'crawler.jar'
+    mainClass.set('com.zipline.CrawlerServerApplication')
+}
+
+springBoot {
+    mainClass.set('com.zipline.CrawlerServerApplication')
+}

@@ -1,0 +1,75 @@
+plugins {
+    id 'java-library'
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencies {
+    // Spring Boot Core
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    
+    // OpenAPI Documentation
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+    
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    
+    // QueryDSL
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    
+    // Jakarta Persistence
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    
+    // AWS SDK
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.429'
+    
+    // Spring WebFlux
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    
+    // Apache Tika
+    implementation 'org.apache.tika:tika-core:2.9.3'
+    
+    // JSON Smart for JSONObject
+    implementation 'net.minidev:json-smart:2.5.0'
+}
+    
+
+tasks.named('bootJar') {
+    enabled = false
+}
+
+tasks.named('jar') {
+    enabled = true
+}
+
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+def querydslDir = "build/generated/querydsl"
+
+tasks.withType(JavaCompile) {
+    options.generatedSourceOutputDirectory = file(querydslDir)
+}
+
+clean {
+    delete file(querydslDir)
+}

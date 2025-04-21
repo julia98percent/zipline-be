@@ -1,0 +1,23 @@
+dependencies {
+    implementation project(':apiserver:domain')
+    implementation project(':apiserver:service')
+    implementation project(':apiserver:controller')
+    implementation project(':apiserver:infrastructure')
+    
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.7.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+bootJar {
+    enabled = true
+    archiveFileName = 'api.jar'
+    mainClass.set('com.zipline.ApiServerApplication')
+}
+
+springBoot {
+    mainClass.set('com.zipline.ApiServerApplication')
+}
+
