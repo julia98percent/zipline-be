@@ -3,13 +3,19 @@ package com.zipline.controller.counsel;
 import java.security.Principal;
 import java.util.Map;
 
-import com.zipline.global.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.zipline.dto.counsel.CounselModifyRequestDTO;
 import com.zipline.dto.counsel.CounselResponseDTO;
+import com.zipline.global.response.ApiResponse;
 import com.zipline.service.counsel.CounselService;
 
 import jakarta.validation.Valid;

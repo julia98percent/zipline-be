@@ -1,14 +1,9 @@
-package com.zipline.service;
+package com.zipline.service.user;
 
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 
-import com.zipline.entity.survey.Survey;
-import com.zipline.entity.user.Authority;
-import com.zipline.global.jwt.dto.TokenRequestDTO;
-import com.zipline.repository.survey.SurveyRepository;
-import com.zipline.service.survey.SurveyService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,11 +16,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.zipline.dto.UserRequestDTO;
 import com.zipline.dto.UserResponseDTO;
+import com.zipline.entity.survey.Survey;
+import com.zipline.entity.user.Authority;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.jwt.ErrorCode;
 import com.zipline.global.jwt.TokenProvider;
+import com.zipline.global.jwt.dto.TokenRequestDTO;
 import com.zipline.repository.UserRepository;
+import com.zipline.repository.survey.SurveyRepository;
+import com.zipline.service.survey.SurveyService;
 
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final SurveyRepository surveyRepository;

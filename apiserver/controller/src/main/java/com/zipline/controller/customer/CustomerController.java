@@ -4,9 +4,6 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
-import com.zipline.global.response.ApiResponse;
-import com.zipline.service.CustomerService;
-import com.zipline.service.counsel.CounselService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,6 +24,9 @@ import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO;
 import com.zipline.dto.contract.ContractListResponseDTO;
 import com.zipline.dto.counsel.CounselCreateRequestDTO;
 import com.zipline.dto.counsel.CounselListResponseDTO;
+import com.zipline.global.response.ApiResponse;
+import com.zipline.service.counsel.CounselService;
+import com.zipline.service.customer.CustomerService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,7 @@ public class CustomerController {
 
 	@GetMapping("/customers")
 	public ResponseEntity<ApiResponse<CustomerListResponseDTO>> getCustomers(PageRequestDTO pageRequestDTO,
-																			 Principal principal) {
+		Principal principal) {
 		ApiResponse<CustomerListResponseDTO> response = customerService.getCustomers(pageRequestDTO,
 			Long.parseLong(principal.getName()));
 		return ResponseEntity.status(HttpStatus.OK).body(response);

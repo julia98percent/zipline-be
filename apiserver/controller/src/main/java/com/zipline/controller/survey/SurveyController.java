@@ -4,9 +4,6 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
-import com.zipline.dto.survey.*;
-import com.zipline.global.response.ApiResponse;
-import com.zipline.service.survey.SurveyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.zipline.dto.PageRequestDTO;
+import com.zipline.dto.survey.SurveyCreateRequestDTO;
+import com.zipline.dto.survey.SurveyResponseDTO;
+import com.zipline.dto.survey.SurveyResponseDetailDTO;
+import com.zipline.dto.survey.SurveyResponseListDTO;
+import com.zipline.dto.survey.SurveySubmitRequestDTO;
+import com.zipline.global.response.ApiResponse;
+import com.zipline.service.survey.SurveyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -56,7 +60,7 @@ public class SurveyController {
 	@Operation(summary = "제출된 설문 결과 조회", description = "제출된 설문 결과를 조회합니다.")
 	@GetMapping("/surveys/responses/{surveyResponseUid}")
 	public ResponseEntity<ApiResponse<SurveyResponseDetailDTO>> getSubmittedSurvey(@PathVariable Long surveyResponseUid,
-																				   Principal principal) {
+		Principal principal) {
 		ApiResponse<SurveyResponseDetailDTO> response = surveyService.getSubmittedSurvey(surveyResponseUid,
 			Long.parseLong(principal.getName()));
 		return ResponseEntity.status(HttpStatus.OK).body(response);

@@ -3,8 +3,6 @@ package com.zipline.controller.user;
 import java.security.Principal;
 import java.time.Duration;
 
-import com.zipline.global.jwt.dto.TokenRequestDTO;
-import com.zipline.global.response.ApiResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -23,11 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.zipline.dto.TokenResponseDTO;
 import com.zipline.dto.UserRequestDTO;
 import com.zipline.dto.UserResponseDTO;
-import com.zipline.service.UserService;
+import com.zipline.global.jwt.dto.TokenRequestDTO;
+import com.zipline.global.response.ApiResponse;
+import com.zipline.service.user.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-
 
 @RestController
 @RequestMapping("/api/users")
@@ -53,26 +52,26 @@ public class UserController {
 
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<TokenResponseDTO>> login(
-			@RequestBody UserRequestDTO userRequestDto,
-			HttpServletResponse response) {
+		@RequestBody UserRequestDTO userRequestDto,
+		HttpServletResponse response) {
 
 		TokenRequestDTO tokenRequestDto = userService.login(userRequestDto); // 로그인 & 토큰 발급
 
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenRequestDto.getRefreshToken())
-				.httpOnly(true)
-				.secure(false)  //https에서만 전송하려면 true로 전환
-				.path("/")
-				.maxAge(Duration.ofDays(7))
-				.sameSite("Strict")
-				.build();
+			.httpOnly(true)
+			.secure(false)  //https에서만 전송하려면 true로 전환
+			.path("/")
+			.maxAge(Duration.ofDays(7))
+			.sameSite("Strict")
+			.build();
 
 		response.setHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
 		TokenResponseDTO tokenResponseDto = TokenResponseDTO.builder()
-				.uid(tokenRequestDto.getUid())
-				.grantType(tokenRequestDto.getGrantType())
-				.accessToken(tokenRequestDto.getAccessToken())
-				.build();
+			.uid(tokenRequestDto.getUid())
+			.grantType(tokenRequestDto.getGrantType())
+			.accessToken(tokenRequestDto.getAccessToken())
+			.build();
 
 		ApiResponse<TokenResponseDTO> responseBody = ApiResponse.ok("로그인 성공", tokenResponseDto);
 		return ResponseEntity.ok(responseBody);
@@ -80,21 +79,21 @@ public class UserController {
 
 	@PatchMapping("/logout")
 	public ResponseEntity<ApiResponse<Void>> logout(
-			@AuthenticationPrincipal UserDetails userDetails,
-			@RequestHeader("Authorization") String authorizationHeader,
-			HttpServletResponse response
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestHeader("Authorization") String authorizationHeader,
+		HttpServletResponse response
 	) {
 		Long uid = Long.parseLong(userDetails.getUsername());
 		String accessToken = authorizationHeader.replace("Bearer ", "");
 		userService.logout(uid, accessToken);
 
 		ResponseCookie expiredCookie = ResponseCookie.from("refreshToken", "")
-				.httpOnly(true)
-				.secure(false)  //https에서만 전송하려면 true로 전환
-				.path("/")
-				.maxAge(0) // 즉시 만료
-				.sameSite("Strict")
-				.build();
+			.httpOnly(true)
+			.secure(false)  //https에서만 전송하려면 true로 전환
+			.path("/")
+			.maxAge(0) // 즉시 만료
+			.sameSite("Strict")
+			.build();
 		response.setHeader(HttpHeaders.SET_COOKIE, expiredCookie.toString());
 
 		ApiResponse<Void> responseBody = ApiResponse.ok("로그아웃 성공");
@@ -103,8 +102,8 @@ public class UserController {
 
 	@PatchMapping("/update-info")
 	public ResponseEntity<ApiResponse<UserResponseDTO>> updateInfo(
-			@RequestBody UserRequestDTO userRequestDto,
-			Principal principal) {
+		@RequestBody UserRequestDTO userRequestDto,
+		Principal principal) {
 		Long uid = Long.parseLong(principal.getName());
 		UserResponseDTO updatedInfo = userService.updateInfo(uid, userRequestDto);
 
@@ -117,18 +116,18 @@ public class UserController {
 		TokenRequestDTO tokenRequestDto = userService.reissue(refreshToken);
 
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenRequestDto.getRefreshToken())
-				.httpOnly(true)
-				.secure(false)
-				.path("/")
-				.maxAge(Duration.ofDays(7))
-				.sameSite("Strict")
-				.build();
+			.httpOnly(true)
+			.secure(false)
+			.path("/")
+			.maxAge(Duration.ofDays(7))
+			.sameSite("Strict")
+			.build();
 
 		TokenResponseDTO tokenResponseDto = TokenResponseDTO.builder()
-				.uid(tokenRequestDto.getUid())
-				.grantType(tokenRequestDto.getGrantType())
-				.accessToken(tokenRequestDto.getAccessToken())
-				.build();
+			.uid(tokenRequestDto.getUid())
+			.grantType(tokenRequestDto.getGrantType())
+			.accessToken(tokenRequestDto.getAccessToken())
+			.build();
 
 		ApiResponse<TokenResponseDTO> response = ApiResponse.ok("AccessToken 재발급 성공", tokenResponseDto);
 		return ResponseEntity.ok(response);
