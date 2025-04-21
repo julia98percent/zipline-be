@@ -89,7 +89,7 @@ jobs:
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver
             
             cat << 'EOF' > /tmp/apiserver-env-vars
-            PORT=${{ secrets.API_PORT }}
+            PORT=${{ secrets.PORT_API }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_NAME=${{ secrets.DB_NAME }}
             DB_URL=${{ secrets.DB_URL }}
@@ -111,11 +111,12 @@ jobs:
             SMS_AUTH_KEY=${{ secrets.SMS_AUTH_KEY }}
             SMS_SEC_KEY=${{ secrets.SMS_SEC_KEY }}
             SURVEY_DELIMITER=${{ secrets.SURVEY_DELIMITER }}
+            MAX_HTTP_TOMCAT_FORM_POST_SIZE=${{ secrets.MAX_HTTP_TOMCAT_FORM_POST_SIZE }}
             SPRING_PROFILES_ACTIVE=dev
             EOF
             
             cat << 'EOF' > /tmp/crawlerserver-env-vars
-            PORT=${{ secrets.CRAWLER_PORT }}
+            PORT=${{ secrets.PORT_CRAWLER }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_NAME=${{ secrets.DB_NAME }}
             DB_URL=${{ secrets.DB_URL }}
@@ -132,17 +133,18 @@ jobs:
             PROXY_RETRY_DELAY=${{ secrets.PROXY_RETRY_DELAY }}
             PROXY_VALIDATION_TIMEOUT=${{ secrets.PROXY_VALIDATION_TIMEOUT }}
             PROXY_VALIDATION_URL=${{ secrets.PROXY_VALIDATION_URL }}
+            MAX_HTTP_TOMCAT_FORM_POST_SIZE=${{ secrets.MAX_HTTP_TOMCAT_FORM_POST_SIZE }}
             SPRING_PROFILES_ACTIVE=dev
             EOF
             
             echo "Starting API Server..."
-            sudo docker run -d -p ${{ secrets.API_PORT }}:${{ secrets.API_PORT }} \
+            sudo docker run -d -p ${{ secrets.PORT_API }}:${{ secrets.PORT_API }} \
             --name apiserver \
             --env-file /tmp/apiserver-env-vars \
             ${{ secrets.DOCKERHUB_USERNAME }}/apiserver
             
             echo "Starting Crawler Server..."
-            sudo docker run -d -p ${{ secrets.CRAWLER_PORT }}:${{ secrets.CRAWLER_PORT }} \
+            sudo docker run -d -p ${{ secrets.PORT_CRAWLER }}:${{ secrets.PORT_CRAWLER }} \
             --name crawlerserver \
             --env-file /tmp/crawlerserver-env-vars \
             ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver
