@@ -1,9 +1,13 @@
 FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
 
-COPY . .
+COPY gradlew .
+COPY gradle gradle
+COPY settings.gradle .
+COPY build.gradle .
+COPY crawlerserver crawlerserver
 
-RUN chmod +x ./gradlew
+RUN chmod +x gradlew
 RUN ./gradlew crawlerserver:bootJar --no-daemon
 
 FROM eclipse-temurin:17-jre
@@ -14,4 +18,4 @@ COPY --from=build /app/crawlerserver/build/libs/*.jar app.jar
 ENV SPRING_CONFIG_NAME=application-dev
 EXPOSE 8081
 
-ENTRYPOINT ["java", "-jar", "app.jar"]", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
