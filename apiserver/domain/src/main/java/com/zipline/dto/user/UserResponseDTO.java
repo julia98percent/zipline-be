@@ -1,9 +1,10 @@
-package com.zipline.dto;
+package com.zipline.dto.user;
 
 import java.time.LocalDateTime;
 
 import com.zipline.entity.survey.Survey;
 import com.zipline.entity.user.User;
+
 import lombok.Builder;
 import lombok.Getter;
 

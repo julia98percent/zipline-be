@@ -1,4 +1,4 @@
-package com.zipline.dto;
+package com.zipline.dto.user;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
