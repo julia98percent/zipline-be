@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/messages")
 public class MessageController {
@@ -19,16 +21,14 @@ public class MessageController {
     this.messageService = messageService;
   }
 
-    return messageService.sendMessage(requestBody)
-        .map(ResponseEntity::ok)
-        .onErrorResume(e -> {
-          System.err.println("Error occurred while sending message: " + e.getMessage());
-
-          // 에러 발생 시 처리
-          return Mono.just(
-              ResponseEntity.status(500).body(e.toString()));
-        });
   @PostMapping("")
   public ResponseEntity<String> sendMessage(@RequestBody List<SendMessageRequestDTO> request) {
+    try {
+      String result = messageService.sendMessage(request);
+      return ResponseEntity.ok(result);
+    } catch (Exception e) {
+      log.error("Error occurred while sending message: {}", e.getMessage());
+      return ResponseEntity.status(500).body(e.toString());
+    }
   }
 }
