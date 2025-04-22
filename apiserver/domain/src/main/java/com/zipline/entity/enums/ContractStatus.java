@@ -1,7 +1,23 @@
 package com.zipline.entity.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum ContractStatus {
-	PENDING,    //계약 전
-	ACTIVE,     //계약 진행중
-	EXPIRED     //계약 만료
+	LISTED("매물 등록됨"),
+	NEGOTIATING("협상 중"),
+	INTENT_SIGNED("가계약"),
+	CANCELLED("계약 취소"),
+	CONTRACTED("계약 체결"),
+	IN_PROGRESS("계약 진행 중"),
+	PAID_COMPLETE("잔금 지급 완료"),
+	REGISTERED("등기 완료"),
+	MOVED_IN("입주 완료"),
+	TERMINATED("계약 해지");
+
+	private final String description;
+
+	ContractStatus(String description) {
+		this.description = description;
+	}
 }
