@@ -187,6 +187,6 @@ public class UserServiceImpl implements UserService {
 			findUserIdRequestDto.getEmail()
 		).orElseThrow(() -> new UserNotFoundException("일치하는 사용자가 없습니다.", HttpStatus.BAD_REQUEST));
 
-		return FindUserIdResponseDTO.findId(user);
+		return new FindUserIdResponseDTO(user.getId());
 	}
 }
