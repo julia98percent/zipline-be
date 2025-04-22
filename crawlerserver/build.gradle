@@ -4,6 +4,7 @@ dependencies {
     implementation project(':crawlerserver:controller')
     implementation project(':crawlerserver:infrastructure')
     implementation project(':common:crawler')
+    implementation project(':common:shared')
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
 
