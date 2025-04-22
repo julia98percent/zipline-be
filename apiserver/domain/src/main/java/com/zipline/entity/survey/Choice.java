@@ -1,5 +1,6 @@
 package com.zipline.entity.survey;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +22,8 @@ public class Choice {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long uid;
+
+	@Column(name = "text", length = 30, nullable = false)
 	private String text;
 
 	@ManyToOne(fetch = FetchType.LAZY)

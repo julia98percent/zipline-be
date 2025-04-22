@@ -1,5 +1,6 @@
 package com.zipline.entity.survey;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 public class SurveyAnswer {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "uid", nullable = false)
 	private Long uid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -29,11 +31,16 @@ public class SurveyAnswer {
 	@JoinColumn(name = "question_uid")
 	private Question question;
 
+	@Column(name = "answer")
 	private String answer;
 
-	public SurveyAnswer(SurveyResponse surveyResponse, Question question, String answer) {
+	@Column(name = "file_name")
+	private String fileName;
+
+	public SurveyAnswer(SurveyResponse surveyResponse, Question question, String answer, String fileName) {
 		this.surveyResponse = surveyResponse;
 		this.question = question;
 		this.answer = answer;
+		this.fileName = fileName;
 	}
 }

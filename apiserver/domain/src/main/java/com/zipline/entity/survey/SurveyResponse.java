@@ -3,6 +3,8 @@ package com.zipline.entity.survey;
 import java.time.LocalDateTime;
 
 import com.zipline.entity.customer.Customer;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -23,6 +25,7 @@ public class SurveyResponse {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "uid", nullable = false)
 	private Long uid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -33,6 +36,7 @@ public class SurveyResponse {
 	@JoinColumn(name = "customer_uid")
 	private Customer customer;
 
+	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
 
 	public SurveyResponse(Survey survey, Customer customer, LocalDateTime createdAt) {
