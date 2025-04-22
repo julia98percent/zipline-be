@@ -2,12 +2,6 @@ package com.zipline.controller.agentProperty;
 
 import java.security.Principal;
 
-import com.zipline.dto.PageRequestDTO;
-import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO;
-import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
-import com.zipline.dto.agentProperty.AgentPropertyResponseDTO;
-import com.zipline.global.response.ApiResponse;
-import com.zipline.service.agentProperty.AgentPropertyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zipline.dto.PageRequestDTO;
+import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO;
+import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
+import com.zipline.dto.agentProperty.AgentPropertyResponseDTO;
+import com.zipline.global.response.ApiResponse;
+import com.zipline.service.agentProperty.AgentPropertyService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,15 +29,17 @@ public class AgentPropertyController {
 	private final AgentPropertyService agentPropertyService;
 
 	@GetMapping("/{propertyUid}")
-	public ResponseEntity<ApiResponse<AgentPropertyResponseDTO>> getProperty(@PathVariable Long propertyUid, Principal principal) {
-		AgentPropertyResponseDTO propertyResponseDTO = agentPropertyService.getProperty(propertyUid, Long.parseLong(principal.getName()));
+	public ResponseEntity<ApiResponse<AgentPropertyResponseDTO>> getProperty(@PathVariable Long propertyUid,
+		Principal principal) {
+		AgentPropertyResponseDTO propertyResponseDTO = agentPropertyService.getProperty(propertyUid,
+			Long.parseLong(principal.getName()));
 		ApiResponse<AgentPropertyResponseDTO> response = ApiResponse.ok("매물 상세 조회 성공", propertyResponseDTO);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	@PostMapping("")
 	public ResponseEntity<ApiResponse<Void>> registerProperty(
-			@RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, Principal principal) {
+		@RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, Principal principal) {
 		agentPropertyService.registerProperty(agentPropertyRequestDTO, Long.parseLong(principal.getName()));
 		ApiResponse<Void> response = ApiResponse.create("매물 등록 성공");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -47,7 +49,8 @@ public class AgentPropertyController {
 	public ResponseEntity<ApiResponse<AgentPropertyResponseDTO>> modifyProperty(
 		@RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, @PathVariable Long propertyUid,
 		Principal principal) {
-		AgentPropertyResponseDTO propertyResponseDTO = agentPropertyService.modifyProperty(agentPropertyRequestDTO, propertyUid, Long.parseLong(principal.getName()));
+		AgentPropertyResponseDTO propertyResponseDTO = agentPropertyService.modifyProperty(agentPropertyRequestDTO,
+			propertyUid, Long.parseLong(principal.getName()));
 		ApiResponse<AgentPropertyResponseDTO> response = ApiResponse.ok("매물 정보 수정 성공", propertyResponseDTO);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
@@ -64,7 +67,7 @@ public class AgentPropertyController {
 
 	@GetMapping("")
 	public ResponseEntity<ApiResponse<AgentPropertyListResponseDTO>> getPropertyList(PageRequestDTO pageRequestDTO,
-																					 Principal principal) {
+		Principal principal) {
 		AgentPropertyListResponseDTO propertyListResponseDTO = agentPropertyService.getAgentPropertyList(pageRequestDTO,
 			Long.parseLong(
 				principal.getName()));
