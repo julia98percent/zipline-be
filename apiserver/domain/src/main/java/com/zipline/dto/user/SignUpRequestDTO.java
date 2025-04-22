@@ -10,7 +10,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SignUpRequestDto {
+public class SignUpRequestDTO {
 	@Schema(description = "로그인 ID", example = "Agent123")
 	@NotBlank(message = "아이디는 필수 입력값입니다.")
 	@Size(min = 4, max = 12, message = "아이디는 4자 이상 12자 이하로 입력해주세요.")

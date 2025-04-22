@@ -3,7 +3,7 @@ package com.zipline.service.user;
 import com.zipline.dto.user.FindUserIdRequestDTO;
 import com.zipline.dto.user.FindUserIdResponseDTO;
 import com.zipline.dto.user.LoginRequestDTO;
-import com.zipline.dto.user.SignUpRequestDto;
+import com.zipline.dto.user.SignUpRequestDTO;
 import com.zipline.dto.user.UserModifyRequestDTO;
 import com.zipline.dto.user.UserResponseDTO;
 import com.zipline.global.jwt.dto.TokenRequestDTO;
@@ -12,7 +12,7 @@ public interface UserService {
 
 	UserResponseDTO findById(Long uid);
 
-	void signup(SignUpRequestDto signUpRequestDto);
+	void signup(SignUpRequestDTO signUpRequestDto);
 
 	TokenRequestDTO login(LoginRequestDTO loginRequestDTO);
 

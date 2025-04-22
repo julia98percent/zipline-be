@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.zipline.dto.user.FindUserIdRequestDTO;
 import com.zipline.dto.user.FindUserIdResponseDTO;
 import com.zipline.dto.user.LoginRequestDTO;
-import com.zipline.dto.user.SignUpRequestDto;
+import com.zipline.dto.user.SignUpRequestDTO;
 import com.zipline.dto.user.UserModifyRequestDTO;
 import com.zipline.dto.user.UserResponseDTO;
 import com.zipline.entity.survey.Survey;
@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Transactional
-	public void signup(SignUpRequestDto signUpRequestDto) {
+	public void signup(SignUpRequestDTO signUpRequestDto) {
 
 		if (!signUpRequestDto.getPassword().equals(signUpRequestDto.getPasswordCheck())) {
 			throw new UserNotFoundException("비밀번호와 비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);

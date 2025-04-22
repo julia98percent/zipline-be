@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.zipline.dto.user.FindUserIdRequestDTO;
 import com.zipline.dto.user.FindUserIdResponseDTO;
 import com.zipline.dto.user.LoginRequestDTO;
-import com.zipline.dto.user.SignUpRequestDto;
+import com.zipline.dto.user.SignUpRequestDTO;
 import com.zipline.dto.user.TokenResponseDTO;
 import com.zipline.dto.user.UserModifyRequestDTO;
 import com.zipline.dto.user.UserResponseDTO;
@@ -49,7 +49,7 @@ public class UserController {
 	}
 
 	@PostMapping("/signup")
-	public ResponseEntity<ApiResponse<Void>> signup(@RequestBody SignUpRequestDto signUpRequestDto) {
+	public ResponseEntity<ApiResponse<Void>> signup(@RequestBody SignUpRequestDTO signUpRequestDto) {
 		userService.signup(signUpRequestDto);
 		ApiResponse<Void> response = ApiResponse.create("회원가입 성공");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
