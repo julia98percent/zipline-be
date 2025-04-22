@@ -11,13 +11,13 @@ import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Service
-public class MessageServiceImpl implements MessageService{
+public class MessageServiceImpl implements MessageService {
 
   private final WebClient webClient;
   private final SmsSignatureGenerator signatureFactory;
 
+  public String sendMessage(List<SendMessageRequestDTO> request) {
 
-  public Mono<String> sendMessage(SendMessageRequestDTO[] request) {
 
     Map<String, Object> wrappedRequest = Map.of("messages", request);
 

@@ -1,9 +1,8 @@
 package com.zipline.service.message;
 
 import com.zipline.dto.message.SendMessageRequestDTO;
-import reactor.core.publisher.Mono;
+import java.util.List;
 
 public interface MessageService {
-
-  Mono<String> sendMessage(SendMessageRequestDTO[] request);
+  String sendMessage(List<SendMessageRequestDTO> request);
 }

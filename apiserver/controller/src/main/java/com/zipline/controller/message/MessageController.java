@@ -2,12 +2,12 @@ package com.zipline.controller.message;
 
 import com.zipline.dto.message.SendMessageRequestDTO;
 import com.zipline.service.message.MessageService;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/v1/messages")
@@ -19,10 +19,6 @@ public class MessageController {
     this.messageService = messageService;
   }
 
-  @PostMapping("/")
-  public Mono<ResponseEntity<String>> sendMessage(
-      @RequestBody SendMessageRequestDTO[] requestBody) {
-
     return messageService.sendMessage(requestBody)
         .map(ResponseEntity::ok)
         .onErrorResume(e -> {
@@ -32,5 +28,7 @@ public class MessageController {
           return Mono.just(
               ResponseEntity.status(500).body(e.toString()));
         });
+  @PostMapping("")
+  public ResponseEntity<String> sendMessage(@RequestBody List<SendMessageRequestDTO> request) {
   }
 }
