@@ -1,6 +1,6 @@
 package com.zipline.entity.user;
 
-import com.zipline.dto.UserRequestDTO;
+import com.zipline.dto.user.UserRequestDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,4 +1,4 @@
-package com.zipline.dto;
+package com.zipline.dto.user;
 
 import lombok.Builder;
 import lombok.Getter;

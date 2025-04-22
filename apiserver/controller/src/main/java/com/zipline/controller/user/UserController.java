@@ -18,14 +18,17 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zipline.dto.TokenResponseDTO;
-import com.zipline.dto.UserRequestDTO;
-import com.zipline.dto.UserResponseDTO;
+import com.zipline.dto.user.FindUserIdRequestDTO;
+import com.zipline.dto.user.FindUserIdResponseDTO;
+import com.zipline.dto.user.TokenResponseDTO;
+import com.zipline.dto.user.UserRequestDTO;
+import com.zipline.dto.user.UserResponseDTO;
 import com.zipline.global.jwt.dto.TokenRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.user.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -108,6 +111,14 @@ public class UserController {
 		UserResponseDTO updatedInfo = userService.updateInfo(uid, userRequestDto);
 
 		ApiResponse<UserResponseDTO> response = ApiResponse.ok("회원 정보 수정 완료", updatedInfo);
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/find-id")
+	public ResponseEntity<ApiResponse<FindUserIdResponseDTO>> findUserId(
+		@RequestBody @Valid FindUserIdRequestDTO findUserIdRequestDto) {
+		FindUserIdResponseDTO findUserId = userService.findUserId(findUserIdRequestDto);
+		ApiResponse<FindUserIdResponseDTO> response = ApiResponse.create("아이디 찾기 성공", findUserId);
 		return ResponseEntity.ok(response);
 	}
 

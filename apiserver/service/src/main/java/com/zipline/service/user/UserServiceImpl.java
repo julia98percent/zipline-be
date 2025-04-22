@@ -14,8 +14,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zipline.dto.UserRequestDTO;
-import com.zipline.dto.UserResponseDTO;
+import com.zipline.dto.user.FindUserIdRequestDTO;
+import com.zipline.dto.user.FindUserIdResponseDTO;
+import com.zipline.dto.user.UserRequestDTO;
+import com.zipline.dto.user.UserResponseDTO;
 import com.zipline.entity.survey.Survey;
 import com.zipline.entity.user.Authority;
 import com.zipline.entity.user.User;
@@ -83,7 +85,6 @@ public class UserServiceImpl implements UserService {
 
 	@Transactional
 	public TokenRequestDTO login(UserRequestDTO userRequestDto) {
-
 		// 0. 입력값 null 체크
 		if (userRequestDto.getId().isBlank() || userRequestDto.getPassword().isBlank()) {
 			throw new UserNotFoundException("아이디와 비밀번호를 모두 입력해주세요.", HttpStatus.BAD_REQUEST);
@@ -179,4 +180,13 @@ public class UserServiceImpl implements UserService {
 		return tokenRequestDto;
 	}
 
+	@Transactional(readOnly = true)
+	public FindUserIdResponseDTO findUserId(FindUserIdRequestDTO findUserIdRequestDto) {
+		User user = userRepository.findByNameAndEmail(
+			findUserIdRequestDto.getName(),
+			findUserIdRequestDto.getEmail()
+		).orElseThrow(() -> new UserNotFoundException("일치하는 사용자가 없습니다.", HttpStatus.BAD_REQUEST));
+
+		return new FindUserIdResponseDTO(user.getId());
+	}
 }
