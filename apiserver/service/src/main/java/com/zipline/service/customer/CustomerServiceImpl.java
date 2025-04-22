@@ -49,8 +49,7 @@ public class CustomerServiceImpl implements CustomerService {
 	public ApiResponse<Void> registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUID) {
 		User loginedUser = userRepository.findById(userUID)
 			.orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-		Customer customer = customerRegisterRequestDTO.toEntity(loginedUser, false, LocalDateTime.now(),
-			null, null);
+		Customer customer = customerRegisterRequestDTO.toEntity(loginedUser);
 		customerRepository.save(customer);
 		return ApiResponse.create("유저 등록에 성공하였습니다.");
 	}
@@ -59,7 +58,7 @@ public class CustomerServiceImpl implements CustomerService {
 	public ApiResponse<CustomerDetailResponseDTO> modifyCustomer(Long customerUid,
 		CustomerModifyRequestDTO customerModifyRequestDTO, Long userUID) {
 
-		Customer savedCustomer = customerRepository.findByUidAndIsDeletedFalse(customerUid)
+		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
 			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
 		if (!savedCustomer.getUser().getUid().equals(userUID)) {
@@ -67,15 +66,16 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 
 		savedCustomer.modifyCustomer(customerModifyRequestDTO.getName(), customerModifyRequestDTO.getPhoneNo(),
-			customerModifyRequestDTO.getAddress(), customerModifyRequestDTO.getTelProvider(),
-			customerModifyRequestDTO.getRegion(),
+			customerModifyRequestDTO.getTelProvider(),
+			customerModifyRequestDTO.getLegalDistrictCode(),
 			customerModifyRequestDTO.getMinRent(), customerModifyRequestDTO.getMaxRent(),
 			customerModifyRequestDTO.getTrafficSource(),
 			customerModifyRequestDTO.isTenant(), customerModifyRequestDTO.isLandlord(),
 			customerModifyRequestDTO.isBuyer(),
 			customerModifyRequestDTO.isSeller(), customerModifyRequestDTO.getMaxPrice(),
 			customerModifyRequestDTO.getMinPrice(),
-			customerModifyRequestDTO.getMinDeposit(), customerModifyRequestDTO.getMaxDeposit(), LocalDateTime.now());
+			customerModifyRequestDTO.getMinDeposit(), customerModifyRequestDTO.getMaxDeposit(),
+			customerModifyRequestDTO.getBirthday());
 
 		CustomerDetailResponseDTO customerDetailResponseDTO = new CustomerDetailResponseDTO(savedCustomer);
 		return ApiResponse.ok("고객 수정에 성공하였습니다.", customerDetailResponseDTO);
@@ -83,7 +83,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Transactional
 	public ApiResponse<Void> deleteCustomer(Long customerUID, Long userUID) {
-		Customer savedCustomer = customerRepository.findByUidAndIsDeletedFalse(customerUID)
+		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUID)
 			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
 		if (!savedCustomer.getUser().getUid().equals(userUID)) {
@@ -94,13 +94,12 @@ public class CustomerServiceImpl implements CustomerService {
 		return ApiResponse.ok("고객 삭제에 성공하였습니다.");
 	}
 
-	//임의 수정
 	@Transactional(readOnly = true)
 	public ApiResponse<CustomerListResponseDTO> getCustomers(PageRequestDTO pageRequestDTO, Long userUID) {
-		Page<Customer> customerPage = customerRepository.findByUserUidAndIsDeleted(userUID, false,
+		Page<Customer> customerPage = customerRepository.findByUserUidAndDeletedAtIsNull(userUID,
 			pageRequestDTO.toPageable());
 		List<CustomerListResponseDTO.CustomerResponseDTO> customerResponseDTOList = customerPage.getContent().stream()
-			.map(customer -> new CustomerListResponseDTO.CustomerResponseDTO(customer))
+			.map(CustomerListResponseDTO.CustomerResponseDTO::new)
 			.toList();
 
 		CustomerListResponseDTO result = new CustomerListResponseDTO(customerResponseDTOList, customerPage);
@@ -110,7 +109,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Transactional(readOnly = true)
 	public CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid) {
-		Customer savedCustomer = customerRepository.findByUidAndIsDeletedFalse(customerUid)
+		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
 			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객 정보가 없습니다.", HttpStatus.BAD_REQUEST));
 
 		if (!savedCustomer.getUser().getUid().equals(userUid)) {
@@ -145,11 +144,9 @@ public class CustomerServiceImpl implements CustomerService {
 	public List<ContractListResponseDTO.ContractListDTO> getCustomerContracts(Long customerUid, Long userUid) {
 		List<CustomerContract> savedCustomerContract = customerContractRepository.findByCustomerUidAndUserUid(
 			customerUid, userUid);
-
 		List<ContractListResponseDTO.ContractListDTO> result = savedCustomerContract.stream()
 			.map(cc -> new ContractListResponseDTO.ContractListDTO(cc))
 			.toList();
-
 		return result;
 	}
 }

@@ -3,6 +3,7 @@ package com.zipline.dto;
 import java.math.BigInteger;
 
 import com.zipline.entity.customer.Customer;
+
 import lombok.Getter;
 
 @Getter
@@ -10,9 +11,8 @@ public class CustomerDetailResponseDTO {
 	private Long uid;
 	private String name;
 	private String phoneNo;
-	private String address;
 	private String telProvider;
-	private String region;
+	private String legalDistrictCode;
 	private BigInteger minRent;
 	private BigInteger maxRent;
 	private String trafficSource;
@@ -24,14 +24,14 @@ public class CustomerDetailResponseDTO {
 	private BigInteger minPrice;
 	private BigInteger minDeposit;
 	private BigInteger maxDeposit;
+	private String birthDay;
 
 	public CustomerDetailResponseDTO(Customer customer) {
 		this.uid = customer.getUid();
 		this.name = customer.getName();
 		this.phoneNo = customer.getPhoneNo();
-		this.address = customer.getAddress();
 		this.telProvider = customer.getTelProvider();
-		this.region = customer.getRegion();
+		this.legalDistrictCode = customer.getLegalDistrictCode();
 		this.minRent = customer.getMinRent();
 		this.maxRent = customer.getMaxRent();
 		this.trafficSource = customer.getTrafficSource();
@@ -43,5 +43,6 @@ public class CustomerDetailResponseDTO {
 		this.minPrice = customer.getMinPrice();
 		this.minDeposit = customer.getMinDeposit();
 		this.maxDeposit = customer.getMaxDeposit();
+		this.birthDay = customer.getBirthday();
 	}
 }
