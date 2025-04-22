@@ -1,6 +1,7 @@
 package com.zipline.service.user;
 
 import java.time.Duration;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
@@ -16,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.zipline.dto.user.FindUserIdRequestDTO;
 import com.zipline.dto.user.FindUserIdResponseDTO;
-import com.zipline.dto.user.UserRequestDTO;
+import com.zipline.dto.user.LoginRequestDTO;
+import com.zipline.dto.user.SignUpRequestDto;
+import com.zipline.dto.user.UserModifyRequestDTO;
 import com.zipline.dto.user.UserResponseDTO;
 import com.zipline.entity.survey.Survey;
 import com.zipline.entity.user.Authority;
@@ -56,46 +59,43 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Transactional
-	public UserResponseDTO signup(UserRequestDTO userRequestDto) {
+	public void signup(SignUpRequestDto signUpRequestDto) {
 
-		if (!userRequestDto.getPassword().equals(userRequestDto.getPasswordCheck())) {
+		if (!signUpRequestDto.getPassword().equals(signUpRequestDto.getPasswordCheck())) {
 			throw new UserNotFoundException("비밀번호와 비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
 		}
 
-		if (userRepository.existsById(userRequestDto.getId())) {
+		if (userRepository.existsById(signUpRequestDto.getId())) {
 			throw new UserNotFoundException("사용할 수 없는 아이디입니다.", HttpStatus.BAD_REQUEST);
 		}
 
 		User user = User.builder()
-			.id(userRequestDto.getId())
-			.password(passwordEncoder.encode(userRequestDto.getPassword()))
-			.name(userRequestDto.getName())
+			.id(signUpRequestDto.getId())
+			.password(passwordEncoder.encode(signUpRequestDto.getPassword()))
+			.name(signUpRequestDto.getName())
+			.phoneNo(signUpRequestDto.getPhoneNo())
+			.email(signUpRequestDto.getEmail())
 			.role(Authority.ROLE_AGENT)
-			.url(userRequestDto.getUrl())
-			.birthday(userRequestDto.getBirthday())
-			.phoneNo(userRequestDto.getPhoneNo())
-			.email(userRequestDto.getEmail())
-			.noticeMonth((userRequestDto.getNoticeMonth()))
+			.noticeMonth(3)
+			.noticeTime(LocalTime.of(11, 0))
 			.build();
-
-		userRepository.save(user);
 		surveyService.createDefaultSurveyForUser(user);
-		return UserResponseDTO.of(user);
+		userRepository.save(user);
 	}
 
 	@Transactional
-	public TokenRequestDTO login(UserRequestDTO userRequestDto) {
+	public TokenRequestDTO login(LoginRequestDTO loginRequestDTO) {
 		// 0. 입력값 null 체크
-		if (userRequestDto.getId().isBlank() || userRequestDto.getPassword().isBlank()) {
+		if (loginRequestDTO.getId().isBlank() || loginRequestDTO.getPassword().isBlank()) {
 			throw new UserNotFoundException("아이디와 비밀번호를 모두 입력해주세요.", HttpStatus.BAD_REQUEST);
 		}
 
 		//1. 사용자 조회
-		User user = userRepository.findByLoginId(userRequestDto.getId())
+		User user = userRepository.findByLoginId(loginRequestDTO.getId())
 			.orElseThrow(() -> new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST));
 
 		// 2. 비밀번호 검증
-		if (!passwordEncoder.matches(userRequestDto.getPassword(), user.getPassword())) {
+		if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
 			throw new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
 		}
 
@@ -117,7 +117,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public void logout(Long uid, String accessToken) {
-		User user = userRepository.findById(uid)
+		userRepository.findById(uid)
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 		// 1. Access Token 검증
 		if (!tokenProvider.validateToken(accessToken)) {
@@ -140,13 +140,22 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
-	public UserResponseDTO updateInfo(Long uid, UserRequestDTO userRequestDto) {
+	public UserResponseDTO updateInfo(Long uid, UserModifyRequestDTO userModifyRequestDto) {
 		User user = userRepository.findById(uid)
 			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-		user.updateInfo(userRequestDto);
+		Survey survey = surveyRepository.findFirstByUserOrderByCreatedAtDesc(user)
+			.orElseThrow(() -> new RuntimeException("해당 유저의 설문이 존재하지 않습니다."));
+		user.updateInfo(
+			userModifyRequestDto.getName(),
+			userModifyRequestDto.getUrl(),
+			userModifyRequestDto.getPhoneNo(),
+			userModifyRequestDto.getEmail(),
+			userModifyRequestDto.getNoticeMonth(),
+			userModifyRequestDto.getNoticeTime()
+		);
 
 		userRepository.save(user);
-		return UserResponseDTO.of(user);
+		return UserResponseDTO.userSurvey(user, survey);
 	}
 
 	@Transactional
