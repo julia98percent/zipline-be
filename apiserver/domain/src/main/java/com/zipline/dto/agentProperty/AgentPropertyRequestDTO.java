@@ -2,15 +2,14 @@ package com.zipline.dto.agentProperty;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Year;
 
 import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.enums.PropertyType;
-
 import com.zipline.entity.user.User;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -29,17 +28,11 @@ public class AgentPropertyRequestDTO {
 	@NotBlank
 	private String address;
 
-	@Schema(description = "동", example = "역삼동", required = true)
+	@Schema(description = "법정동 코드", example = "1100000000", required = true)
 	@NotBlank
-	private String dong;
+	private String legalDistrictCode;
 
-	@Schema(description = "도로명", example = "OO길")
-	private String roadName;
-
-	@Schema(description = "상세 주소", example = "301호")
-	private String extraAddress;
-
-	@Schema(description = "보증금", example = "50000000", required = true)
+	@Schema(description = "보증금", example = "50000000")
 	@Positive
 	private BigInteger deposit;
 
@@ -104,16 +97,11 @@ public class AgentPropertyRequestDTO {
 	@Schema(description = "기타 상세 사항", example = "풀옵션, 관리비 별도")
 	private String details;
 
-	public AgentProperty toEntity(User user, Boolean isDeleted, Customer customer, LocalDateTime createdAt,
-								  LocalDateTime updatedAt,
-								  LocalDateTime deletedAt) {
+	public AgentProperty toEntity(User user, Customer customer) {
 		return AgentProperty.builder()
 			.user(user)
 			.customer(customer)
 			.address(address)
-			.address1(dong)
-			.address2(roadName)
-			.address3(extraAddress)
 			.deposit(deposit)
 			.monthlyRent(monthlyRent)
 			.price(price)
@@ -132,10 +120,6 @@ public class AgentPropertyRequestDTO {
 			.netArea(netArea)
 			.totalArea(totalArea)
 			.details(details)
-			.isDeleted(isDeleted)
-			.createdAt(createdAt)
-			.updatedAt(updatedAt)
-			.deletedAt(deletedAt)
 			.build();
 	}
 }
