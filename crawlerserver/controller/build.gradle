@@ -1,19 +1,21 @@
 dependencies {
     implementation project(':crawlerserver:service')
     implementation project(':crawlerserver:domain')
-    implementation project(':crawlerserver:common')
+    implementation project(':common:crawler')
     implementation project(':crawlerserver:infrastructure')
+    implementation project(':common:shared')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 bootJar {
-    enabled = false
+    enabled = true
+    archiveFileName = 'crawler.jar'
+    mainClass.set('com.zipline.CrawlerServerApplication')
 }
 
 jar {
     enabled = true
 }
-

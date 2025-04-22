@@ -3,7 +3,8 @@ dependencies {
     implementation project(':apiserver:service')
     implementation project(':apiserver:controller')
     implementation project(':apiserver:infrastructure')
-    
+    implementation project(':common:shared')
+    implementation project(':common:api')
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
@@ -20,4 +21,3 @@ bootJar {
 springBoot {
     mainClass.set('com.zipline.ApiServerApplication')
 }
-

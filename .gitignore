@@ -11,5 +11,4 @@ apiserver/.idea
 apiserver/.settings
 apiserver/bin
 .idea
-apiserver/controller/src/main/resources/application.yml
-crawlerserver/controller/src/main/resources/application.yml
+**/src/main/resources/application.yml

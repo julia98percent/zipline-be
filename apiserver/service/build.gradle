@@ -1,6 +1,7 @@
 dependencies {
     implementation project(':apiserver:domain')
-    implementation project(':apiserver:common')
+    implementation project(':common:api')
+    implementation project(':common:shared')
     implementation project(':apiserver:infrastructure')
     
     // Spring Boot Core
@@ -36,7 +37,7 @@ dependencies {
     
     // Ensure these are implementation dependencies to make them available at compile time
     implementation project(':apiserver:domain')
-    implementation project(':apiserver:common')
+    implementation project(':common:api')
 }
 
 bootJar {
