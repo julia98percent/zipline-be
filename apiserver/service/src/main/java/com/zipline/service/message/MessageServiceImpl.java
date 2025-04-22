@@ -23,7 +23,9 @@ public class MessageServiceImpl implements MessageService {
       String response = webClient.post()
           .uri("/send-many/detail")
           .bodyValue(wrappedRequest)
-          .retrieve().toString();
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
 
       log.info("메시지 전송 성공: {} 개의 메시지", request.size());
       return response;

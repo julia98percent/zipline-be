@@ -28,7 +28,7 @@ public class MessageController {
       return ResponseEntity.ok(result);
     } catch (Exception e) {
       log.error("Error occurred while sending message: {}", e.getMessage());
-      return ResponseEntity.status(500).body(e.toString());
+      return ResponseEntity.status(500).body("An unexpected error occurred. Please try again later.");
     }
   }
 }
