@@ -28,6 +28,7 @@ import com.zipline.global.response.ApiResponse;
 import com.zipline.service.user.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -115,7 +116,7 @@ public class UserController {
 
 	@PostMapping("/find-id")
 	public ResponseEntity<ApiResponse<FindUserIdResponseDTO>> findUserId(
-		@RequestBody FindUserIdRequestDTO findUserIdRequestDto) {
+		@RequestBody @Valid FindUserIdRequestDTO findUserIdRequestDto) {
 		FindUserIdResponseDTO findUserId = userService.findUserId(findUserIdRequestDto);
 		ApiResponse<FindUserIdResponseDTO> response = ApiResponse.create("아이디 찾기 성공", findUserId);
 		return ResponseEntity.ok(response);
