@@ -10,20 +10,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "contract_documents")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
+@Entity
+@Table(name = "contract_documents")
 public class ContractDocument {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "uid", nullable = false)
 	private Long uid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -32,4 +30,15 @@ public class ContractDocument {
 
 	@Column(name = "document_url", nullable = false)
 	private String documentUrl;
+
+	@Column(name = "document_name", nullable = false)
+	private String documentName;
+
+	@Builder
+	private ContractDocument(Contract contract, String documentUrl, String documentName) {
+		this.contract = contract;
+		this.documentUrl = documentUrl;
+		this.documentName = documentName;
+	}
 }
+

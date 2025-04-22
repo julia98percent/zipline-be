@@ -1,11 +1,10 @@
 package com.zipline.dto;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
-
 
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.user.User;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -26,14 +25,11 @@ public class CustomerRegisterRequestDTO {
 	@Pattern(regexp = "^(\\d{3})-(\\d{3,4})-(\\d{4})$", message = "전화번호 형식이 올바르지 않습니다.")
 	private String phoneNo;
 
-	@Schema(description = "주소", example = "서울특별시 강남구 테헤란로")
-	private String address;
-
 	@Schema(description = "통신사", example = "SKT")
 	private String telProvider;
 
-	@Schema(description = "지역", example = "강남")
-	private String region;
+	@Schema(description = "지역코드", example = "110000000")
+	private String legalDistrictCode;
 
 	@Schema(description = "최소 임대료", example = "100000")
 	@DecimalMin(value = "0", message = "최소 임대료는 0 이상이어야 합니다.")
@@ -74,14 +70,16 @@ public class CustomerRegisterRequestDTO {
 	@DecimalMax(value = "1000000000", message = "최대 보증금은 1000000000 이하이어야 합니다.")
 	private BigInteger maxDeposit;
 
-	public Customer toEntity(User user, boolean isDeleted, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+	@Schema(description = "생년월일", example = "20220410")
+	private String birthDay;
+
+	public Customer toEntity(User user) {
 		return Customer.builder()
 			.user(user)
 			.name(name)
 			.phoneNo(phoneNo)
-			.address(address)
 			.telProvider(telProvider)
-			.region(region)
+			.legalDistrictCode(legalDistrictCode)
 			.minRent(minRent)
 			.maxRent(maxRent)
 			.trafficSource(trafficSource)
@@ -93,10 +91,7 @@ public class CustomerRegisterRequestDTO {
 			.minPrice(minPrice)
 			.minDeposit(minDeposit)
 			.maxDeposit(maxDeposit)
-			.isDeleted(isDeleted)
-			.createdAt(createdAt)
-			.updatedAt(updatedAt)
-			.deletedAt(deletedAt)
+			.birthday(birthDay)
 			.build();
 	}
 }

@@ -1,11 +1,11 @@
 package com.zipline.entity.customer;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 
-import com.zipline.entity.user.User;
 import org.springframework.http.HttpStatus;
 
+import com.zipline.entity.BaseTimeEntity;
+import com.zipline.entity.user.User;
 import com.zipline.global.exception.custom.customer.PriceValidationException;
 
 import jakarta.persistence.Column;
@@ -26,30 +26,28 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "customers")
 @Entity
-public class Customer {
+public class Customer extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "uid", nullable = false)
 	private Long uid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_uid")
 	private User user;
 
-	@Column(name = "name", nullable = false)
+	@Column(name = "name", length = 50, nullable = false)
 	private String name;
 
-	@Column(name = "phone_no", nullable = false)
+	@Column(name = "phone_no", length = 13, nullable = false)
 	private String phoneNo;
 
-	@Column(name = "address")
-	private String address;
+	@Column(name = "legal_district_code", length = 10)
+	private String legalDistrictCode;
 
 	@Column(name = "tel_provider")
 	private String telProvider;
-
-	@Column(name = "region")
-	private String region;
 
 	@Column(name = "min_rent")
 	private BigInteger minRent;
@@ -84,30 +82,21 @@ public class Customer {
 	@Column(name = "max_deposit")
 	private BigInteger maxDeposit;
 
-	@Column(name = "is_deleted", nullable = false)
-	private boolean isDeleted;
-
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
-
-	@Column(name = "deleted_at")
-	private LocalDateTime deletedAt;
+	@Column(name = "birth_day", length = 8)
+	private String birthday;
 
 	@Builder
-	private Customer(User user, String name, String phoneNo, String address, String telProvider, String region,
+	private Customer(User user, String name, String phoneNo, String telProvider,
+		String legalDistrictCode,
 		BigInteger minRent, BigInteger maxRent, String trafficSource, boolean isTenant, boolean isLandlord,
 		boolean isBuyer,
 		boolean isSeller, BigInteger maxPrice, BigInteger minPrice, BigInteger minDeposit, BigInteger maxDeposit,
-		boolean isDeleted, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+		String birthday) {
 		this.user = user;
 		this.name = name;
 		this.phoneNo = phoneNo;
-		this.address = address;
 		this.telProvider = telProvider;
-		this.region = region;
+		this.legalDistrictCode = legalDistrictCode;
 		this.minRent = minRent;
 		this.maxRent = maxRent;
 		this.trafficSource = trafficSource;
@@ -119,22 +108,19 @@ public class Customer {
 		this.minPrice = minPrice;
 		this.minDeposit = minDeposit;
 		this.maxDeposit = maxDeposit;
-		this.isDeleted = isDeleted;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
-		this.deletedAt = deletedAt;
+		this.birthday = birthday;
 	}
 
-	public void modifyCustomer(String name, String phoneNo, String address, String telProvider, String region,
+	public void modifyCustomer(String name, String phoneNo, String telProvider,
+		String legalDistrictCode,
 		BigInteger minRent, BigInteger maxRent, String trafficSource, boolean isTenant, boolean isLandlord,
 		boolean isBuyer, boolean isSeller, BigInteger maxPrice, BigInteger minPrice, BigInteger minDeposit,
-		BigInteger maxDeposit, LocalDateTime updatedAt) {
+		BigInteger maxDeposit, String birthday) {
 		validatePrices(minRent, maxRent, maxPrice, minPrice, minDeposit, maxDeposit);
 		this.name = name;
 		this.phoneNo = phoneNo;
-		this.address = address;
 		this.telProvider = telProvider;
-		this.region = region;
+		this.legalDistrictCode = legalDistrictCode;
 		this.minRent = minRent;
 		this.maxRent = maxRent;
 		this.trafficSource = trafficSource;
@@ -146,12 +132,7 @@ public class Customer {
 		this.maxPrice = maxPrice;
 		this.minDeposit = minDeposit;
 		this.maxDeposit = maxDeposit;
-		this.updatedAt = updatedAt;
-	}
-
-	public void delete(LocalDateTime deletedAt) {
-		this.isDeleted = true;
-		this.deletedAt = deletedAt;
+		this.birthday = birthday;
 	}
 
 	private void validatePrices(BigInteger minRent, BigInteger maxRent, BigInteger minPrice, BigInteger maxPrice,

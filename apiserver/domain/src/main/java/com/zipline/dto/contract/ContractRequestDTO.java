@@ -1,12 +1,11 @@
 package com.zipline.dto.contract;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.enums.ContractStatus;
-
 import com.zipline.entity.user.User;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,20 +33,18 @@ public class ContractRequestDTO {
 	@Schema(description = "고객 UID", example = "1")
 	private Long customerUid;
 
-	public Contract toEntity(User user, Boolean isDeleted, LocalDateTime createdAt,
-							 LocalDateTime updatedAt,
-							 LocalDateTime deletedAt) {
+	@Schema(description = "계약 종료 예상일", example = "2026-05-01")
+	private LocalDate expectedContractEndDate;
+
+	public Contract toEntity(User user) {
 		return Contract.builder()
 			.category(this.category)
 			.contractStartDate(this.contractStartDate)
 			.contractEndDate(this.contractEndDate)
 			.contractDate(this.contractDate)
 			.status(this.status)
-			.isDeleted(isDeleted)
-			.createdAt(createdAt)
-			.updatedAt(updatedAt)
-			.deletedAt(deletedAt)
 			.user(user)
+			.expectedContractEndDate(this.expectedContractEndDate)
 			.build();
 	}
 }

@@ -2,15 +2,15 @@ package com.zipline.entity.agentProperty;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Year;
 
 import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
+import com.zipline.entity.BaseTimeEntity;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.enums.PropertyType;
-
 import com.zipline.entity.user.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,20 +23,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "agent_properties")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
-public class AgentProperty {
+@Entity
+@Table(name = "agent_properties")
+public class AgentProperty extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "uid", nullable = false)
 	private Long uid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -47,35 +45,29 @@ public class AgentProperty {
 	@JoinColumn(name = "user_uid", nullable = false)
 	private User user;
 
-	@Column(nullable = false)
+	@Column(name = "address", nullable = false)
 	private String address;
 
-	@Column
-	private String address1;
+	@Column(name = "legal_district_code", length = 10, nullable = false)
+	private String legalDistrictCode;
 
-	@Column
-	private String address2;
-
-	@Column
-	private String address3;
-
-	@Column
+	@Column(name = "deposit")
 	private BigInteger deposit;
 
 	@Column(name = "monthly_rent")
 	private BigInteger monthlyRent;
 
-	@Column
+	@Column(name = "price")
 	private BigInteger price;
 
-	@Column(nullable = false)
+	@Column(name = "type", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private PropertyType type;
 
-	@Column
+	@Column(name = "longitude")
 	private Double longitude;
 
-	@Column
+	@Column(name = "latitude")
 	private Double latitude;
 
 	@Column(name = "start_date")
@@ -87,14 +79,14 @@ public class AgentProperty {
 	@Column(name = "move_in_date")
 	private LocalDate moveInDate;
 
-	@Column(name = "real_category")
+	@Column(name = "real_category", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private PropertyCategory realCategory;
 
 	@Column(name = "pets_allowed", nullable = false)
 	private Boolean petsAllowed;
 
-	@Column
+	@Column(name = "floor")
 	private Integer floor;
 
 	@Column(name = "has_elevator", nullable = false)
@@ -112,35 +104,51 @@ public class AgentProperty {
 	@Column(name = "total_area", nullable = false)
 	private Double totalArea;
 
-	@Column
+	@Column(name = "details", length = 255)
 	private String details;
 
-	@Column(name = "is_deleted", nullable = false)
-	private Boolean isDeleted;
-
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
-
-	@Column(name = "deleted_at")
-	private LocalDateTime deletedAt;
+	@Builder
+	private AgentProperty(Customer customer, User user, String address, String legalDistrictCode, BigInteger deposit,
+		BigInteger monthlyRent, BigInteger price, PropertyType type, Double longitude, Double latitude,
+		LocalDate startDate,
+		LocalDate endDate, LocalDate moveInDate, PropertyCategory realCategory, Boolean petsAllowed, Integer floor,
+		Boolean hasElevator, Year constructionYear, Integer parkingCapacity, Double netArea, Double totalArea,
+		String details) {
+		this.customer = customer;
+		this.user = user;
+		this.address = address;
+		this.legalDistrictCode = legalDistrictCode;
+		this.deposit = deposit;
+		this.monthlyRent = monthlyRent;
+		this.price = price;
+		this.type = type;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.moveInDate = moveInDate;
+		this.realCategory = realCategory;
+		this.petsAllowed = petsAllowed;
+		this.floor = floor;
+		this.hasElevator = hasElevator;
+		this.constructionYear = constructionYear;
+		this.parkingCapacity = parkingCapacity;
+		this.netArea = netArea;
+		this.totalArea = totalArea;
+		this.details = details;
+	}
 
 	public void modifyProperty(AgentPropertyRequestDTO dto,
-		Customer customer,
-		LocalDateTime updatedAt) {
+		Customer customer) {
 		this.customer = customer;
 		this.address = dto.getAddress();
-		this.address1 = dto.getDong();
-		this.address2 = dto.getRoadName();
-		this.address3 = dto.getExtraAddress();
 		this.deposit = dto.getDeposit();
 		this.monthlyRent = dto.getMonthlyRent();
 		this.price = dto.getPrice();
 		this.type = dto.getType();
 		this.longitude = dto.getLongitude();
 		this.latitude = dto.getLatitude();
+		this.legalDistrictCode = dto.getLegalDistrictCode();
 		this.startDate = dto.getStartDate();
 		this.endDate = dto.getEndDate();
 		this.moveInDate = dto.getMoveInDate();
@@ -153,11 +161,5 @@ public class AgentProperty {
 		this.netArea = dto.getNetArea();
 		this.totalArea = dto.getTotalArea();
 		this.details = dto.getDetails();
-		this.updatedAt = updatedAt;
-	}
-
-	public void delete(LocalDateTime deletedAt) {
-		this.isDeleted = true;
-		this.deletedAt = deletedAt;
 	}
 }

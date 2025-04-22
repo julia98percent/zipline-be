@@ -6,9 +6,9 @@ import java.util.List;
 
 import com.zipline.entity.enums.SurveyStatus;
 import com.zipline.entity.user.User;
-import com.zipline.entity.survey.Question;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -32,8 +32,10 @@ public class Survey {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "uid", nullable = false)
 	private Long uid;
 
+	@Column(name = "title", length = 20, nullable = false)
 	private String title;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -44,9 +46,13 @@ public class Survey {
 	private List<Question> questions = new ArrayList<>();
 
 	@Enumerated(EnumType.STRING)
+	@Column(name = "status", nullable = false)
 	private SurveyStatus status;
 
+	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
+
+	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 
 	public Survey(String title, User user, SurveyStatus status, LocalDateTime createdAt, LocalDateTime deletedAt) {

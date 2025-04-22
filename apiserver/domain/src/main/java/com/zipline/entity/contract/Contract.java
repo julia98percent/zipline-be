@@ -1,10 +1,10 @@
 package com.zipline.entity.contract;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-import com.zipline.entity.user.User;
+import com.zipline.entity.BaseTimeEntity;
 import com.zipline.entity.enums.ContractStatus;
+import com.zipline.entity.user.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,52 +16,52 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "contracts")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
-public class Contract {
+@Entity
+@Table(name = "contracts")
+public class Contract extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "uid", nullable = false)
 	private Long uid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_uid", nullable = false)
 	private User user;
 
-	@Column
+	@Column(name = "category", length = 20)
 	private String category;
 
-	@Column
+	@Column(name = "contract_start_date")
 	private LocalDate contractStartDate;
 
-	@Column
+	@Column(name = "contract_date")
 	private LocalDate contractDate;
 
-	@Column
+	@Column(name = "contract_end_date")
 	private LocalDate contractEndDate;
 
 	@Column(name = "status", nullable = false)
 	private ContractStatus status;
 
-	@Column(name = "is_deleted", nullable = false)
-	private Boolean isDeleted;
+	@Column(name = "expected_contract_end_date")
+	private LocalDate expectedContractEndDate;
 
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
-
-	@Column(name = "deleted_at")
-	private LocalDateTime deletedAt;
-
+	@Builder
+	private Contract(User user, String category, LocalDate contractStartDate, LocalDate contractDate,
+		LocalDate contractEndDate, ContractStatus status, LocalDate expectedContractEndDate) {
+		this.user = user;
+		this.category = category;
+		this.contractStartDate = contractStartDate;
+		this.contractDate = contractDate;
+		this.contractEndDate = contractEndDate;
+		this.status = status;
+		this.expectedContractEndDate = expectedContractEndDate;
+	}
 }

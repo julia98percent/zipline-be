@@ -2,7 +2,6 @@ package com.zipline.service.contract;
 
 import static java.util.stream.Collectors.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -47,8 +46,8 @@ public class ContractServiceImpl implements ContractService {
 	private final S3FileUploader s3FileUploader;
 
 	@Transactional(readOnly = true)
-	public ContractResponseDTO getContract(Long contratUid, Long userUid) {
-		Contract contract = contractRepository.findByUidAndIsDeletedFalse(contratUid)
+	public ContractResponseDTO getContract(Long contractUid, Long userUid) {
+		Contract contract = contractRepository.findByUidAndDeletedAtIsNull(contractUid)
 			.orElseThrow(() -> new ContractNotFoundException("해당 계약을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
 		CustomerContract customerContract = customerContractRepository.findByContract(contract)
@@ -74,7 +73,7 @@ public class ContractServiceImpl implements ContractService {
 		Customer customer = customerRepository.findById(contractRequestDTO.getCustomerUid())
 			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
 
-		Contract contract = contractRequestDTO.toEntity(savedUser, false, LocalDateTime.now(), null, null);
+		Contract contract = contractRequestDTO.toEntity(savedUser);
 		Contract savedContract = contractRepository.save(contract);
 
 		CustomerContract customerContract = CustomerContract.builder()
@@ -98,7 +97,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Transactional(readOnly = true)
 	public ContractListResponseDTO getContractList(PageRequestDTO pageRequestDTO, Long userUid) {
-		Page<Contract> contractPage = contractRepository.findByUserUidAndIsDeleted(userUid, false,
+		Page<Contract> contractPage = contractRepository.findByUserUidAndDeletedAtIsNull(userUid,
 			pageRequestDTO.toPageable());
 		List<Contract> content = contractPage.getContent();
 		List<Long> contractIds = content.stream().map(c -> c.getUid()).collect(toList());
@@ -108,5 +107,4 @@ public class ContractServiceImpl implements ContractService {
 			.toList();
 		return new ContractListResponseDTO(contractList, contractPage);
 	}
-
 }
