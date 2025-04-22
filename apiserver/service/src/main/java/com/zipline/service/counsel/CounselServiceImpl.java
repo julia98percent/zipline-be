@@ -41,18 +41,16 @@ public class CounselServiceImpl implements CounselService {
 	@Transactional
 	public ApiResponse<Map<String, Long>> createCounsel(Long customerUid, CounselCreateRequestDTO requestDTO,
 		Long userUid) {
-		Customer savedCustomer = customerRepository.findByUidAndIsDeletedFalse(customerUid)
+		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
 			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.",
 				HttpStatus.BAD_REQUEST));
 		User savedUser = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserNotFoundException("해당하는 사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-		LocalDateTime createdAt = LocalDateTime.now();
-		Counsel counsel = new Counsel(requestDTO.getTitle(), requestDTO.getCounselDate(), createdAt,
-			null, null, savedUser, savedCustomer);
+		Counsel counsel = new Counsel(requestDTO.getTitle(), requestDTO.getCounselDate(), null, null, savedUser,
+			savedCustomer, null);
 		for (CounselCreateRequestDTO.CounselDetailDTO counselDetailDTO : requestDTO.getCounselDetails()) {
 			counsel.addDetail(
-				new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), counsel, createdAt,
-					null));
+				new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), counsel));
 		}
 
 		Counsel savedCounsel = counselRepository.save(counsel);
@@ -85,16 +83,14 @@ public class CounselServiceImpl implements CounselService {
 		if (!savedCounsel.getUser().getUid().equals(userUid)) {
 			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
 		}
-
-		LocalDateTime now = LocalDateTime.now();
-		savedCounsel.update(requestDTO.getTitle(), requestDTO.getCounselDate(), now);
-		savedCounselDetails.forEach(detail -> detail.delete(now));
+		LocalDateTime deletedAt = LocalDateTime.now();
+		savedCounsel.update(requestDTO.getTitle(), requestDTO.getCounselDate());
+		savedCounselDetails.forEach(detail -> detail.delete(deletedAt));
 
 		List<CounselDetail> counselDetails = new ArrayList<>();
 		for (CounselModifyRequestDTO.CounselDetailDTO counselDetailDTO : requestDTO.getCounselDetails()) {
 			counselDetails.add(
-				new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), savedCounsel, now,
-					null));
+				new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), savedCounsel));
 		}
 
 		counselDetailRepository.saveAll(counselDetails);

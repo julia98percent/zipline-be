@@ -1,12 +1,14 @@
 package com.zipline.entity.counsel;
 
-import java.time.LocalDateTime;
+import com.zipline.entity.BaseTimeEntity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -17,32 +19,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "counsel_details")
 @Entity
-public class CounselDetail {
+public class CounselDetail extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "uid", nullable = false)
 	private Long uid;
 
+	@Column(name = "question", length = 200, nullable = false)
 	private String question;
 
+	@Column(name = "answer", length = 200, nullable = false)
 	private String answer;
 
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "counsel_uid")
 	private Counsel counsel;
 
-	private LocalDateTime createdAt;
-	private LocalDateTime deletedAt;
-
-	public CounselDetail(String question, String answer, Counsel counsel, LocalDateTime createdAt,
-		LocalDateTime deletedAt) {
+	public CounselDetail(String question, String answer, Counsel counsel) {
 		this.question = question;
 		this.answer = answer;
 		this.counsel = counsel;
-		this.createdAt = createdAt;
-		this.deletedAt = deletedAt;
-	}
-
-	public void delete(LocalDateTime deletedAt) {
-		this.deletedAt = deletedAt;
 	}
 }
