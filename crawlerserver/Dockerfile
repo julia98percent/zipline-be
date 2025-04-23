@@ -5,7 +5,6 @@ COPY gradle ./gradle
 COPY gradlew ./
 COPY settings.gradle ./
 COPY build.gradle ./
-COPY common ./common  
 COPY crawlerserver ./crawlerserver
 RUN chmod +x ./gradlew
 RUN ./gradlew crawlerserver:bootJar --no-daemon

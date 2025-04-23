@@ -1,15 +1,18 @@
+plugins {
+    id 'org.springframework.boot' version '3.4.3'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
 dependencies {
     implementation project(':apiserver:domain')
     implementation project(':apiserver:service')
     implementation project(':apiserver:controller')
     implementation project(':apiserver:infrastructure')
-    implementation project(':common:shared')
-    implementation project(':common:api')
+    implementation project(':apiserver:common')
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.7.0'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 bootJar {
