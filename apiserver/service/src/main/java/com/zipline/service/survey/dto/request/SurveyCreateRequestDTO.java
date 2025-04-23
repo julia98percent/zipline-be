@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
@@ -31,21 +30,16 @@ public class SurveyCreateRequestDTO {
 	@QuestionValidate
 	public static class QuestionRequestDTO {
 		@Schema(description = "문항 제목", example = "관심 매물의 종류")
-		@Size(max = 20, message = "문항 제목의 최대 길이는 20자 입니다.")
-		@NotBlank(message = "문항 제목의 최소 길이는 1자 입니다.")
 		private String title;
 
 		@Schema(description = "문항 설명", example = "선택지 중 하나를 골라주세요.")
-		@NotBlank(message = "문항 설명의 최소 길이는 1자 입니다.")
 		private String description;
 
-		@NotBlank(message = "문항의 타입은 필수입니다.")
 		@Schema(description = "문항 타입", example = "SINGLE_CHOICE", allowableValues = {"SINGLE_CHOICE", "MULTIPLE_CHOICE",
 			"SUBJECTIVE", "FILE_UPLOAD"})
 		private String type;
 
 		@Schema(description = "필수 응답 여부", example = "true")
-		@NotNull(message = "문항의 required 여부는 필수값입니다.")
 		private Boolean isRequired;
 
 		@ArraySchema(schema = @Schema(description = "문항 선택지 목록", implementation = ChoiceRequestDTO.class))
