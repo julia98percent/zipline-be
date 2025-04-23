@@ -6,7 +6,6 @@ COPY gradlew ./
 COPY settings.gradle ./
 COPY build.gradle ./
 COPY apiserver ./apiserver
-COPY common ./common  
 RUN chmod +x ./gradlew
 RUN ./gradlew apiserver:bootJar --no-daemon
 

@@ -14,12 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.zipline.dto.PageRequestDTO;
-import com.zipline.dto.survey.SurveyCreateRequestDTO;
-import com.zipline.dto.survey.SurveyResponseDTO;
-import com.zipline.dto.survey.SurveyResponseDetailDTO;
-import com.zipline.dto.survey.SurveyResponseListDTO;
-import com.zipline.dto.survey.SurveySubmitRequestDTO;
 import com.zipline.entity.enums.QuestionType;
 import com.zipline.entity.enums.SurveyStatus;
 import com.zipline.entity.survey.Choice;
@@ -32,6 +26,7 @@ import com.zipline.global.config.S3Folder;
 import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.SurveyNotFoundException;
 import com.zipline.global.exception.custom.UserNotFoundException;
+import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.global.util.S3FileUploader;
 import com.zipline.repository.survey.QuestionRepository;
@@ -39,6 +34,11 @@ import com.zipline.repository.survey.SurveyAnswerRepository;
 import com.zipline.repository.survey.SurveyRepository;
 import com.zipline.repository.survey.SurveyResponseRepository;
 import com.zipline.repository.user.UserRepository;
+import com.zipline.service.survey.dto.request.SurveyCreateRequestDTO;
+import com.zipline.service.survey.dto.request.SurveySubmitRequestDTO;
+import com.zipline.service.survey.dto.response.SurveyResponseDTO;
+import com.zipline.service.survey.dto.response.SurveyResponseDetailDTO;
+import com.zipline.service.survey.dto.response.SurveyResponseListDTO;
 
 import lombok.RequiredArgsConstructor;
 

@@ -8,11 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zipline.dto.PageRequestDTO;
-import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO;
-import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO.PropertyResponseDTO;
-import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
-import com.zipline.dto.agentProperty.AgentPropertyResponseDTO;
 import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.user.User;
@@ -20,9 +15,14 @@ import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.agentProperty.PropertyNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
-import com.zipline.repository.CustomerRepository;
+import com.zipline.global.request.PageRequestDTO;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
+import com.zipline.repository.customer.CustomerRepository;
 import com.zipline.repository.user.UserRepository;
+import com.zipline.service.agentProperty.dto.request.AgentPropertyRequestDTO;
+import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
+import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO.PropertyResponseDTO;
+import com.zipline.service.agentProperty.dto.response.AgentPropertyResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -73,7 +73,17 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 		if (!agentProperty.getUser().getUid().equals(userUid))
 			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
 
-		agentProperty.modifyProperty(agentPropertyRequestDTO, customer);
+		agentProperty.modifyProperty(customer, agentPropertyRequestDTO.getAddress(),
+			agentPropertyRequestDTO.getLegalDistrictCode(), agentPropertyRequestDTO.getDeposit(),
+			agentPropertyRequestDTO.getMonthlyRent(), agentPropertyRequestDTO.getPrice(),
+			agentPropertyRequestDTO.getType(), agentPropertyRequestDTO.getLongitude(),
+			agentPropertyRequestDTO.getLatitude(), agentPropertyRequestDTO.getStartDate(),
+			agentPropertyRequestDTO.getEndDate(), agentPropertyRequestDTO.getMoveInDate(),
+			agentPropertyRequestDTO.getRealCategory(), agentPropertyRequestDTO.getPetsAllowed(),
+			agentPropertyRequestDTO.getFloor(), agentPropertyRequestDTO.getHasElevator(),
+			agentPropertyRequestDTO.getConstructionYear(), agentPropertyRequestDTO.getParkingCapacity(),
+			agentPropertyRequestDTO.getNetArea(), agentPropertyRequestDTO.getTotalArea(),
+			agentPropertyRequestDTO.getDetails());
 
 		agentPropertyRepository.save(agentProperty);
 

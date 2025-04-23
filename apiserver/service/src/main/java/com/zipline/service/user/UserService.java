@@ -1,13 +1,13 @@
 package com.zipline.service.user;
 
-import com.zipline.dto.user.FindPasswordRequestDTO;
-import com.zipline.dto.user.FindUserIdRequestDTO;
-import com.zipline.dto.user.FindUserIdResponseDTO;
-import com.zipline.dto.user.LoginRequestDTO;
-import com.zipline.dto.user.ResetPasswordRequestDTO;
-import com.zipline.dto.user.SignUpRequestDTO;
-import com.zipline.dto.user.UserModifyRequestDTO;
-import com.zipline.dto.user.UserResponseDTO;
+import com.zipline.service.user.dto.request.FindUserIdRequestDTO;
+import com.zipline.service.user.dto.request.FindPasswordRequestDTO;
+import com.zipline.service.user.dto.request.ResetPasswordRequestDTO;
+import com.zipline.service.user.dto.response.FindUserIdResponseDTO;
+import com.zipline.service.user.dto.request.LoginRequestDTO;
+import com.zipline.service.user.dto.request.SignUpRequestDTO;
+import com.zipline.service.user.dto.request.UserModifyRequestDTO;
+import com.zipline.service.user.dto.response.UserResponseDTO;
 import com.zipline.global.jwt.dto.TokenRequestDTO;
 
 public interface UserService {

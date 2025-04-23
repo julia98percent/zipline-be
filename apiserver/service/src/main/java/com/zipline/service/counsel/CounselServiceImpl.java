@@ -10,9 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zipline.dto.counsel.CounselCreateRequestDTO;
-import com.zipline.dto.counsel.CounselModifyRequestDTO;
-import com.zipline.dto.counsel.CounselResponseDTO;
 import com.zipline.entity.counsel.Counsel;
 import com.zipline.entity.counsel.CounselDetail;
 import com.zipline.entity.customer.Customer;
@@ -22,10 +19,13 @@ import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
 import com.zipline.global.response.ApiResponse;
-import com.zipline.repository.CustomerRepository;
 import com.zipline.repository.counsel.CounselDetailRepository;
 import com.zipline.repository.counsel.CounselRepository;
+import com.zipline.repository.customer.CustomerRepository;
 import com.zipline.repository.user.UserRepository;
+import com.zipline.service.counsel.dto.request.CounselCreateRequestDTO;
+import com.zipline.service.counsel.dto.request.CounselModifyRequestDTO;
+import com.zipline.service.counsel.dto.response.CounselResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 

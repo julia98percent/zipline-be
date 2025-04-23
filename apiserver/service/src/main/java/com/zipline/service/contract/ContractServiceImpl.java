@@ -10,11 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.zipline.dto.PageRequestDTO;
-import com.zipline.dto.contract.ContractListResponseDTO;
-import com.zipline.dto.contract.ContractListResponseDTO.ContractListDTO;
-import com.zipline.dto.contract.ContractRequestDTO;
-import com.zipline.dto.contract.ContractResponseDTO;
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.contract.ContractDocument;
 import com.zipline.entity.contract.CustomerContract;
@@ -25,12 +20,17 @@ import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.contract.ContractNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
+import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.util.S3FileUploader;
-import com.zipline.repository.CustomerRepository;
 import com.zipline.repository.contract.ContractDocumentRepository;
 import com.zipline.repository.contract.ContractRepository;
 import com.zipline.repository.contract.CustomerContractRepository;
+import com.zipline.repository.customer.CustomerRepository;
 import com.zipline.repository.user.UserRepository;
+import com.zipline.service.contract.dto.request.ContractRequestDTO;
+import com.zipline.service.contract.dto.response.ContractListResponseDTO;
+import com.zipline.service.contract.dto.response.ContractListResponseDTO.ContractListDTO;
+import com.zipline.service.contract.dto.response.ContractResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 
