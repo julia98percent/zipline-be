@@ -1,9 +1,13 @@
+plugins {
+    id 'org.springframework.boot' version '3.4.3'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
 dependencies {
     implementation project(':crawlerserver:service')
     implementation project(':crawlerserver:domain')
-    implementation project(':common:crawler')
+    implementation project(':crawlerserver:common')
     implementation project(':crawlerserver:infrastructure')
-    implementation project(':common:shared')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
