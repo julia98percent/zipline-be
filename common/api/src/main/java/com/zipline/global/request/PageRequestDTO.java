@@ -1,4 +1,4 @@
-package com.zipline.dto;
+package com.zipline.global.request;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +19,7 @@ public class PageRequestDTO {
 	}
 
 	private Integer getSize() {
-		if (this.size <= 0 || this.size > 20) {
+		if (this.size <= 0 || this.size > 100) {
 			return 20;
 		}
 		return size;
