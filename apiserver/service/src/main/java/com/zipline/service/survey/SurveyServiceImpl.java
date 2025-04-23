@@ -25,7 +25,7 @@ import com.zipline.entity.user.User;
 import com.zipline.global.config.S3Folder;
 import com.zipline.global.exception.custom.PermissionDeniedException;
 import com.zipline.global.exception.custom.SurveyNotFoundException;
-import com.zipline.global.exception.custom.UserNotFoundException;
+import com.zipline.global.exception.custom.user.UserNotFoundException;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.global.util.S3FileUploader;
