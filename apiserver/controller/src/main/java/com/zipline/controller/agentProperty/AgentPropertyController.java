@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zipline.dto.PageRequestDTO;
-import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO;
-import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
-import com.zipline.dto.agentProperty.AgentPropertyResponseDTO;
+import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.agentProperty.AgentPropertyService;
+import com.zipline.service.agentProperty.dto.request.AgentPropertyRequestDTO;
+import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
+import com.zipline.service.agentProperty.dto.response.AgentPropertyResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -75,5 +75,4 @@ public class AgentPropertyController {
 		ApiResponse<AgentPropertyListResponseDTO> response = ApiResponse.ok("매물 목록 조회 성공", propertyListResponseDTO);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
-
 }

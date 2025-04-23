@@ -2,9 +2,9 @@ package com.zipline.service.counsel;
 
 import java.util.Map;
 
-import com.zipline.dto.counsel.CounselCreateRequestDTO;
-import com.zipline.dto.counsel.CounselModifyRequestDTO;
-import com.zipline.dto.counsel.CounselResponseDTO;
+import com.zipline.service.counsel.dto.request.CounselCreateRequestDTO;
+import com.zipline.service.counsel.dto.request.CounselModifyRequestDTO;
+import com.zipline.service.counsel.dto.response.CounselResponseDTO;
 import com.zipline.global.response.ApiResponse;
 
 public interface CounselService {

@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.zipline.dto.PageRequestDTO;
-import com.zipline.dto.survey.SurveyCreateRequestDTO;
-import com.zipline.dto.survey.SurveyResponseDTO;
-import com.zipline.dto.survey.SurveyResponseDetailDTO;
-import com.zipline.dto.survey.SurveyResponseListDTO;
-import com.zipline.dto.survey.SurveySubmitRequestDTO;
+import com.zipline.global.request.PageRequestDTO;
+import com.zipline.service.survey.dto.request.SurveyCreateRequestDTO;
+import com.zipline.service.survey.dto.response.SurveyResponseDTO;
+import com.zipline.service.survey.dto.response.SurveyResponseDetailDTO;
+import com.zipline.service.survey.dto.response.SurveyResponseListDTO;
+import com.zipline.service.survey.dto.request.SurveySubmitRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.survey.SurveyService;
 

@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import com.zipline.dto.survey.SurveySubmitRequestDTO;
+import com.zipline.service.survey.dto.request.SurveySubmitRequestDTO;
 import com.zipline.entity.enums.QuestionType;
 import com.zipline.entity.survey.Choice;
 import com.zipline.entity.survey.Question;
