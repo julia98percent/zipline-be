@@ -83,4 +83,8 @@ public class User {
 	public void setUrl(String url) {
 		this.url = url;
 	}
+
+	public void updatePassword(String password) {
+		this.password = password;
+	}
 }

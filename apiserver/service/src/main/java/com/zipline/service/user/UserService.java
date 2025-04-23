@@ -1,8 +1,10 @@
 package com.zipline.service.user;
 
+import com.zipline.dto.user.FindPasswordRequestDTO;
 import com.zipline.dto.user.FindUserIdRequestDTO;
 import com.zipline.dto.user.FindUserIdResponseDTO;
 import com.zipline.dto.user.LoginRequestDTO;
+import com.zipline.dto.user.ResetPasswordRequestDTO;
 import com.zipline.dto.user.SignUpRequestDTO;
 import com.zipline.dto.user.UserModifyRequestDTO;
 import com.zipline.dto.user.UserResponseDTO;
@@ -23,4 +25,8 @@ public interface UserService {
 	TokenRequestDTO reissue(String refreshToken);
 
 	FindUserIdResponseDTO findUserId(FindUserIdRequestDTO findUserIdRequestDto);
+
+	String findUserPassword(FindPasswordRequestDTO findPasswordRequestDTO);
+
+	void resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO);
 }

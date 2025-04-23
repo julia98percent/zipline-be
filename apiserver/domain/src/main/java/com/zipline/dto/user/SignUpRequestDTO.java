@@ -3,6 +3,7 @@ package com.zipline.dto.user;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,14 @@ public class SignUpRequestDTO {
 	@Schema(description = "비밀번호 확인", example = "Secure123!")
 	@NotBlank(message = "비밀번호 확인은 필수 입력값입니다.")
 	private String passwordCheck;
+
+	@Schema(description = "비밀번호 찾기 질문", example = "1")
+	@NotNull(message = "비밀번호 찾기 질문은 필수입니다.")
+	private Long passwordQuestionUid;
+
+	@Schema(description = "비밀번호 찾기 답변", example = "쫑이")
+	@NotBlank(message = "비밀번호 찾기 답변은 필수입니다.")
+	private String questionAnswer;
 
 	@Schema(description = "이름", example = "홍길동")
 	@NotBlank(message = "이름은 필수 입력값입니다.")
