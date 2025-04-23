@@ -1,6 +1,9 @@
-package com.zipline.dto;
+package com.zipline.service.customer.dto.request;
 
 import java.math.BigInteger;
+
+import com.zipline.entity.customer.Customer;
+import com.zipline.entity.user.User;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMax;
@@ -12,7 +15,8 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class CustomerModifyRequestDTO {
+public class CustomerRegisterRequestDTO {
+
 	@Schema(description = "사용자 이름", example = "홍길동", required = true)
 	@NotBlank(message = "이름은 필수 입력 항목입니다.")
 	private String name;
@@ -24,7 +28,7 @@ public class CustomerModifyRequestDTO {
 	@Schema(description = "통신사", example = "SKT")
 	private String telProvider;
 
-	@Schema(description = "지역 코드", example = "110000000")
+	@Schema(description = "지역코드", example = "110000000")
 	private String legalDistrictCode;
 
 	@Schema(description = "최소 임대료", example = "100000")
@@ -63,9 +67,31 @@ public class CustomerModifyRequestDTO {
 	private BigInteger minDeposit;
 
 	@Schema(description = "최대 보증금", example = "10000000")
-	@DecimalMax(value = "1000000000", message = "최대 보증금은 1000000000 이하여야 합니다.")
+	@DecimalMax(value = "1000000000", message = "최대 보증금은 1000000000 이하이어야 합니다.")
 	private BigInteger maxDeposit;
 
-	@Schema(description = "생년월일", example = "20021123")
-	private String birthday;
+	@Schema(description = "생년월일", example = "20220410")
+	private String birthDay;
+
+	public Customer toEntity(User user) {
+		return Customer.builder()
+			.user(user)
+			.name(name)
+			.phoneNo(phoneNo)
+			.telProvider(telProvider)
+			.legalDistrictCode(legalDistrictCode)
+			.minRent(minRent)
+			.maxRent(maxRent)
+			.trafficSource(trafficSource)
+			.isLandlord(isLandlord)
+			.isTenant(isTenant)
+			.isBuyer(isBuyer)
+			.isSeller(isSeller)
+			.maxPrice(maxPrice)
+			.minPrice(minPrice)
+			.minDeposit(minDeposit)
+			.maxDeposit(maxDeposit)
+			.birthday(birthDay)
+			.build();
+	}
 }

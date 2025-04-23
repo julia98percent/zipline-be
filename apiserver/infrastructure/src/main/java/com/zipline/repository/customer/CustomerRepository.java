@@ -1,4 +1,4 @@
-package com.zipline.repository;
+package com.zipline.repository.customer;
 
 import java.util.Optional;
 

@@ -2,15 +2,15 @@ package com.zipline.service.customer;
 
 import java.util.List;
 
-import com.zipline.dto.CustomerDetailResponseDTO;
-import com.zipline.dto.CustomerListResponseDTO;
-import com.zipline.dto.CustomerModifyRequestDTO;
-import com.zipline.dto.CustomerRegisterRequestDTO;
-import com.zipline.dto.PageRequestDTO;
-import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO;
-import com.zipline.dto.contract.ContractListResponseDTO;
-import com.zipline.dto.counsel.CounselListResponseDTO;
+import com.zipline.service.customer.dto.response.CustomerDetailResponseDTO;
+import com.zipline.service.customer.dto.response.CustomerListResponseDTO;
+import com.zipline.service.customer.dto.request.CustomerModifyRequestDTO;
+import com.zipline.service.customer.dto.request.CustomerRegisterRequestDTO;
+import com.zipline.global.request.PageRequestDTO;
+import com.zipline.service.contract.dto.response.ContractListResponseDTO;
+import com.zipline.service.counsel.dto.response.CounselListResponseDTO;
 import com.zipline.global.response.ApiResponse;
+import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
 
 public interface CustomerService {
 

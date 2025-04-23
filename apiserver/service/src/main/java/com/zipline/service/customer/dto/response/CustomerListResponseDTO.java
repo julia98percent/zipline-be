@@ -1,9 +1,9 @@
-package com.zipline.dto;
+package com.zipline.service.customer.dto.response;
 
 import java.util.List;
 
 import com.zipline.entity.customer.Customer;
-import lombok.NoArgsConstructor;
+
 import org.springframework.data.domain.Page;
 
 import lombok.Getter;
@@ -16,7 +16,6 @@ public class CustomerListResponseDTO {
 	private int totalElements;
 	private int totalPages;
 	private boolean hasNext;
-
 
 	public CustomerListResponseDTO(List<CustomerResponseDTO> customers, Page page) {
 		this.customers = customers;

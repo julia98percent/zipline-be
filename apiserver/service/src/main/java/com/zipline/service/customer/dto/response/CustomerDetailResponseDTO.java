@@ -1,4 +1,4 @@
-package com.zipline.dto;
+package com.zipline.service.customer.dto.response;
 
 import java.math.BigInteger;
 
