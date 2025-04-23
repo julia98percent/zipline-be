@@ -1,7 +1,7 @@
-package com.zipline.dto.survey;
-
+package com.zipline.service.survey.dto.response;
 
 import com.zipline.entity.survey.Choice;
+
 import lombok.Getter;
 
 @Getter

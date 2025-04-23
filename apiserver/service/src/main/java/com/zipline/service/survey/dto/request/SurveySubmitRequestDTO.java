@@ -1,4 +1,4 @@
-package com.zipline.dto.survey;
+package com.zipline.service.survey.dto.request;
 
 import java.util.List;
 

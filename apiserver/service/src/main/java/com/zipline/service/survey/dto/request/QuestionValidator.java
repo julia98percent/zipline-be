@@ -1,10 +1,11 @@
-package com.zipline.dto.survey;
+package com.zipline.service.survey.dto.request;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import com.zipline.entity.enums.QuestionType;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

@@ -1,12 +1,12 @@
-package com.zipline.dto.survey;
+package com.zipline.service.survey.dto.response;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.zipline.entity.survey.Choice;
 import com.zipline.entity.survey.Question;
-import lombok.Getter;
 
+import lombok.Getter;
 
 @Getter
 public class QuestionResponseDTO {
@@ -28,8 +28,8 @@ public class QuestionResponseDTO {
 
 	public static QuestionResponseDTO from(Question question, List<Choice> choices) {
 		List<ChoiceResponseDTO> choiceResponseDTOList = choices.stream()
-				.map(ChoiceResponseDTO::new)
-				.collect(Collectors.toList());
+			.map(ChoiceResponseDTO::new)
+			.collect(Collectors.toList());
 
 		return new QuestionResponseDTO(question, choiceResponseDTOList);
 	}

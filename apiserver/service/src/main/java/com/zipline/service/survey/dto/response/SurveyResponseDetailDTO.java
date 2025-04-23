@@ -1,4 +1,4 @@
-package com.zipline.dto.survey;
+package com.zipline.service.survey.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.zipline.entity.survey.Choice;
 import com.zipline.entity.survey.SurveyAnswer;
 import com.zipline.entity.survey.SurveyResponse;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
