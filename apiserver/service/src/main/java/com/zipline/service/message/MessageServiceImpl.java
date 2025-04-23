@@ -1,10 +1,12 @@
 package com.zipline.service.message;
 
 import com.zipline.dto.message.SendMessageRequestDTO;
+import com.zipline.global.exception.custom.message.MessageCommonException;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -31,8 +33,7 @@ public class MessageServiceImpl implements MessageService {
       return response;
 
     } catch (Exception e) {
-      log.error("메시지 전송 중 오류 발생: {}", e.getMessage());
-      throw new RuntimeException("메시지 전송 실패: " + e.getMessage(), e);
+      throw new MessageCommonException("메시지 전송 실패: " + e.getMessage(), HttpStatus.BAD_GATEWAY);
     }
   }
 }
