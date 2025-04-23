@@ -1,5 +1,6 @@
 package com.zipline.global.config;
 
+import com.zipline.service.message.SmsSignatureGenerator;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -9,21 +10,16 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-public class WebClientConfig {
-  
+public class SmsWebClientConfig {
+
   @Value("${sms.api-key}")
   String apiKey;
 
   @Bean
-  public WebClient webClient() {
-    // 임시 값
-    Map<String, String> signatureResult = Map.of(
-        "time", "2025-04-01T15:29:00Z",
-        "salt", "randomSaltValue123",
-        "hash", "exampleHashValue456"
-    );
+  public WebClient webClient(SmsSignatureGenerator smsSignatureGenerator) {
+      Map<String, String> signatureResult = smsSignatureGenerator.generateSignature().block();
 
-    if (signatureResult == null || signatureResult.isEmpty()) {
+      if (signatureResult == null || signatureResult.isEmpty()) {
       throw new IllegalArgumentException("유효하지 않은 signature 값 입니다.");
     }
 
@@ -36,7 +32,7 @@ public class WebClientConfig {
     return WebClient.builder()
         .baseUrl("https://api.solapi.com/messages/v4")
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        .defaultHeader(HttpHeaders.AUTHORIZATION, authorizationHeader) // Adding Authorization here
+        .defaultHeader(HttpHeaders.AUTHORIZATION, authorizationHeader)
         .build();
   }
 }
