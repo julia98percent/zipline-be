@@ -117,9 +117,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public void logout(Long uid, String accessToken) {
-		userRepository.findById(uid)
-			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-		// 1. Access Token 검증
 		if (!tokenProvider.validateToken(accessToken)) {
 			throw new UserNotFoundException("유효하지 않은 토큰입니다.", HttpStatus.BAD_REQUEST);
 		}
@@ -166,7 +163,6 @@ public class UserServiceImpl implements UserService {
 
 		String uidStr = tokenProvider.getUserIdFromToken(refreshToken);
 		Long uid = Long.parseLong(uidStr);
-		//refreshToken = "refreshToken: " + refreshToken;
 		String redisKey = "refreshToken:" + uidStr;
 		String saveRefreshToken = redisTemplate.opsForValue().get(redisKey);
 
