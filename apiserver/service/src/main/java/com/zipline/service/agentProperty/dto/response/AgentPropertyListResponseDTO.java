@@ -1,4 +1,4 @@
-package com.zipline.dto.agentProperty;
+package com.zipline.service.agentProperty.dto.response;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -6,8 +6,8 @@ import java.time.Year;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import com.zipline.entity.agentProperty.AgentProperty;
 
+import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.enums.PropertyType;
 

@@ -1,4 +1,4 @@
-package com.zipline.dto.agentProperty;
+package com.zipline.service.agentProperty.dto.response;
 
 import java.math.BigInteger;
 import java.time.LocalDate;

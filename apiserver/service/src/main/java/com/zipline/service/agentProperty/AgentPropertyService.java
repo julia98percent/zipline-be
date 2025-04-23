@@ -1,9 +1,9 @@
 package com.zipline.service.agentProperty;
 
-import com.zipline.dto.PageRequestDTO;
-import com.zipline.dto.agentProperty.AgentPropertyListResponseDTO;
-import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
-import com.zipline.dto.agentProperty.AgentPropertyResponseDTO;
+import com.zipline.global.request.PageRequestDTO;
+import com.zipline.service.agentProperty.dto.request.AgentPropertyRequestDTO;
+import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
+import com.zipline.service.agentProperty.dto.response.AgentPropertyResponseDTO;
 
 public interface AgentPropertyService {
 

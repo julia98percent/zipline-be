@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.Year;
 
-import com.zipline.dto.agentProperty.AgentPropertyRequestDTO;
 import com.zipline.entity.BaseTimeEntity;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.enums.PropertyCategory;
@@ -138,28 +137,32 @@ public class AgentProperty extends BaseTimeEntity {
 		this.details = details;
 	}
 
-	public void modifyProperty(AgentPropertyRequestDTO dto,
-		Customer customer) {
+	public void modifyProperty(Customer customer, String address, String legalDistrictCode, BigInteger deposit,
+		BigInteger monthlyRent, BigInteger price, PropertyType type, Double longitude, Double latitude,
+		LocalDate startDate,
+		LocalDate endDate, LocalDate moveInDate, PropertyCategory realCategory, Boolean petsAllowed, Integer floor,
+		Boolean hasElevator, Year constructionYear, Integer parkingCapacity, Double netArea, Double totalArea,
+		String details) {
 		this.customer = customer;
-		this.address = dto.getAddress();
-		this.deposit = dto.getDeposit();
-		this.monthlyRent = dto.getMonthlyRent();
-		this.price = dto.getPrice();
-		this.type = dto.getType();
-		this.longitude = dto.getLongitude();
-		this.latitude = dto.getLatitude();
-		this.legalDistrictCode = dto.getLegalDistrictCode();
-		this.startDate = dto.getStartDate();
-		this.endDate = dto.getEndDate();
-		this.moveInDate = dto.getMoveInDate();
-		this.realCategory = dto.getRealCategory();
-		this.petsAllowed = dto.getPetsAllowed();
-		this.floor = dto.getFloor();
-		this.hasElevator = dto.getHasElevator();
-		this.constructionYear = dto.getConstructionYear();
-		this.parkingCapacity = dto.getParkingCapacity();
-		this.netArea = dto.getNetArea();
-		this.totalArea = dto.getTotalArea();
-		this.details = dto.getDetails();
+		this.address = address;
+		this.deposit = deposit;
+		this.monthlyRent = monthlyRent;
+		this.price = price;
+		this.type = type;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.legalDistrictCode = legalDistrictCode;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.moveInDate = moveInDate;
+		this.realCategory = realCategory;
+		this.petsAllowed = petsAllowed;
+		this.floor = floor;
+		this.hasElevator = hasElevator;
+		this.constructionYear = constructionYear;
+		this.parkingCapacity = parkingCapacity;
+		this.netArea = netArea;
+		this.totalArea = totalArea;
+		this.details = details;
 	}
 }
