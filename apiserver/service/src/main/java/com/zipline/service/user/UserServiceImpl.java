@@ -24,6 +24,7 @@ import com.zipline.dto.user.UserResponseDTO;
 import com.zipline.entity.survey.Survey;
 import com.zipline.entity.user.Authority;
 import com.zipline.entity.user.User;
+import com.zipline.global.exception.custom.SurveyNotFoundException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.jwt.ErrorCode;
 import com.zipline.global.jwt.TokenProvider;
@@ -53,7 +54,7 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findById(uid)
 			.orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다. id=" + uid, HttpStatus.BAD_REQUEST));
 		Survey survey = surveyRepository.findFirstByUserOrderByCreatedAtDesc(user)
-			.orElseThrow(() -> new RuntimeException("해당 유저의 설문이 존재하지 않습니다."));
+			.orElseThrow(() -> new SurveyNotFoundException("해당 유저의 설문이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
 		return UserResponseDTO.userSurvey(user, survey);
 	}
