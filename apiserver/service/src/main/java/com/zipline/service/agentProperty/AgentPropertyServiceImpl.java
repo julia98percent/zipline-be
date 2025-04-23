@@ -21,8 +21,8 @@ import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.agentProperty.PropertyNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
 import com.zipline.repository.CustomerRepository;
-import com.zipline.repository.UserRepository;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
+import com.zipline.repository.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 

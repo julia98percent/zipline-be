@@ -27,10 +27,10 @@ import com.zipline.global.exception.custom.contract.ContractNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
 import com.zipline.global.util.S3FileUploader;
 import com.zipline.repository.CustomerRepository;
-import com.zipline.repository.UserRepository;
 import com.zipline.repository.contract.ContractDocumentRepository;
 import com.zipline.repository.contract.ContractRepository;
 import com.zipline.repository.contract.CustomerContractRepository;
+import com.zipline.repository.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 

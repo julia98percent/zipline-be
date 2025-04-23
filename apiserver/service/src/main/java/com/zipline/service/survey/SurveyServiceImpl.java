@@ -34,11 +34,11 @@ import com.zipline.global.exception.custom.SurveyNotFoundException;
 import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.global.util.S3FileUploader;
-import com.zipline.repository.UserRepository;
 import com.zipline.repository.survey.QuestionRepository;
 import com.zipline.repository.survey.SurveyAnswerRepository;
 import com.zipline.repository.survey.SurveyRepository;
 import com.zipline.repository.survey.SurveyResponseRepository;
+import com.zipline.repository.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 

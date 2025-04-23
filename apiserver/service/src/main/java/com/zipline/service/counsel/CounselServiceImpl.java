@@ -23,9 +23,9 @@ import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.repository.CustomerRepository;
-import com.zipline.repository.UserRepository;
 import com.zipline.repository.counsel.CounselDetailRepository;
 import com.zipline.repository.counsel.CounselRepository;
+import com.zipline.repository.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
