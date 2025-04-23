@@ -20,8 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.zipline.dto.user.FindUserIdRequestDTO;
 import com.zipline.dto.user.FindUserIdResponseDTO;
+import com.zipline.dto.user.LoginRequestDTO;
+import com.zipline.dto.user.SignUpRequestDTO;
 import com.zipline.dto.user.TokenResponseDTO;
-import com.zipline.dto.user.UserRequestDTO;
+import com.zipline.dto.user.UserModifyRequestDTO;
 import com.zipline.dto.user.UserResponseDTO;
 import com.zipline.global.jwt.dto.TokenRequestDTO;
 import com.zipline.global.response.ApiResponse;
@@ -47,18 +49,18 @@ public class UserController {
 	}
 
 	@PostMapping("/signup")
-	public ResponseEntity<ApiResponse<Void>> signup(@RequestBody UserRequestDTO userRequestDto) {
-		userService.signup(userRequestDto);
+	public ResponseEntity<ApiResponse<Void>> signup(@RequestBody SignUpRequestDTO signUpRequestDto) {
+		userService.signup(signUpRequestDto);
 		ApiResponse<Void> response = ApiResponse.create("회원가입 성공");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<TokenResponseDTO>> login(
-		@RequestBody UserRequestDTO userRequestDto,
+		@RequestBody LoginRequestDTO loginRequestDTO,
 		HttpServletResponse response) {
 
-		TokenRequestDTO tokenRequestDto = userService.login(userRequestDto); // 로그인 & 토큰 발급
+		TokenRequestDTO tokenRequestDto = userService.login(loginRequestDTO); // 로그인 & 토큰 발급
 
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenRequestDto.getRefreshToken())
 			.httpOnly(true)
@@ -105,10 +107,10 @@ public class UserController {
 
 	@PatchMapping("/update-info")
 	public ResponseEntity<ApiResponse<UserResponseDTO>> updateInfo(
-		@RequestBody UserRequestDTO userRequestDto,
+		@RequestBody UserModifyRequestDTO userModifyRequestDto,
 		Principal principal) {
 		Long uid = Long.parseLong(principal.getName());
-		UserResponseDTO updatedInfo = userService.updateInfo(uid, userRequestDto);
+		UserResponseDTO updatedInfo = userService.updateInfo(uid, userModifyRequestDto);
 
 		ApiResponse<UserResponseDTO> response = ApiResponse.ok("회원 정보 수정 완료", updatedInfo);
 		return ResponseEntity.ok(response);

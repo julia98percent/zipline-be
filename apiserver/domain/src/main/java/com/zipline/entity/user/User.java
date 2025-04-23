@@ -1,6 +1,6 @@
 package com.zipline.entity.user;
 
-import com.zipline.dto.user.UserRequestDTO;
+import java.time.LocalTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,12 +23,9 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 public class User {
 
-	@Enumerated(EnumType.STRING)
-	private Authority role;
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long uid; // PK
+	private Long uid;
 
 	@Column(nullable = false, length = 20, unique = true)
 	private String id;
@@ -39,44 +36,48 @@ public class User {
 	@Column(nullable = false, length = 50)
 	private String name;
 
-	@Column(length = 255)
+	@Column(nullable = false, length = 255)
 	private String url;
 
-	@Column
-	private Integer birthday;
-
-	@Column
+	@Column(nullable = false)
 	private Integer noticeMonth;
 
-	@Column(length = 20)
+	@Column(nullable = false, length = 13)
 	private String phoneNo;
 
-	@Column(length = 255)
+	@Column(nullable = false, length = 255)
 	private String email;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, length = 5)
+	private Authority role;
+
+	@Column(nullable = false)
+	private LocalTime noticeTime;
 
 	@Builder
 	public User(String id, String password, String name, Authority role,
-		String url, Integer birthday, String phoneNo, String email, Integer noticeMonth
+		String url, String phoneNo, String email, Integer noticeMonth, LocalTime noticeTime
 	) {
 		this.id = id;
 		this.password = password;
 		this.name = name;
 		this.role = role;
 		this.url = url;
-		this.birthday = birthday;
 		this.phoneNo = phoneNo;
 		this.email = email;
 		this.noticeMonth = noticeMonth;
+		this.noticeTime = noticeTime;
 	}
 
-	public void updateInfo(UserRequestDTO dto) {
-		this.id = dto.getId();
-		this.name = dto.getName();
-		this.url = dto.getUrl();
-		this.birthday = dto.getBirthday();
-		this.phoneNo = dto.getPhoneNo();
-		this.email = dto.getEmail();
-		this.noticeMonth = dto.getNoticeMonth();
+	public void updateInfo(String name, String url, String phoneNo, String email, Integer noticeMonth,
+		LocalTime noticeTime) {
+		this.name = name;
+		this.url = url;
+		this.phoneNo = phoneNo;
+		this.email = email;
+		this.noticeMonth = noticeMonth;
+		this.noticeTime = noticeTime;
 	}
 
 	public void setUrl(String url) {
