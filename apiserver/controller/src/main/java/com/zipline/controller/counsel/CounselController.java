@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zipline.dto.counsel.CounselModifyRequestDTO;
-import com.zipline.dto.counsel.CounselResponseDTO;
+import com.zipline.service.counsel.dto.request.CounselModifyRequestDTO;
+import com.zipline.service.counsel.dto.response.CounselResponseDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.counsel.CounselService;
 

@@ -1,4 +1,4 @@
-package com.zipline.dto.counsel;
+package com.zipline.service.counsel.dto.request;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,9 +12,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
-@Tag(name = "상담 수정 요청", description = "상담을 생성하기 위한 요청 DTO")
+@Tag(name = "상담 생성 요청", description = "상담을 생성하기 위한 요청 DTO")
 @Getter
-public class CounselModifyRequestDTO {
+public class CounselCreateRequestDTO {
 
 	@Schema(description = "상담 제목", example = "1:1 맞춤 상담", required = true)
 	@Size(max = 20, message = "상담 제목의 최대 길이는 20자 입니다.")
@@ -33,6 +33,7 @@ public class CounselModifyRequestDTO {
 	@Schema(description = "상담 문항 정보")
 	@Getter
 	public static class CounselDetailDTO {
+
 		@Schema(description = "상담 질문", example = "관심있는 매물의 유형은?", required = true)
 		@Size(max = 100, message = "질문의 최대 길이는 100자 입니다.")
 		@NotBlank(message = "질문 내용은 필수입니다.")

@@ -1,4 +1,4 @@
-package com.zipline.dto.counsel;
+package com.zipline.service.counsel.dto.response;
 
 import java.time.LocalDateTime;
 
