@@ -23,12 +23,7 @@ public class MessageController {
 
   @PostMapping("")
   public ResponseEntity<String> sendMessage(@RequestBody List<SendMessageRequestDTO> request) {
-    try {
       String result = messageService.sendMessage(request);
       return ResponseEntity.ok(result);
-    } catch (Exception e) {
-      log.error("Error occurred while sending message: {}", e.getMessage());
-      return ResponseEntity.status(500).body("An unexpected error occurred. Please try again later.");
-    }
   }
 }
