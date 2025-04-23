@@ -1,4 +1,4 @@
-package com.zipline.dto.contract;
+package com.zipline.service.contract.dto.request;
 
 import java.time.LocalDate;
 

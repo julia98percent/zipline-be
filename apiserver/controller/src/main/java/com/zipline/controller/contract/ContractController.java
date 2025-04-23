@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.List;
 
 import com.zipline.global.response.ApiResponse;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.zipline.dto.PageRequestDTO;
-import com.zipline.dto.contract.ContractListResponseDTO;
-import com.zipline.dto.contract.ContractRequestDTO;
-import com.zipline.dto.contract.ContractResponseDTO;
+import com.zipline.global.request.PageRequestDTO;
+import com.zipline.service.contract.dto.response.ContractListResponseDTO;
+import com.zipline.service.contract.dto.request.ContractRequestDTO;
+import com.zipline.service.contract.dto.response.ContractResponseDTO;
 import com.zipline.service.contract.ContractService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class ContractController {
 
 	@GetMapping("/{contractUid}")
 	public ResponseEntity<ApiResponse<ContractResponseDTO>> getContract(@PathVariable Long contractUid,
-																		Principal principal) {
+		Principal principal) {
 		ContractResponseDTO contractResponseDTO = contractService.getContract(contractUid, Long.parseLong(
 			principal.getName()));
 		ApiResponse<ContractResponseDTO> response = ApiResponse.ok("계약 상세 조회 성공", contractResponseDTO);
