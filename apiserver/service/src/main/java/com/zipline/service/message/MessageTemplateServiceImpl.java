@@ -1,6 +1,6 @@
 package com.zipline.service.message;
 
-import com.zipline.dto.message.MessageTemplateRequestDTO;
+import com.zipline.service.message.dto.message.request.MessageTemplateRequestDTO;
 import com.zipline.entity.message.MessageTemplate;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.custom.UserNotFoundException;

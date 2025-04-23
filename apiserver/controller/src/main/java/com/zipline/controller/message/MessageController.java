@@ -1,6 +1,6 @@
 package com.zipline.controller.message;
 
-import com.zipline.dto.message.SendMessageRequestDTO;
+import com.zipline.service.message.dto.message.request.SendMessageRequestDTO;
 import com.zipline.service.message.MessageService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;

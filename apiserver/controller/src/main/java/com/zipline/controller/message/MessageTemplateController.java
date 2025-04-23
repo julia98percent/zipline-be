@@ -1,6 +1,6 @@
 package com.zipline.controller.message;
 
-import com.zipline.dto.message.MessageTemplateRequestDTO;
+import com.zipline.service.message.dto.message.request.MessageTemplateRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.message.MessageTemplateService;
 import io.swagger.v3.oas.annotations.tags.Tag;
