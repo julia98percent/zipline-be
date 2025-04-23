@@ -1,6 +1,6 @@
 package com.zipline.global.config;
 
-import com.zipline.global.util.SmsSignatureGenerator;
+import com.zipline.service.message.SmsSignatureGenerator;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
