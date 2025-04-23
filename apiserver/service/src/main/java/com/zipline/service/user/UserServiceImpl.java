@@ -23,7 +23,9 @@ import com.zipline.entity.user.PasswordQuestion;
 import com.zipline.entity.user.PasswordQuestionAnswer;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.custom.SurveyNotFoundException;
-import com.zipline.global.exception.custom.UserNotFoundException;
+import com.zipline.global.exception.custom.user.PasswordAnswerNotFoundException;
+import com.zipline.global.exception.custom.user.PasswordQuestionNotFoundException;
+import com.zipline.global.exception.custom.user.UserNotFoundException;
 import com.zipline.global.jwt.ErrorCode;
 import com.zipline.global.jwt.TokenProvider;
 import com.zipline.global.jwt.dto.TokenRequestDTO;
@@ -221,13 +223,13 @@ public class UserServiceImpl implements UserService {
 			.orElseThrow(() -> new UserNotFoundException("존재하지 않는 아이디입니다.", HttpStatus.BAD_REQUEST));
 
 		PasswordQuestion question = passwordQuestionRepository.findById(findPasswordRequestDTO.getPasswordQuestionUid())
-			.orElseThrow(() -> new UserNotFoundException("선택한 질문이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new PasswordQuestionNotFoundException("선택한 질문이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
 		PasswordQuestionAnswer answer = passwordQuestionAnswerRepository.findByUserAndPasswordQuestion(user, question)
-			.orElseThrow(() -> new UserNotFoundException("해당 질문에 대한 답변이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new PasswordAnswerNotFoundException("해당 질문에 대한 답변이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
 		if (!answer.getAnswer().equals(findPasswordRequestDTO.getAnswer())) {
-			throw new UserNotFoundException("답변이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+			throw new PasswordAnswerNotFoundException("답변이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
 		}
 
 		Set<String> keys = redisTemplate.keys("resetToken:*");
