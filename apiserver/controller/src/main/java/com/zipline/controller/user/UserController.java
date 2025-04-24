@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zipline.service.user.dto.request.FindPasswordRequestDTO;
 import com.zipline.service.user.dto.request.FindUserIdRequestDTO;
+import com.zipline.service.user.dto.request.ResetPasswordRequestDTO;
 import com.zipline.service.user.dto.response.FindUserIdResponseDTO;
 import com.zipline.service.user.dto.request.LoginRequestDTO;
 import com.zipline.service.user.dto.request.SignUpRequestDTO;
@@ -122,6 +124,20 @@ public class UserController {
 		FindUserIdResponseDTO findUserId = userService.findUserId(findUserIdRequestDto);
 		ApiResponse<FindUserIdResponseDTO> response = ApiResponse.create("아이디 찾기 성공", findUserId);
 		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/find-password")
+	public ResponseEntity<ApiResponse<String>> findUserPassword(
+		@RequestBody @Valid FindPasswordRequestDTO findPasswordRequestDTO) {
+		String resetToken = userService.findUserPassword(findPasswordRequestDTO);
+		return ResponseEntity.ok(ApiResponse.ok("비밀번호 재설정 토큰 발급", resetToken));
+	}
+
+	@PatchMapping("/reset-password")
+	public ResponseEntity<ApiResponse<Void>> resetPassword(
+		@RequestBody ResetPasswordRequestDTO resetPasswordRequestDTO) {
+		userService.resetPassword(resetPasswordRequestDTO);
+		return ResponseEntity.ok(ApiResponse.ok("비밀번호 재설정 성공"));
 	}
 
 	@GetMapping("/reissue")
