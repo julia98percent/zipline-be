@@ -42,11 +42,12 @@ public class SurveyController {
 
 	@Operation(summary = "설문 생성", description = "새로운 설문을 생성합니다.")
 	@PostMapping("/surveys")
-	public ResponseEntity<ApiResponse<Map<String, Long>>> createSurvey(
+	public ResponseEntity<ApiResponse<Map<String, String>>> createSurvey(
 		@Valid @RequestBody SurveyCreateRequestDTO requestDTO,
 		Principal principal) {
-		ApiResponse<Map<String, Long>> response = surveyService.createSurvey(requestDTO,
+		Map<String, String> result = surveyService.createSurvey(requestDTO,
 			Long.parseLong(principal.getName()));
+		ApiResponse<Map<String, String>> response = ApiResponse.create("설문 등록 완료", result);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
