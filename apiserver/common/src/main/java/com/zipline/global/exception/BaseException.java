@@ -1,14 +1,13 @@
 package com.zipline.global.exception;
 
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 public class BaseException extends RuntimeException {
-	private HttpStatus status;
+	private final ErrorCode errorCode;
 
-	public BaseException(String message, HttpStatus status) {
-		super(message);
-		this.status = status;
+	public BaseException(ErrorCode errorCode) {
+		super(errorCode.getMessage());
+		this.errorCode = errorCode;
 	}
 }
