@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.zipline.entity.enums.QuestionType;
-import com.zipline.entity.survey.Question;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.zipline.global.exception.custom.QuestionNotFoundException;
+import com.zipline.entity.enums.QuestionType;
+import com.zipline.entity.survey.Question;
+import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
+import com.zipline.global.exception.survey.SurveyException;
 
 @Component
 public class FileQuestionMapper {
@@ -35,7 +35,7 @@ public class FileQuestionMapper {
 	private void validateFileUploadQuestionExists(List<Question> questions, Long uid) {
 		if (questions.stream().noneMatch(q -> q.getUid().equals(uid)
 			&& q.getQuestionType() == QuestionType.FILE_UPLOAD)) {
-			throw new QuestionNotFoundException("파일과 매핑되는 유효한 문항이 없습니다.", HttpStatus.BAD_REQUEST);
+			throw new SurveyException(SurveyErrorCode.QUESTION_NOT_FOUND);
 		}
 	}
 

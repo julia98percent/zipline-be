@@ -2,9 +2,10 @@ package com.zipline.repository.survey;
 
 import java.util.List;
 
-import com.zipline.entity.survey.SurveyAnswer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import com.zipline.entity.survey.SurveyAnswer;
 
 public interface SurveyAnswerRepository extends JpaRepository<SurveyAnswer, Long> {
 

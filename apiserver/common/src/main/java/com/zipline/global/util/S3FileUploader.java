@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,7 +18,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.zipline.global.config.S3Folder;
-import com.zipline.global.exception.custom.FileUploadException;
+import com.zipline.global.exception.common.FileUploadException;
+import com.zipline.global.exception.common.errorcode.CommonErrorCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,7 +68,9 @@ public class S3FileUploader {
 		try (InputStream inputStream = file.getInputStream()) {
 			amazonS3.putObject(new PutObjectRequest(bucket, storeFileName, inputStream, metadata));
 		} catch (IOException e) {
-			throw new FileUploadException("파일 업로드 중 오류가 발생하였습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+			log.error("File Upload Failed : name = {}, size = {}, error= {}", file.getOriginalFilename(),
+				file.getSize(), e.getMessage());
+			throw new FileUploadException(CommonErrorCode.FILE_UPLOAD_FAILED);
 		}
 
 		return amazonS3.getUrl(bucket, storeFileName).toString();
