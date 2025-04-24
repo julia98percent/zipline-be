@@ -41,7 +41,7 @@ public class RegionCodeServiceImpl implements RegionCodeService {
 				List<RegionDTO> regions = parseRegions(response);
 				log.info("파싱된 지역 정보: {}", regions);
 				for (RegionDTO region : regions) {
-					saveRegion(region, 1);
+					saveRegion(0000000000, region, 1);
 				}
 			} else {
 				log.error("지역 목록이 비어있습니다.");
@@ -65,7 +65,7 @@ public class RegionCodeServiceImpl implements RegionCodeService {
 					List<RegionDTO> regions = parseRegions(response);
 					log.info("파싱된 지역 정보: {}", regions);
 					for (RegionDTO region : regions) {
-						saveRegion(region, 2);
+						saveRegion(city.getCortarNo(), region, 2);
 					}
 				} else {
 					log.error("지역 목록이 비어있습니다.");
@@ -90,7 +90,7 @@ public class RegionCodeServiceImpl implements RegionCodeService {
 					List<RegionDTO> regions = parseRegions(response);
 					log.info("파싱된 지역 정보: {}", regions);
 					for (RegionDTO region : regions) {
-						saveRegion(region, 3);
+						saveRegion(district.getCortarNo(), region, 3);
 					}
 				} else {
 					log.error("지역 목록이 비어있습니다.");
@@ -117,40 +117,35 @@ public class RegionCodeServiceImpl implements RegionCodeService {
 	 * 지역 정보를 데이터베이스에 저장합니다.
 	 * 이미 존재하는 경우 정보를 업데이트합니다.
 	 */
-	private void saveRegion(RegionDTO dto, int level) {
-		log.info("\n=== 지역 정보 저장 시작 ===");
-		log.info("저장할 지역: {} (레벨: {})", dto.getCortarName(), level);
+    private void saveRegion(long parentCortarNo, RegionDTO dto, int level) {
+      log.info("\n=== 지역 정보 저장 시작 ===");
+      log.info("저장할 지역: {} (레벨: {})", dto.getCortarName(), level);
 
-		Optional<Region> existingRegion = regionRepository.findByCortarNo(dto.getCortarNo());
-		Region region;
+      Optional<Region> existingRegion = regionRepository.findByCortarNo(dto.getCortarNo());
+      Region region;
 
-		if (existingRegion.isPresent()) {
-			region = existingRegion.get();
-			log.info("기존 지역 정보 업데이트: {}", region.getCortarName());
-			// 기존 지역 정보 업데이트 (메서드 사용)
-			region = region.updateCoordinates(dto.getCenterLat(), dto.getCenterLon());
-		} else {
-			// 새 지역 정보 생성 (빌더 패턴 사용)
-			region = Region.builder()
-				.cortarNo(dto.getCortarNo())
-				.cortarName(dto.getCortarName())
-				.level(level)
-				.centerLat(dto.getCenterLat())
-				.centerLon(dto.getCenterLon())
-				.naverStatus(CrawlStatus.NEW)
-				.zigbangStatus(CrawlStatus.NEW)
-				.dabangStatus(CrawlStatus.NEW)
-				.build();
-			log.info("새로운 지역 정보 생성: {}", region.getCortarName());
-		}
+      // 부모 지역 찾기 (parentCortarNo가 0이 아닌 경우에만)
+      Region parentRegion = null;
+      if (parentCortarNo > 0) {
+        parentRegion = regionRepository.findByCortarNo(parentCortarNo)
+                .orElseThrow(() -> new IllegalArgumentException("Parent region not found: " + parentCortarNo));
+        log.info("부모 지역 설정: {}", parentRegion.getCortarName());
+      }
+
+        // 새 지역 정보 생성 (빌더 패턴 사용)
+        region = Region.builder()
+                .cortarNo(dto.getCortarNo())
+                .cortarName(dto.getCortarName())
+                .level(level)
+                .centerLat(dto.getCenterLat())
+                .centerLon(dto.getCenterLon())
+                .parent(parentRegion)  // 부모 지역 설정
+                .naverStatus(CrawlStatus.NEW)
+                .zigbangStatus(CrawlStatus.NEW)
+                .dabangStatus(CrawlStatus.NEW)
+                .build();
 
 		Region savedRegion = regionRepository.save(region);
-		log.info("저장된 지역 정보: cortarNo={}, cortarName={}, level={}, centerLat={}, centerLon={}",
-			savedRegion.getCortarNo(),
-			savedRegion.getCortarName(),
-			savedRegion.getLevel(),
-			savedRegion.getCenterLat(),
-			savedRegion.getCenterLon());
 		log.info("=== 지역 정보 저장 완료 ===\n");
 	}
 
