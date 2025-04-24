@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import com.zipline.global.exception.ErrorCode;
 
 public enum CounselErrorCode implements ErrorCode {
-	COUNSEL_NOT_FOUND("Counsel-001", "해당하는 상담을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+	COUNSEL_NOT_FOUND("COUNSEL-001", "해당하는 상담을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
 	private final String code;
 	private final String message;
