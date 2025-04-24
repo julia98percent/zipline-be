@@ -3,18 +3,16 @@ package com.zipline.service.survey;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import com.zipline.service.survey.dto.request.SurveySubmitRequestDTO;
 import com.zipline.entity.enums.QuestionType;
 import com.zipline.entity.survey.Choice;
 import com.zipline.entity.survey.Question;
 import com.zipline.entity.survey.SurveyAnswer;
 import com.zipline.entity.survey.SurveyResponse;
-import com.zipline.global.exception.custom.ChoiceNotAllowedException;
-import com.zipline.global.exception.custom.QuestionNotFoundException;
-import com.zipline.global.exception.custom.QuestionTypeException;
+import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
+import com.zipline.global.exception.survey.SurveyException;
+import com.zipline.service.survey.dto.request.SurveySubmitRequestDTO;
 
 @Component
 public class SurveyAnswerFactory {
@@ -34,7 +32,7 @@ public class SurveyAnswerFactory {
 				.collect(Collectors.toList()));
 			return new SurveyAnswer(surveyResponse, question, choiceValue, null);
 		}
-		throw new QuestionTypeException("지원하지 않는 질문 타입입니다.", HttpStatus.BAD_REQUEST);
+		throw new SurveyException(SurveyErrorCode.QUESTION_TYPE_UNSUPPORTED);
 	}
 
 	public SurveyAnswer createFileAnswer(Long questionUid, String fileUrl, List<Question> questions,
@@ -47,7 +45,7 @@ public class SurveyAnswerFactory {
 		return questions.stream()
 			.filter(q -> q.getUid().equals(uid))
 			.findFirst()
-			.orElseThrow(() -> new QuestionNotFoundException("해당하는 문항이 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new SurveyException(SurveyErrorCode.QUESTION_NOT_FOUND));
 	}
 
 	private boolean isChoiceQuestion(QuestionType questionType) {
@@ -56,13 +54,13 @@ public class SurveyAnswerFactory {
 
 	private void validateChoicesIds(Question question, List<Long> submittedChoiceIds) {
 		if (question.getQuestionType() == QuestionType.SINGLE_CHOICE && submittedChoiceIds.size() > 1) {
-			throw new ChoiceNotAllowedException("단일 선택 문항에는 하나의 선택지만 허용됩니다.", HttpStatus.BAD_REQUEST);
+			throw new SurveyException(SurveyErrorCode.CHOICE_SINGLE_ONLY);
 		}
 		if (!question.getChoices().stream()
 			.map(Choice::getUid)
 			.collect(Collectors.toSet())
 			.containsAll(submittedChoiceIds)) {
-			throw new ChoiceNotAllowedException("올바르지 않은 선택지가 포함되어 있습니다.", HttpStatus.BAD_REQUEST);
+			throw new SurveyException(SurveyErrorCode.CHOICE_INVALID);
 		}
 	}
 }

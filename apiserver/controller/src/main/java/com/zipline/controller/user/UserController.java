@@ -18,31 +18,31 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zipline.service.user.dto.request.FindPasswordRequestDTO;
-import com.zipline.service.user.dto.request.FindUserIdRequestDTO;
-import com.zipline.service.user.dto.request.ResetPasswordRequestDTO;
-import com.zipline.service.user.dto.response.FindUserIdResponseDTO;
-import com.zipline.service.user.dto.request.LoginRequestDTO;
-import com.zipline.service.user.dto.request.SignUpRequestDTO;
-import com.zipline.service.user.dto.response.TokenResponseDTO;
-import com.zipline.service.user.dto.request.UserModifyRequestDTO;
-import com.zipline.service.user.dto.response.UserResponseDTO;
 import com.zipline.global.jwt.dto.TokenRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.user.UserService;
+import com.zipline.service.user.dto.request.FindPasswordRequestDTO;
+import com.zipline.service.user.dto.request.FindUserIdRequestDTO;
+import com.zipline.service.user.dto.request.LoginRequestDTO;
+import com.zipline.service.user.dto.request.ResetPasswordRequestDTO;
+import com.zipline.service.user.dto.request.SignUpRequestDTO;
+import com.zipline.service.user.dto.request.UserModifyRequestDTO;
+import com.zipline.service.user.dto.response.FindUserIdResponseDTO;
+import com.zipline.service.user.dto.response.TokenResponseDTO;
+import com.zipline.service.user.dto.response.UserResponseDTO;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
 
 	private final UserService userService;
 
-	@GetMapping("/me")  // 특정 사용자 정보 조회
+	@GetMapping("/info")  // 특정 사용자 정보 조회
 	public ResponseEntity<ApiResponse<UserResponseDTO>> findById(Principal principal) {
 		Long uid = Long.parseLong(principal.getName());
 		UserResponseDTO dto = userService.findById(uid);
@@ -84,7 +84,7 @@ public class UserController {
 		return ResponseEntity.ok(responseBody);
 	}
 
-	@PatchMapping("/logout")
+	@PostMapping("/logout")
 	public ResponseEntity<ApiResponse<Void>> logout(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestHeader("Authorization") String authorizationHeader,
@@ -107,7 +107,7 @@ public class UserController {
 		return ResponseEntity.ok(responseBody);
 	}
 
-	@PatchMapping("/update-info")
+	@PatchMapping("/info")
 	public ResponseEntity<ApiResponse<UserResponseDTO>> updateInfo(
 		@RequestBody UserModifyRequestDTO userModifyRequestDto,
 		Principal principal) {

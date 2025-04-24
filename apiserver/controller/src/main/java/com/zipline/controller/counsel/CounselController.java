@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zipline.service.counsel.dto.request.CounselModifyRequestDTO;
-import com.zipline.service.counsel.dto.response.CounselResponseDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.counsel.CounselService;
+import com.zipline.service.counsel.dto.request.CounselModifyRequestDTO;
+import com.zipline.service.counsel.dto.response.CounselResponseDTO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

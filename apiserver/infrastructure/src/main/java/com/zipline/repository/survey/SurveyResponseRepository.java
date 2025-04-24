@@ -2,12 +2,12 @@ package com.zipline.repository.survey;
 
 import java.util.Optional;
 
-import com.zipline.entity.survey.SurveyResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.zipline.entity.survey.SurveyResponse;
 
 public interface SurveyResponseRepository extends JpaRepository<SurveyResponse, Long> {
 

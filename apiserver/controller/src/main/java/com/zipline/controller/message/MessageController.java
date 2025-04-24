@@ -1,6 +1,6 @@
 package com.zipline.controller.message;
 
-import com.zipline.dto.message.SendMessageRequestDTO;
+import com.zipline.service.message.dto.message.request.SendMessageRequestDTO;
 import com.zipline.service.message.MessageService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/messages")
 @Tag(name = "문자", description = "문자 / 문자 템플릿 관련 API")

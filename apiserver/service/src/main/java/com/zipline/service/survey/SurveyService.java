@@ -5,14 +5,14 @@ import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.zipline.entity.user.User;
 import com.zipline.global.request.PageRequestDTO;
+import com.zipline.global.response.ApiResponse;
 import com.zipline.service.survey.dto.request.SurveyCreateRequestDTO;
+import com.zipline.service.survey.dto.request.SurveySubmitRequestDTO;
 import com.zipline.service.survey.dto.response.SurveyResponseDTO;
 import com.zipline.service.survey.dto.response.SurveyResponseDetailDTO;
 import com.zipline.service.survey.dto.response.SurveyResponseListDTO;
-import com.zipline.service.survey.dto.request.SurveySubmitRequestDTO;
-import com.zipline.entity.user.User;
-import com.zipline.global.response.ApiResponse;
 
 public interface SurveyService {
 
