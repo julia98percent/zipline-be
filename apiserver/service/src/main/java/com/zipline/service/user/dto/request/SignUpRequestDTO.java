@@ -30,7 +30,7 @@ public class SignUpRequestDTO {
 	@NotBlank(message = "비밀번호 확인은 필수 입력값입니다.")
 	private String passwordCheck;
 
-	@Schema(description = "비밀번호 찾기 질문", example = "1")
+	@Schema(description = "비밀번호 찾기 질문", example = "5")
 	@NotNull(message = "비밀번호 찾기 질문은 필수입니다.")
 	private Long passwordQuestionUid;
 

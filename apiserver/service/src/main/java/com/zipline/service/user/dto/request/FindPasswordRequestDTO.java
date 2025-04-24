@@ -14,11 +14,11 @@ public class FindPasswordRequestDTO {
 	@NotBlank(message = "아이디는 필수입니다.")
 	private String loginId;
 
-	@Schema(description = "질문 UID", example = "1")
+	@Schema(description = "질문 UID", example = "5")
 	@NotNull(message = "질문을 선택해주세요.")
 	private Long passwordQuestionUid;
 
-	@Schema(description = "답변", example = "어릴 적 별명")
+	@Schema(description = "답변", example = "쫑이")
 	@NotBlank(message = "답변을 입력해주세요.")
 	private String answer;
 }
