@@ -12,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
+import com.zipline.global.jwt.JwtExceptionHandler;
 import com.zipline.global.jwt.JwtFilter;
 import com.zipline.global.jwt.TokenProvider;
 
@@ -28,6 +29,7 @@ public class SecurityConfig {
 
 	private final TokenProvider jwtTokenProvider;
 	private final RedisTemplate<String, String> redisTemplate;
+	private final JwtExceptionHandler jwtExceptionHandler;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -75,7 +77,7 @@ public class SecurityConfig {
 				.anyRequest()
 				.authenticated()
 			)
-			.addFilterBefore(new JwtFilter(jwtTokenProvider, redisTemplate),
+			.addFilterBefore(new JwtFilter(jwtExceptionHandler, jwtTokenProvider, redisTemplate),
 				UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();

@@ -2,16 +2,15 @@ package com.zipline.global.jwt;
 
 import java.io.IOException;
 
-import com.zipline.global.response.ApiResponse;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import net.minidev.json.JSONObject;
+import com.zipline.global.exception.auth.AuthException;
+import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
 
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,8 +24,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	public static final String AUTHORIZATION_HEADER = "Authorization";
 	public static final String BEARER_PREFIX = "Bearer";
-
-	public final TokenProvider tokenProvider;
+	private final JwtExceptionHandler jwtExceptionHandler;
+	private final TokenProvider tokenProvider;
 	private final RedisTemplate<String, String> redisTemplate;
 
 	@Override
@@ -43,7 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
 				Boolean isBlacklisted = redisTemplate.hasKey(blacklistKey);
 
 				if (isBlacklisted) {
-					setResponse(response, ErrorCode.EXPIRED_TOKEN);
+					jwtExceptionHandler.handle(response, AuthErrorCode.EXPIRED_TOKEN);
 					return;
 				}
 				Authentication authentication = tokenProvider.getAuthentication(jwt);
@@ -51,27 +50,9 @@ public class JwtFilter extends OncePerRequestFilter {
 			}
 
 			filterChain.doFilter(request, response);
-		} catch (JwtException ex) {
-			String message = ex.getMessage();
-			if (ErrorCode.UNAUTHORIZED_CLIENT.getMessage().equals(message))
-				setResponse(response, ErrorCode.UNAUTHORIZED_CLIENT);
-			else if (ErrorCode.JWT_SIGNATURE_FAIL.getMessage().equals(message))
-				setResponse(response, ErrorCode.JWT_SIGNATURE_FAIL);
-			else if (ErrorCode.EXPIRED_TOKEN.getMessage().equals(message))
-				setResponse(response, ErrorCode.EXPIRED_TOKEN);
-			else if (ErrorCode.JWT_DECODE_FAIL.getMessage().equals(message))
-				setResponse(response, ErrorCode.JWT_DECODE_FAIL);
-			else
-				setResponse(response, ErrorCode.FORBIDDEN_CLIENT);
+		} catch (AuthException e) {
+			jwtExceptionHandler.handle(response, e.getErrorCode());
 		}
-	}
-
-	private void setResponse(HttpServletResponse response, ErrorCode errorCode) throws RuntimeException, IOException {
-		JSONObject apiResponse = ApiResponse.jsonOf(errorCode);
-		String json = apiResponse.toJSONString();
-		response.setContentType("application/json;charset=UTF-8");
-		response.setStatus(errorCode.getHttpStatus().value());
-		response.getWriter().write(json);
 	}
 
 	private String resolveToken(HttpServletRequest request) {
