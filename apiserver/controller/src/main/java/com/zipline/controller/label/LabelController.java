@@ -12,6 +12,7 @@ import com.zipline.global.response.ApiResponse;
 import com.zipline.service.label.LabelService;
 import com.zipline.service.label.dto.request.LabelRequestDTO;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -23,7 +24,7 @@ public class LabelController {
 
 	@PostMapping("")
 	public ResponseEntity<ApiResponse<Void>> createLabel(
-		@RequestBody LabelRequestDTO labelRequestDTO,
+		@Valid @RequestBody LabelRequestDTO labelRequestDTO,
 		@AuthenticationPrincipal UserDetails userDetails
 	) {
 		Long userUid = Long.parseLong(userDetails.getUsername());
