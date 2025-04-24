@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,10 +13,14 @@ import com.zipline.entity.counsel.Counsel;
 import com.zipline.entity.counsel.CounselDetail;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.user.User;
-import com.zipline.global.exception.custom.CounselNotFoundException;
-import com.zipline.global.exception.custom.PermissionDeniedException;
-import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
-import com.zipline.global.exception.custom.user.UserNotFoundException;
+import com.zipline.global.exception.auth.AuthException;
+import com.zipline.global.exception.counsel.CounselException;
+import com.zipline.global.exception.customer.CustomerException;
+import com.zipline.global.exception.user.errorcode.UserErrorCode;
+import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
+import com.zipline.global.exception.counsel.errorcode.CounselErrorCode;
+import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
+import com.zipline.global.exception.user.UserException;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.repository.counsel.CounselDetailRepository;
 import com.zipline.repository.counsel.CounselRepository;
@@ -42,10 +45,9 @@ public class CounselServiceImpl implements CounselService {
 	public ApiResponse<Map<String, Long>> createCounsel(Long customerUid, CounselCreateRequestDTO requestDTO,
 		Long userUid) {
 		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
-			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.",
-				HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 		User savedUser = userRepository.findById(userUid)
-			.orElseThrow(() -> new UserNotFoundException("해당하는 사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		Counsel counsel = new Counsel(requestDTO.getTitle(), requestDTO.getCounselDate(), null, null, savedUser,
 			savedCustomer, null);
 		for (CounselCreateRequestDTO.CounselDetailDTO counselDetailDTO : requestDTO.getCounselDetails()) {
@@ -60,10 +62,10 @@ public class CounselServiceImpl implements CounselService {
 	@Transactional(readOnly = true)
 	public ApiResponse<CounselResponseDTO> getCounsel(Long counselUid, Long userUid) {
 		Counsel savedCounsel = counselRepository.findByUidAndDeletedAtIsNull(counselUid)
-			.orElseThrow(() -> new CounselNotFoundException("해당하는 상담을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new CounselException(CounselErrorCode.COUNSEL_NOT_FOUND));
 
 		if (!savedCounsel.getUser().getUid().equals(userUid)) {
-			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 		}
 
 		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
@@ -76,12 +78,12 @@ public class CounselServiceImpl implements CounselService {
 	public ApiResponse<Map<String, Long>> modifyCounsel(Long counselUid, CounselModifyRequestDTO requestDTO,
 		Long userUid) {
 		Counsel savedCounsel = counselRepository.findByUidAndDeletedAtIsNull(counselUid)
-			.orElseThrow(() -> new CounselNotFoundException("해당하는 상담을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new CounselException(CounselErrorCode.COUNSEL_NOT_FOUND));
 
 		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
 			counselUid);
 		if (!savedCounsel.getUser().getUid().equals(userUid)) {
-			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 		}
 		LocalDateTime deletedAt = LocalDateTime.now();
 		savedCounsel.update(requestDTO.getTitle(), requestDTO.getCounselDate());
@@ -100,9 +102,9 @@ public class CounselServiceImpl implements CounselService {
 	@Transactional
 	public ApiResponse<Void> deleteCounsel(Long counselUid, Long userUid) {
 		Counsel savedCounsel = counselRepository.findByUidAndDeletedAtIsNull(counselUid)
-			.orElseThrow(() -> new CounselNotFoundException("해당하는 상담을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new CounselException(CounselErrorCode.COUNSEL_NOT_FOUND));
 		if (!savedCounsel.getUser().getUid().equals(userUid)) {
-			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 		}
 		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
 			counselUid);

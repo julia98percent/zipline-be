@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +12,12 @@ import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.counsel.Counsel;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.user.User;
-import com.zipline.global.exception.custom.PermissionDeniedException;
-import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
-import com.zipline.global.exception.custom.user.UserNotFoundException;
+import com.zipline.global.exception.auth.AuthException;
+import com.zipline.global.exception.customer.CustomerException;
+import com.zipline.global.exception.user.errorcode.UserErrorCode;
+import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
+import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
+import com.zipline.global.exception.user.UserException;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
@@ -48,7 +50,7 @@ public class CustomerServiceImpl implements CustomerService {
 	@Transactional
 	public ApiResponse<Void> registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUID) {
 		User loginedUser = userRepository.findById(userUID)
-			.orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		Customer customer = customerRegisterRequestDTO.toEntity(loginedUser);
 		customerRepository.save(customer);
 		return ApiResponse.create("유저 등록에 성공하였습니다.");
@@ -59,10 +61,10 @@ public class CustomerServiceImpl implements CustomerService {
 		CustomerModifyRequestDTO customerModifyRequestDTO, Long userUID) {
 
 		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
-			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		if (!savedCustomer.getUser().getUid().equals(userUID)) {
-			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 		}
 
 		savedCustomer.modifyCustomer(customerModifyRequestDTO.getName(), customerModifyRequestDTO.getPhoneNo(),
@@ -84,10 +86,10 @@ public class CustomerServiceImpl implements CustomerService {
 	@Transactional
 	public ApiResponse<Void> deleteCustomer(Long customerUID, Long userUID) {
 		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUID)
-			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		if (!savedCustomer.getUser().getUid().equals(userUID)) {
-			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 		}
 
 		savedCustomer.delete(LocalDateTime.now());
@@ -110,10 +112,10 @@ public class CustomerServiceImpl implements CustomerService {
 	@Transactional(readOnly = true)
 	public CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid) {
 		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
-			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객 정보가 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		if (!savedCustomer.getUser().getUid().equals(userUid)) {
-			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 		}
 
 		return new CustomerDetailResponseDTO(savedCustomer);

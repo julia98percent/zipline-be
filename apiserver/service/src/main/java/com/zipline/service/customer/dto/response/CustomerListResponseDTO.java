@@ -2,9 +2,9 @@ package com.zipline.service.customer.dto.response;
 
 import java.util.List;
 
-import com.zipline.entity.customer.Customer;
-
 import org.springframework.data.domain.Page;
+
+import com.zipline.entity.customer.Customer;
 
 import lombok.Getter;
 

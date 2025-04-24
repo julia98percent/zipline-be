@@ -3,10 +3,9 @@ package com.zipline.entity.survey;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-
 import com.zipline.entity.enums.QuestionType;
-import com.zipline.global.exception.custom.ChoiceNotAllowedException;
+import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
+import com.zipline.global.exception.survey.SurveyException;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -67,7 +66,7 @@ public class Question {
 	public void addChoice(Choice choice) {
 		if (this.questionType == QuestionType.FILE_UPLOAD
 			|| this.questionType == QuestionType.SUBJECTIVE) {
-			throw new ChoiceNotAllowedException("객관식이 아닌 문항에는 선택지를 추가할 수 없습니다.", HttpStatus.BAD_REQUEST);
+			throw new SurveyException(SurveyErrorCode.CHOICE_NOT_ALLOWED_FOR_NON_OBJECTIVE);
 		}
 		this.choices.add(choice);
 	}

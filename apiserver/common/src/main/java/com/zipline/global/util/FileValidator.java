@@ -7,11 +7,11 @@ import java.util.Set;
 
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.zipline.global.exception.custom.FileUploadException;
+import com.zipline.global.exception.common.FileUploadException;
+import com.zipline.global.exception.common.errorcode.CommonErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,10 +30,10 @@ public class FileValidator {
 		try {
 			String detect = tika.detect(file.getInputStream());
 			if (!ALLOWED_MIME_TYPES.contains(detect)) {
-				throw new FileUploadException("지원하지 않는 MIME TYPE 입니다.", HttpStatus.BAD_REQUEST);
+				throw new FileUploadException(CommonErrorCode.FILE_TYPE_NOT_SUPPORTED);
 			}
 		} catch (IOException e) {
-			throw new FileUploadException("파일 MIME 타입 검증에 실패하였습니다.", HttpStatus.BAD_REQUEST);
+			throw new FileUploadException(CommonErrorCode.FILE_VALIDATION_FAILED);
 		}
 	}
 

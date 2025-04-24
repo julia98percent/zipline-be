@@ -4,17 +4,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.user.User;
-import com.zipline.global.exception.custom.PermissionDeniedException;
-import com.zipline.global.exception.custom.agentProperty.PropertyNotFoundException;
-import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
-import com.zipline.global.exception.custom.user.UserNotFoundException;
+import com.zipline.global.exception.agentProperty.PropertyException;
+import com.zipline.global.exception.auth.AuthException;
+import com.zipline.global.exception.customer.CustomerException;
+import com.zipline.global.exception.agentProperty.errorcode.PropertyErrorCode;
+import com.zipline.global.exception.user.errorcode.UserErrorCode;
+import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
+import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
+import com.zipline.global.exception.user.UserException;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.customer.CustomerRepository;
@@ -37,20 +40,20 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 	@Transactional(readOnly = true)
 	public AgentPropertyResponseDTO getProperty(Long propertyUid, Long userUid) {
 		AgentProperty agentProperty = agentPropertyRepository.findByUidAndDeletedAtIsNull(propertyUid)
-			.orElseThrow(() -> new PropertyNotFoundException("해당 매물을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
 
 		if (!agentProperty.getUser().getUid().equals(userUid))
-			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 		return AgentPropertyResponseDTO.of(agentProperty);
 	}
 
 	@Transactional
 	public AgentPropertyResponseDTO registerProperty(AgentPropertyRequestDTO agentPropertyRequestDTO, Long userUid) {
 		User loggedInUser = userRepository.findById(userUid)
-			.orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
 		Customer customer = customerRepository.findById(agentPropertyRequestDTO.getCustomerUid())
-			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		AgentProperty agentProperty = agentPropertyRequestDTO.toEntity(loggedInUser, customer);
 
@@ -62,16 +65,16 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 	public AgentPropertyResponseDTO modifyProperty(AgentPropertyRequestDTO agentPropertyRequestDTO, Long propertyUid,
 		Long userUid) {
 		User loggedInUser = userRepository.findById(userUid)
-			.orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
 		AgentProperty agentProperty = agentPropertyRepository.findByUidAndDeletedAtIsNull(propertyUid)
-			.orElseThrow(() -> new PropertyNotFoundException("해당 매물을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
 
 		Customer customer = customerRepository.findById(agentPropertyRequestDTO.getCustomerUid())
-			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		if (!agentProperty.getUser().getUid().equals(userUid))
-			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 
 		agentProperty.modifyProperty(customer, agentPropertyRequestDTO.getAddress(),
 			agentPropertyRequestDTO.getLegalDistrictCode(), agentPropertyRequestDTO.getDeposit(),
@@ -93,10 +96,10 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 	@Transactional
 	public void deleteProperty(Long propertyUid, Long userUid) {
 		AgentProperty agentProperty = agentPropertyRepository.findByUidAndDeletedAtIsNull(propertyUid)
-			.orElseThrow(() -> new PropertyNotFoundException("해당 매물을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
 
 		if (!agentProperty.getUser().getUid().equals(userUid))
-			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 
 		agentProperty.delete(LocalDateTime.now());
 	}

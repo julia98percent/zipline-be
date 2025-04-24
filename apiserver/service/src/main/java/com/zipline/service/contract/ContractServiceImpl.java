@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.*;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,10 +15,14 @@ import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.user.User;
 import com.zipline.global.config.S3Folder;
-import com.zipline.global.exception.custom.PermissionDeniedException;
-import com.zipline.global.exception.custom.contract.ContractNotFoundException;
-import com.zipline.global.exception.custom.customer.CustomerNotFoundException;
-import com.zipline.global.exception.custom.user.UserNotFoundException;
+import com.zipline.global.exception.auth.AuthException;
+import com.zipline.global.exception.contract.ContractException;
+import com.zipline.global.exception.customer.CustomerException;
+import com.zipline.global.exception.contract.errorcode.ContractErrorCode;
+import com.zipline.global.exception.user.errorcode.UserErrorCode;
+import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
+import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
+import com.zipline.global.exception.user.UserException;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.util.S3FileUploader;
 import com.zipline.repository.contract.ContractDocumentRepository;
@@ -48,13 +51,13 @@ public class ContractServiceImpl implements ContractService {
 	@Transactional(readOnly = true)
 	public ContractResponseDTO getContract(Long contractUid, Long userUid) {
 		Contract contract = contractRepository.findByUidAndDeletedAtIsNull(contractUid)
-			.orElseThrow(() -> new ContractNotFoundException("해당 계약을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new ContractException(ContractErrorCode.CONTRACT_NOT_FOUND));
 
 		CustomerContract customerContract = customerContractRepository.findByContract(contract)
-			.orElseThrow(() -> new CustomerNotFoundException("해당 계약에 연결된 고객 정보가 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		if (!contract.getUser().getUid().equals(userUid))
-			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 
 		List<ContractDocument> documents = contractDocumentRepository.findAllByContract(contract);
 		List<String> documentUrls = documents.stream()
@@ -68,10 +71,10 @@ public class ContractServiceImpl implements ContractService {
 	public ContractResponseDTO registerContract(ContractRequestDTO contractRequestDTO, List<MultipartFile> files,
 		Long userUid) {
 		User savedUser = userRepository.findById(userUid)
-			.orElseThrow(() -> new UserNotFoundException("해당하는 유저를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
 		Customer customer = customerRepository.findById(contractRequestDTO.getCustomerUid())
-			.orElseThrow(() -> new CustomerNotFoundException("해당하는 고객을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		Contract contract = contractRequestDTO.toEntity(savedUser);
 		Contract savedContract = contractRepository.save(contract);

@@ -2,11 +2,10 @@ package com.zipline.entity.customer;
 
 import java.math.BigInteger;
 
-import org.springframework.http.HttpStatus;
-
 import com.zipline.entity.BaseTimeEntity;
 import com.zipline.entity.user.User;
-import com.zipline.global.exception.custom.customer.PriceValidationException;
+import com.zipline.global.exception.customer.CustomerException;
+import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -154,7 +153,7 @@ public class Customer extends BaseTimeEntity {
 		}
 
 		if (price.compareTo(BigInteger.ZERO) < 0) {
-			throw new PriceValidationException("가격은 음수일 수 없습니다.", HttpStatus.BAD_REQUEST);
+			throw new CustomerException(CustomerErrorCode.NEGATIVE_PRICE);
 		}
 	}
 
@@ -164,7 +163,7 @@ public class Customer extends BaseTimeEntity {
 		}
 
 		if (min.compareTo(max) > 0) {
-			throw new PriceValidationException("최소 가격이 최대 가격보다 클 수 없습니다.", HttpStatus.BAD_REQUEST);
+			throw new CustomerException(CustomerErrorCode.INVALID_PRICE_RANGE);
 		}
 	}
 }

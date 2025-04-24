@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,11 +21,12 @@ import com.zipline.entity.user.Authority;
 import com.zipline.entity.user.PasswordQuestion;
 import com.zipline.entity.user.PasswordQuestionAnswer;
 import com.zipline.entity.user.User;
-import com.zipline.global.exception.custom.SurveyNotFoundException;
-import com.zipline.global.exception.custom.user.PasswordAnswerNotFoundException;
-import com.zipline.global.exception.custom.user.PasswordQuestionNotFoundException;
-import com.zipline.global.exception.custom.user.UserNotFoundException;
-import com.zipline.global.jwt.ErrorCode;
+import com.zipline.global.exception.auth.AuthException;
+import com.zipline.global.exception.user.errorcode.UserErrorCode;
+import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
+import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
+import com.zipline.global.exception.survey.SurveyException;
+import com.zipline.global.exception.user.UserException;
 import com.zipline.global.jwt.TokenProvider;
 import com.zipline.global.jwt.dto.TokenRequestDTO;
 import com.zipline.repository.survey.SurveyRepository;
@@ -64,9 +64,9 @@ public class UserServiceImpl implements UserService {
 	@Transactional(readOnly = true)
 	public UserResponseDTO findById(Long uid) {
 		User user = userRepository.findById(uid)
-			.orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다. id=" + uid, HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		Survey survey = surveyRepository.findFirstByUserOrderByCreatedAtDesc(user)
-			.orElseThrow(() -> new SurveyNotFoundException("해당 유저의 설문이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
 
 		return UserResponseDTO.userSurvey(user, survey);
 	}
@@ -75,15 +75,15 @@ public class UserServiceImpl implements UserService {
 	public void signup(SignUpRequestDTO signUpRequestDto) {
 
 		if (!signUpRequestDto.getPassword().equals(signUpRequestDto.getPasswordCheck())) {
-			throw new UserNotFoundException("비밀번호와 비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+			throw new UserException(UserErrorCode.INVALID_PASSWORD_CHECK);
 		}
 
 		if (userRepository.existsById(signUpRequestDto.getId())) {
-			throw new UserNotFoundException("사용할 수 없는 아이디입니다.", HttpStatus.BAD_REQUEST);
+			throw new UserException(UserErrorCode.INVALID_USER_ID);
 		}
 
 		PasswordQuestion question = passwordQuestionRepository.findById(signUpRequestDto.getPasswordQuestionUid())
-			.orElseThrow(() -> new PasswordQuestionNotFoundException("해당 질문이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.PASSWORD_QUESTION_NOT_FOUND));
 
 		User user = User.builder()
 			.id(signUpRequestDto.getId())
@@ -106,24 +106,15 @@ public class UserServiceImpl implements UserService {
 
 	@Transactional
 	public TokenRequestDTO login(LoginRequestDTO loginRequestDTO) {
-		// 0. 입력값 null 체크
-		if (loginRequestDTO.getId().isBlank() || loginRequestDTO.getPassword().isBlank()) {
-			throw new UserNotFoundException("아이디와 비밀번호를 모두 입력해주세요.", HttpStatus.BAD_REQUEST);
-		}
-
-		//1. 사용자 조회
 		User user = userRepository.findByLoginId(loginRequestDTO.getId())
-			.orElseThrow(() -> new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.INVALID_CREDENTIALS));
 
-		// 2. 비밀번호 검증
 		if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
-			throw new UserNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+			throw new UserException(UserErrorCode.INVALID_CREDENTIALS);
 		}
 
-		// 3. 권한 설정
 		List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getRole().name()));
 
-		// 4. 수동 인증 객체 생성
 		Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUid(), null, authorities);
 
 		TokenRequestDTO tokenRequestDto = tokenProvider.generateTokenDto(authentication, user.getUid());
@@ -139,7 +130,7 @@ public class UserServiceImpl implements UserService {
 
 	public void logout(Long uid, String accessToken) {
 		if (!tokenProvider.validateToken(accessToken)) {
-			throw new UserNotFoundException("유효하지 않은 토큰입니다.", HttpStatus.BAD_REQUEST);
+			throw new AuthException(AuthErrorCode.UNAUTHORIZED_CLIENT);
 		}
 
 		String refreshKey = "refreshToken:" + uid;
@@ -160,7 +151,7 @@ public class UserServiceImpl implements UserService {
 
 	public UserResponseDTO updateInfo(Long uid, UserModifyRequestDTO userModifyRequestDto) {
 		User user = userRepository.findById(uid)
-			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		Survey survey = surveyRepository.findFirstByUserOrderByCreatedAtDesc(user)
 			.orElseThrow(() -> new RuntimeException("해당 유저의 설문이 존재하지 않습니다."));
 		user.updateInfo(
@@ -179,7 +170,7 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public TokenRequestDTO reissue(String refreshToken) {
 		if (!tokenProvider.validateToken(refreshToken)) {
-			throw new JwtException(ErrorCode.JWT_DECODE_FAIL.getMessage());
+			throw new JwtException(AuthErrorCode.JWT_DECODE_FAIL.getMessage());
 		}
 
 		String uidStr = tokenProvider.getUserIdFromToken(refreshToken);
@@ -188,11 +179,11 @@ public class UserServiceImpl implements UserService {
 		String saveRefreshToken = redisTemplate.opsForValue().get(redisKey);
 
 		if (saveRefreshToken == null || !saveRefreshToken.equals(refreshToken)) {
-			throw new JwtException(ErrorCode.JWT_SIGNATURE_FAIL.getMessage());
+			throw new JwtException(AuthErrorCode.JWT_SIGNATURE_FAIL.getMessage());
 		}
 
 		User user = userRepository.findById(uid)
-			.orElseThrow(() -> new UserNotFoundException("해당 사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
 		List<GrantedAuthority> authorities =
 			List.of(new SimpleGrantedAuthority(user.getRole().name()));
@@ -211,7 +202,7 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findByNameAndEmail(
 			findUserIdRequestDto.getName(),
 			findUserIdRequestDto.getEmail()
-		).orElseThrow(() -> new UserNotFoundException("일치하는 사용자가 없습니다.", HttpStatus.BAD_REQUEST));
+		).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
 		return new FindUserIdResponseDTO(user.getId());
 	}
@@ -219,16 +210,16 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public String findUserPassword(FindPasswordRequestDTO findPasswordRequestDTO) {
 		User user = userRepository.findByLoginId(findPasswordRequestDTO.getLoginId())
-			.orElseThrow(() -> new UserNotFoundException("존재하지 않는 아이디입니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
 		PasswordQuestion question = passwordQuestionRepository.findById(findPasswordRequestDTO.getPasswordQuestionUid())
-			.orElseThrow(() -> new PasswordQuestionNotFoundException("선택한 질문이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.PASSWORD_QUESTION_NOT_FOUND));
 
 		PasswordQuestionAnswer answer = passwordQuestionAnswerRepository.findByUserAndPasswordQuestion(user, question)
-			.orElseThrow(() -> new PasswordAnswerNotFoundException("해당 질문에 대한 답변이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.PASSWORD_QUESTION_NOT_FOUND));
 
 		if (!answer.getAnswer().equals(findPasswordRequestDTO.getAnswer())) {
-			throw new PasswordAnswerNotFoundException("답변이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+			throw new UserException(UserErrorCode.INCORRECT_QUESTION_ANSWER);
 		}
 
 		Set<String> keys = redisTemplate.keys("resetToken:*");
@@ -252,19 +243,19 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public void resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO) {
 		if (!resetPasswordRequestDTO.getNewPassword().equals(resetPasswordRequestDTO.getNewPasswordCheck())) {
-			throw new UserNotFoundException("비밀번호와 비밀번호 확인이 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+			throw new UserException(UserErrorCode.INVALID_PASSWORD_CHECK);
 		}
 
 		String redisKey = "resetToken:" + resetPasswordRequestDTO.getToken();
 		String uidStr = redisTemplate.opsForValue().get(redisKey);
 
 		if (uidStr == null) {
-			throw new UserNotFoundException("유효하지 않거나 만료된 토큰입니다.", HttpStatus.BAD_REQUEST);
+			throw new AuthException(AuthErrorCode.EXPIRED_TOKEN);
 		}
 
 		Long uid = Long.parseLong(uidStr);
 		User user = userRepository.findById(uid)
-			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
 		user.updatePassword(passwordEncoder.encode(resetPasswordRequestDTO.getNewPassword()));
 		userRepository.save(user);
