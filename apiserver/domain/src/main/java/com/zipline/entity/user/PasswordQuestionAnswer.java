@@ -31,7 +31,7 @@ public class PasswordQuestionAnswer {
 	@JoinColumn(name = "password_question_uid", nullable = false)
 	private PasswordQuestion passwordQuestion;
 
-	@Column(nullable = false)
+	@Column(length = 255, nullable = false)
 	private String answer;
 
 	public PasswordQuestionAnswer(User user, PasswordQuestion passwordQuestion, String answer) {
