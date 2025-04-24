@@ -27,7 +27,7 @@ public class Label {
 	@JoinColumn(name = "user_uid", nullable = false)
 	private User user;
 
-	@Column(length = 20, nullable = false)
+	@Column(name = "name", nullable = false, length = 10)
 	private String name;
 
 	public Label(User user, String name) {
