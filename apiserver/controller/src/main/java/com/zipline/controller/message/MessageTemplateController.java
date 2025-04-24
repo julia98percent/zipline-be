@@ -6,6 +6,7 @@ import com.zipline.service.message.MessageTemplateService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,8 +26,9 @@ public class MessageTemplateController {
   }
 
   @PostMapping("")
-  public ResponseEntity<MessageTemplateRequestDTO> createMessageTemplate(@RequestBody MessageTemplateRequestDTO request, 	Principal principal) {
-      ApiResponse<MessageTemplateRequestDTO> messageTemplate = messageTemplateService.createMessageTemplate(request, Long.parseLong(principal.getName()));
-      return ResponseEntity.ok(messageTemplate.getData());
+  public ResponseEntity<ApiResponse<Void>> createMessageTemplate(@RequestBody MessageTemplateRequestDTO request, Principal principal) {
+    messageTemplateService.createMessageTemplate(request, Long.parseLong(principal.getName()));
+    ApiResponse<Void> response = ApiResponse.create("문자 템플릿 등록 성공");
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 }
