@@ -21,7 +21,7 @@ public class LabelController {
 
 	private final LabelService labelService;
 
-	@PostMapping
+	@PostMapping("")
 	public ResponseEntity<ApiResponse<Void>> createLabel(
 		@RequestBody LabelRequestDTO labelRequestDTO,
 		@AuthenticationPrincipal UserDetails userDetails
