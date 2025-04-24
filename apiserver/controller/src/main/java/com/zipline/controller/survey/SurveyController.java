@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.zipline.global.request.PageRequestDTO;
+import com.zipline.global.response.ApiResponse;
+import com.zipline.service.survey.SurveyService;
 import com.zipline.service.survey.dto.request.SurveyCreateRequestDTO;
+import com.zipline.service.survey.dto.request.SurveySubmitRequestDTO;
 import com.zipline.service.survey.dto.response.SurveyResponseDTO;
 import com.zipline.service.survey.dto.response.SurveyResponseDetailDTO;
 import com.zipline.service.survey.dto.response.SurveyResponseListDTO;
-import com.zipline.service.survey.dto.request.SurveySubmitRequestDTO;
-import com.zipline.global.response.ApiResponse;
-import com.zipline.service.survey.SurveyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -68,7 +68,8 @@ public class SurveyController {
 
 	@Operation(summary = "제출된 설문 리스트 조회", description = "제출된 설문 리스트를 조회합니다.")
 	@GetMapping("/surveys/responses")
-	public ResponseEntity<?> getSurveyResponses(PageRequestDTO pageRequestDTO, Principal principal) {
+	public ResponseEntity<ApiResponse<SurveyResponseListDTO>> getSurveyResponses(PageRequestDTO pageRequestDTO,
+		Principal principal) {
 		SurveyResponseListDTO result = surveyService.getSurveyResponses(pageRequestDTO,
 			Long.parseLong(principal.getName()));
 		ApiResponse<SurveyResponseListDTO> response = ApiResponse.ok("제출된 설문 리스트 조회에 성공하였습니다.", result);

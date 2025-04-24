@@ -1,15 +1,17 @@
 package com.zipline.global.exception;
 
-
-import com.zipline.global.jwt.ErrorCode;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+
+import com.zipline.global.exception.common.errorcode.CommonErrorCode;
+import com.zipline.global.response.ExceptionResponseDTO;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestControllerAdvice
@@ -30,39 +32,41 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(BaseException.class)
 	public ResponseEntity<ExceptionResponseDTO> handleException(BaseException e) {
 		log.error(e.getMessage(), e);
-		ExceptionResponseDTO response = ExceptionResponseDTO.of(e.getStatus(), e.getMessage());
-		return ResponseEntity.status(e.getStatus()).body(response);
+		ErrorCode errorCode = e.getErrorCode();
+		ExceptionResponseDTO response = ExceptionResponseDTO.of(errorCode.getCode(), e.getMessage());
+		return ResponseEntity.status(errorCode.getStatus()).body(response);
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ExceptionResponseDTO> handleException(MethodArgumentNotValidException e) {
 		log.error(e.getMessage(), e);
-		ExceptionResponseDTO response = ExceptionResponseDTO.of(HttpStatus.BAD_REQUEST,
-			e.getBindingResult().getFieldError().getDefaultMessage());
-		return ResponseEntity.status(e.getStatusCode()).body(response);
+		String message = e.getBindingResult().getFieldError().getDefaultMessage();
+		ErrorCode errorCode = CommonErrorCode.INVALID_INPUT_VALUE;
+		return ResponseEntity.status(errorCode.getStatus())
+			.body(ExceptionResponseDTO.of(errorCode.getCode(), message));
+	}
+
+	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	public ResponseEntity<ExceptionResponseDTO> handleException(HttpRequestMethodNotSupportedException e) {
+		log.error(e.getMessage(), e);
+		ErrorCode errorCode = CommonErrorCode.METHOD_NOT_ALLOWED;
+		return ResponseEntity.status(errorCode.getStatus())
+			.body(ExceptionResponseDTO.of(errorCode.getCode(), errorCode.getMessage()));
 	}
 
 	@ExceptionHandler({MaxUploadSizeExceededException.class, FileSizeLimitExceededException.class})
 	public ResponseEntity<ExceptionResponseDTO> handleException(RuntimeException e) {
-		ExceptionResponseDTO response = ExceptionResponseDTO.of(HttpStatus.PAYLOAD_TOO_LARGE, "파일의 크기가 너무 큽니다.");
-		return ResponseEntity.status(response.getCode()).body(response);
+		log.error(e.getMessage(), e);
+		ErrorCode errorCode = CommonErrorCode.FILE_TOO_LARGE;
+		ExceptionResponseDTO response = ExceptionResponseDTO.of(errorCode.getCode(), errorCode.getMessage());
+		return ResponseEntity.status(errorCode.getStatus()).body(response);
 	}
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ExceptionResponseDTO> handleException(Exception e) {
 		log.error(e.getMessage(), e);
-		ExceptionResponseDTO response = ExceptionResponseDTO.of(HttpStatus.INTERNAL_SERVER_ERROR,
-			"서버 에러가 발생하였습니다.");
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-	}
-
-	private ErrorCode JwtExceptionMessageToErrorCode(String message) {
-		if (ErrorCode.JWT_DECODE_FAIL.getMessage().equals(message)) {
-			return ErrorCode.JWT_DECODE_FAIL;
-		} else if (ErrorCode.JWT_SIGNATURE_FAIL.getMessage().equals(message)) {
-			return ErrorCode.JWT_SIGNATURE_FAIL;
-		} else {
-			return ErrorCode.FORBIDDEN_CLIENT;
-		}
+		ErrorCode errorCode = CommonErrorCode.INTERNAL_SERVER_ERROR;
+		ExceptionResponseDTO response = ExceptionResponseDTO.of(errorCode.getCode(), e.getMessage());
+		return ResponseEntity.status(errorCode.getStatus()).body(response);
 	}
 }
