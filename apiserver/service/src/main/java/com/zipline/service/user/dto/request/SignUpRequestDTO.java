@@ -35,6 +35,7 @@ public class SignUpRequestDTO {
 	private Long passwordQuestionUid;
 
 	@Schema(description = "비밀번호 찾기 답변", example = "쫑이")
+	@Size(max = 255, message = "답변은 255자 이하로 입력해주세요.")
 	@NotBlank(message = "비밀번호 찾기 답변은 필수입니다.")
 	private String questionAnswer;
 

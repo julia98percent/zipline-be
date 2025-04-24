@@ -3,6 +3,7 @@ package com.zipline.service.user.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -19,6 +20,7 @@ public class FindPasswordRequestDTO {
 	private Long passwordQuestionUid;
 
 	@Schema(description = "답변", example = "쫑이")
+	@Size(max = 255, message = "답변은 255자 이하로 입력해주세요.")
 	@NotBlank(message = "답변을 입력해주세요.")
 	private String answer;
 }
