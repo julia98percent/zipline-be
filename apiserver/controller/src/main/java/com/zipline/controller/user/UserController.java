@@ -36,13 +36,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
 
 	private final UserService userService;
 
-	@GetMapping("/me")  // 특정 사용자 정보 조회
+	@GetMapping("/info")  // 특정 사용자 정보 조회
 	public ResponseEntity<ApiResponse<UserResponseDTO>> findById(Principal principal) {
 		Long uid = Long.parseLong(principal.getName());
 		UserResponseDTO dto = userService.findById(uid);
@@ -84,7 +84,7 @@ public class UserController {
 		return ResponseEntity.ok(responseBody);
 	}
 
-	@PatchMapping("/logout")
+	@PostMapping("/logout")
 	public ResponseEntity<ApiResponse<Void>> logout(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestHeader("Authorization") String authorizationHeader,
@@ -107,7 +107,7 @@ public class UserController {
 		return ResponseEntity.ok(responseBody);
 	}
 
-	@PatchMapping("/update-info")
+	@PatchMapping("/info")
 	public ResponseEntity<ApiResponse<UserResponseDTO>> updateInfo(
 		@RequestBody UserModifyRequestDTO userModifyRequestDto,
 		Principal principal) {

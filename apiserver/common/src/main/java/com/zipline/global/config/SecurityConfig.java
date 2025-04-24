@@ -57,8 +57,9 @@ public class SecurityConfig {
 			.sessionManagement(
 				session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/users/login", "/api/users/signup", "/api/users/me",
-					"/api/users/reissue", "/api/users/find-id", "/api/users/find-password", "/api/users/reset-password")
+				.requestMatchers("/api/v1/users/login", "/api/v1/users/signup", "/api/v1/users/info",
+					"/api/v1/users/reissue", "/api/v1/users/find-id", "/api/v1/users/find-password",
+					"/api/v1/users/reset-password")
 				.permitAll()
 				.requestMatchers(new RegexRequestMatcher("/api/surveys/\\d+$", "GET"),
 					new RegexRequestMatcher("/api/surveys/\\d+/submit$", "POST"))
