@@ -82,9 +82,8 @@ public class UserServiceImpl implements UserService {
 			throw new UserNotFoundException("사용할 수 없는 아이디입니다.", HttpStatus.BAD_REQUEST);
 		}
 
-		// 질문 조회
 		PasswordQuestion question = passwordQuestionRepository.findById(signUpRequestDto.getPasswordQuestionUid())
-			.orElseThrow(() -> new IllegalArgumentException("해당 질문이 존재하지 않습니다."));
+			.orElseThrow(() -> new PasswordQuestionNotFoundException("해당 질문이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
 		User user = User.builder()
 			.id(signUpRequestDto.getId())
