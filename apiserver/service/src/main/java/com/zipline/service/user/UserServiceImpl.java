@@ -22,11 +22,11 @@ import com.zipline.entity.user.PasswordQuestion;
 import com.zipline.entity.user.PasswordQuestionAnswer;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.auth.AuthException;
-import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
-import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
 import com.zipline.global.exception.survey.SurveyException;
+import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
 import com.zipline.global.exception.user.UserException;
+import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.jwt.TokenProvider;
 import com.zipline.global.jwt.dto.TokenRequestDTO;
 import com.zipline.repository.survey.SurveyRepository;
@@ -153,7 +153,7 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findById(uid)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		Survey survey = surveyRepository.findFirstByUserOrderByCreatedAtDesc(user)
-			.orElseThrow(() -> new RuntimeException("해당 유저의 설문이 존재하지 않습니다."));
+			.orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
 		user.updateInfo(
 			userModifyRequestDto.getName(),
 			userModifyRequestDto.getUrl(),
