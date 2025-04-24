@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import com.zipline.global.exception.ErrorCode;
 
 public enum PropertyErrorCode implements ErrorCode {
-	PROPERTY_NOT_FOUND("CONTRACT-001", "해당하는 계약을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+	PROPERTY_NOT_FOUND("PROPERTY-001", "해당하는 매물을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
 	private final String code;
 	private final String message;
