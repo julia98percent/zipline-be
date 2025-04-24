@@ -1,6 +1,6 @@
 package com.zipline.service.message;
 
-import com.zipline.dto.message.SendMessageRequestDTO;
+import com.zipline.service.message.dto.message.request.SendMessageRequestDTO;
 import java.util.List;
 
 public interface MessageService {

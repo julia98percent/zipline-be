@@ -1,6 +1,6 @@
 package com.zipline.service.message;
 
-import com.zipline.dto.message.SendMessageRequestDTO;
+import com.zipline.service.message.dto.message.request.SendMessageRequestDTO;
 import com.zipline.global.exception.custom.message.MessageCommonException;
 import java.util.List;
 import java.util.Map;
