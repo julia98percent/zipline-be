@@ -1,9 +1,10 @@
 package com.zipline.service.message;
 
+import com.zipline.global.exception.custom.user.UserNotFoundException;
+import com.zipline.service.agentProperty.dto.response.AgentPropertyResponseDTO;
 import com.zipline.service.message.dto.message.request.MessageTemplateRequestDTO;
 import com.zipline.entity.message.MessageTemplate;
 import com.zipline.entity.user.User;
-import com.zipline.global.exception.custom.UserNotFoundException;
 import com.zipline.global.exception.custom.message.MessageTemplateDuplicatedException;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.repository.message.MessageTemplateRepository;
@@ -28,10 +29,13 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
 
   @Override
   @Transactional
-  public ApiResponse<MessageTemplateRequestDTO> createMessageTemplate(MessageTemplateRequestDTO requestDTO, Long userUid) {
-    if (requestDTO.getCategory().equals(MessageTemplateCategory.BIRTHDAY) || requestDTO.getCategory().equals(MessageTemplateCategory.EXPIRED_NOTI)) {
-      messageTemplateRepository.findByCategoryAndUserUidAndDeletedAtIsNull(requestDTO.getCategory(), userUid).ifPresent(template -> {
-        throw new MessageTemplateDuplicatedException(String.format("해당 카테고리(%s)의 메세지 템플릿이 이미 존재합니다.", requestDTO.getCategory()));
+  public void createMessageTemplate(MessageTemplateRequestDTO requestDTO, Long userUid) {
+    if (requestDTO.getCategory().equals(MessageTemplateCategory.BIRTHDAY)
+        || requestDTO.getCategory().equals(MessageTemplateCategory.EXPIRED_NOTI)) {
+      messageTemplateRepository.findByCategoryAndUserUidAndDeletedAtIsNull(requestDTO.getCategory(),
+          userUid).ifPresent(template -> {
+        throw new MessageTemplateDuplicatedException(
+            String.format("해당 카테고리(%s)의 메세지 템플릿이 이미 존재합니다.", requestDTO.getCategory()));
       });
     }
 
@@ -49,9 +53,6 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
         .updatedAt(now)
         .build();
 
-
-      messageTemplateRepository.save(messageTemplate);
-      return ApiResponse.create("메세지 템플릿 생성 완료", requestDTO);
-
+    messageTemplateRepository.save(messageTemplate);
   }
 }
