@@ -1,12 +1,16 @@
 package com.zipline.entity.customer;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.zipline.entity.BaseTimeEntity;
+import com.zipline.entity.label.LabelCustomer;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.customer.CustomerException;
 import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,6 +19,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -83,6 +88,9 @@ public class Customer extends BaseTimeEntity {
 
 	@Column(name = "birth_day", length = 8)
 	private String birthday;
+
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<LabelCustomer> labelCustomers = new ArrayList<>();
 
 	@Builder
 	private Customer(User user, String name, String phoneNo, String telProvider,
