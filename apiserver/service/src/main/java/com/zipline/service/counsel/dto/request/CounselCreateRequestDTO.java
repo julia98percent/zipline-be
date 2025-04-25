@@ -33,6 +33,7 @@ public class CounselCreateRequestDTO {
 	@Schema(description = "의뢰 기한", example = "2025-02-01")
 	private LocalDate dueDate;
 
+	@Schema(description = "상담 관련 매물 UID", example = "1")
 	private Long propertyUid;
 
 	@Valid
