@@ -114,8 +114,9 @@ public class CustomerController {
 	@PostMapping("/customers/{customerUid}/counsels")
 	public ResponseEntity<ApiResponse<Map<String, Long>>> createCounsel(@PathVariable Long customerUid,
 		@Valid @RequestBody CounselCreateRequestDTO requestDTO, Principal principal) {
-		ApiResponse<Map<String, Long>> response = counselService.createCounsel(customerUid, requestDTO,
+		Map<String, Long> result = counselService.createCounsel(customerUid, requestDTO,
 			Long.parseLong(principal.getName()));
+		ApiResponse<Map<String, Long>> response = ApiResponse.create("상담 생성에 성공하였습니다.", result);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 }
