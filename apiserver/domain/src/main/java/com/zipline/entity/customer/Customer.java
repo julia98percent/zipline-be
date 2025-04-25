@@ -123,7 +123,7 @@ public class Customer extends BaseTimeEntity {
 		BigInteger minRent, BigInteger maxRent, String trafficSource, boolean isTenant, boolean isLandlord,
 		boolean isBuyer, boolean isSeller, BigInteger maxPrice, BigInteger minPrice, BigInteger minDeposit,
 		BigInteger maxDeposit, String birthday) {
-		validatePrices(minRent, maxRent, maxPrice, minPrice, minDeposit, maxDeposit);
+		validatePrices(minRent, maxRent, minPrice, maxPrice, minDeposit, maxDeposit);
 		this.name = name;
 		this.phoneNo = phoneNo;
 		this.telProvider = telProvider;
