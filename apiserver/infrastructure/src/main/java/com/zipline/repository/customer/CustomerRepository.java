@@ -16,5 +16,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
 	@Query("SELECT c FROM Customer c WHERE c.user.uid = :userUID AND c.deletedAt IS NULL ORDER BY c.uid DESC")
 	Page<Customer> findByUserUidAndDeletedAtIsNull(Long userUID, Pageable pageable);
+
+	boolean existsByUidAndUserUidAndDeletedAtIsNull(Long customerUid, Long userUid);
 }
 

@@ -13,11 +13,11 @@ import com.zipline.entity.counsel.Counsel;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.auth.AuthException;
-import com.zipline.global.exception.customer.CustomerException;
-import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
+import com.zipline.global.exception.customer.CustomerException;
 import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
 import com.zipline.global.exception.user.UserException;
+import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
@@ -123,6 +123,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Transactional(readOnly = true)
 	public List<CounselListResponseDTO> getCustomerCounsels(Long customerUid, Long userUid) {
+		validateCustomerExistence(customerUid, userUid);
 		List<Counsel> savedCounsels = counselRepository.findByCustomerUidAndUserUidAndDeletedAtIsNullOrderByCreatedAtDesc(
 			customerUid, userUid);
 
@@ -132,6 +133,7 @@ public class CustomerServiceImpl implements CustomerService {
 	@Transactional(readOnly = true)
 	public AgentPropertyListResponseDTO getCustomerProperties(Long customerUid, PageRequestDTO pageRequestDTO,
 		Long userUid) {
+		validateCustomerExistence(customerUid, userUid);
 		Page<AgentProperty> savedAgentPropertiesPage = agentPropertyRepository.findByCustomerUidAndUserUidAndDeletedAtIsNullOrderByCreatedAtDesc(
 			customerUid, userUid, pageRequestDTO.toPageable());
 
@@ -144,11 +146,18 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Transactional(readOnly = true)
 	public List<ContractListResponseDTO.ContractListDTO> getCustomerContracts(Long customerUid, Long userUid) {
+		validateCustomerExistence(customerUid, userUid);
 		List<CustomerContract> savedCustomerContract = customerContractRepository.findByCustomerUidAndUserUid(
 			customerUid, userUid);
 		List<ContractListResponseDTO.ContractListDTO> result = savedCustomerContract.stream()
 			.map(cc -> new ContractListResponseDTO.ContractListDTO(cc))
 			.toList();
 		return result;
+	}
+
+	private void validateCustomerExistence(Long customerUid, Long userUid) {
+		if (!customerRepository.existsByUidAndUserUidAndDeletedAtIsNull(customerUid, userUid)) {
+			throw new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND);
+		}
 	}
 }
