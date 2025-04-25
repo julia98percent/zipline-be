@@ -18,5 +18,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 	Page<Customer> findByUserUidAndDeletedAtIsNull(Long userUID, Pageable pageable);
 
 	boolean existsByUidAndUserUidAndDeletedAtIsNull(Long customerUid, Long userUid);
+
+	Optional<Customer> findByUidAndUserUidAndDeletedAtIsNull(Long customerUid, Long userUid);
 }
 

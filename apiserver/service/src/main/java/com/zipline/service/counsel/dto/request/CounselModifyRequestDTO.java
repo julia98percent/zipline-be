@@ -38,9 +38,6 @@ public class CounselModifyRequestDTO {
 	@Schema(description = "의뢰 기한", example = "2025-02-01")
 	private LocalDate dueDate;
 
-	@Schema(description = "상담 관련 매물 UID", example = "1")
-	private Long propertyUid;
-
 	@Schema(description = "상담 문항 정보")
 	@Getter
 	public static class CounselDetailDTO {

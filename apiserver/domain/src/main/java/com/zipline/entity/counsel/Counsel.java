@@ -81,8 +81,10 @@ public class Counsel extends BaseTimeEntity {
 		this.details.add(detail);
 	}
 
-	public void update(String title, LocalDateTime counselDate) {
+	public void update(String title, LocalDateTime counselDate, CounselType type, LocalDate dueDate) {
 		this.title = title;
 		this.counselDate = counselDate;
+		this.type = type;
+		this.dueDate = dueDate;
 	}
 }

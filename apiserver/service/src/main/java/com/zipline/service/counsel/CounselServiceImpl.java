@@ -17,8 +17,6 @@ import com.zipline.entity.enums.CounselType;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.agentProperty.PropertyException;
 import com.zipline.global.exception.agentProperty.errorcode.PropertyErrorCode;
-import com.zipline.global.exception.auth.AuthException;
-import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
 import com.zipline.global.exception.counsel.CounselException;
 import com.zipline.global.exception.counsel.errorcode.CounselErrorCode;
 import com.zipline.global.exception.customer.CustomerException;
@@ -49,7 +47,7 @@ public class CounselServiceImpl implements CounselService {
 	@Transactional
 	public Map<String, Long> createCounsel(Long customerUid, CounselCreateRequestDTO requestDTO,
 		Long userUid) {
-		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
+		Customer savedCustomer = customerRepository.findByUidAndUserUidAndDeletedAtIsNull(customerUid, userUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 		User savedUser = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
@@ -75,12 +73,8 @@ public class CounselServiceImpl implements CounselService {
 
 	@Transactional(readOnly = true)
 	public CounselResponseDTO getCounsel(Long counselUid, Long userUid) {
-		Counsel savedCounsel = counselRepository.findByUidAndDeletedAtIsNull(counselUid)
+		Counsel savedCounsel = counselRepository.findByUidAndUserUidAndDeletedAtIsNull(counselUid, userUid)
 			.orElseThrow(() -> new CounselException(CounselErrorCode.COUNSEL_NOT_FOUND));
-
-		if (!savedCounsel.getUser().getUid().equals(userUid)) {
-			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
-		}
 
 		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
 			counselUid);
@@ -90,16 +84,15 @@ public class CounselServiceImpl implements CounselService {
 	@Transactional
 	public Map<String, Long> modifyCounsel(Long counselUid, CounselModifyRequestDTO requestDTO,
 		Long userUid) {
-		Counsel savedCounsel = counselRepository.findByUidAndDeletedAtIsNull(counselUid)
+		Counsel savedCounsel = counselRepository.findByUidAndUserUidAndDeletedAtIsNull(counselUid, userUid)
 			.orElseThrow(() -> new CounselException(CounselErrorCode.COUNSEL_NOT_FOUND));
 
 		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
 			counselUid);
-		if (!savedCounsel.getUser().getUid().equals(userUid)) {
-			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
-		}
+
 		LocalDateTime deletedAt = LocalDateTime.now();
-		savedCounsel.update(requestDTO.getTitle(), requestDTO.getCounselDate());
+		savedCounsel.update(requestDTO.getTitle(), requestDTO.getCounselDate(), CounselType.from(requestDTO.getType()),
+			requestDTO.getDueDate());
 		savedCounselDetails.forEach(detail -> detail.delete(deletedAt));
 
 		List<CounselDetail> counselDetails = new ArrayList<>();
@@ -114,16 +107,13 @@ public class CounselServiceImpl implements CounselService {
 
 	@Transactional
 	public void deleteCounsel(Long counselUid, Long userUid) {
-		Counsel savedCounsel = counselRepository.findByUidAndDeletedAtIsNull(counselUid)
+		Counsel savedCounsel = counselRepository.findByUidAndUserUidAndDeletedAtIsNull(counselUid, userUid)
 			.orElseThrow(() -> new CounselException(CounselErrorCode.COUNSEL_NOT_FOUND));
-		if (!savedCounsel.getUser().getUid().equals(userUid)) {
-			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
-		}
+
 		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
 			counselUid);
 		LocalDateTime deletedAt = LocalDateTime.now();
 		savedCounsel.delete(deletedAt);
-
 		savedCounselDetails.forEach(counselDetail -> counselDetail.delete(deletedAt));
 	}
 }
