@@ -21,7 +21,7 @@ import com.zipline.service.counsel.dto.response.CounselResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 @RestController
 @RequiredArgsConstructor
 public class CounselController {
