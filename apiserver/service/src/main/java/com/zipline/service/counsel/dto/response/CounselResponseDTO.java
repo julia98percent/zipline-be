@@ -17,6 +17,7 @@ public class CounselResponseDTO {
 	private String type;
 	private LocalDateTime counselDate;
 	private LocalDate dueDate;
+	private Long propertyUid;
 	private List<CounselDetailResponseDTO> counselDetails;
 
 	public CounselResponseDTO(Counsel counsel, List<CounselDetail> counselDetails) {
@@ -25,6 +26,7 @@ public class CounselResponseDTO {
 		this.type = counsel.getType().getDescription();
 		this.counselDate = counsel.getCounselDate();
 		this.dueDate = counsel.getDueDate();
+		this.propertyUid = (counsel.getAgentProperty() != null) ? counsel.getAgentProperty().getUid() : null;
 		this.counselDetails = counselDetails
 			.stream()
 			.map(CounselDetailResponseDTO::new)
