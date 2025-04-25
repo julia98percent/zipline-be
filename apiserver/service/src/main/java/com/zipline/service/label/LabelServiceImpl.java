@@ -1,10 +1,14 @@
 package com.zipline.service.label;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.zipline.entity.label.Label;
 import com.zipline.entity.user.User;
+import com.zipline.global.exception.auth.AuthException;
+import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
 import com.zipline.global.exception.label.LabelException;
 import com.zipline.global.exception.label.errorcode.LabelErrorCode;
 import com.zipline.global.exception.user.UserException;
@@ -49,5 +53,16 @@ public class LabelServiceImpl implements LabelService {
 		label.updateName(labelRequestDTO.getName());
 
 		return new LabelResponseDTO(label);
+	}
+
+	@Transactional
+	public void deleteLabel(Long userUid, Long labelUid) {
+		Label label = labelRepository.findByUidAndUserUid(labelUid, userUid)
+			.orElseThrow(() -> new LabelException(LabelErrorCode.LABEL_NOT_FOUND));
+
+		if (!label.getUser().getUid().equals(userUid)) {
+			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
+		}
+		label.delete(LocalDateTime.now());
 	}
 }
