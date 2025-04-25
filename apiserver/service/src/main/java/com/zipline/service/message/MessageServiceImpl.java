@@ -88,13 +88,14 @@ public class MessageServiceImpl implements MessageService {
               clientResponse -> clientResponse.bodyToMono(String.class)
                   .handle((errorBody, sink) -> {
                     log.error("Error response from external API: {}", errorBody);
-                    sink.error(new MessageException(MessageErrorCode.MESSAGE_SEND_FAILED));
+                    sink.error(new MessageException(MessageErrorCode.MESSAGE_HISTORY_EXTERNAL_FAILED));
                   })
           )
           .bodyToMono(MessageHistoryResponseDTO.class)
           .block();
     } catch (Exception e) {
-      throw new MessageException(MessageErrorCode.MESSAGE_SEND_FAILED);
+      log.error("Error response from internal API: {}", e.getMessage());
+      throw new MessageException(MessageErrorCode.MESSAGE_HISTORY_INTERNAL_FAILED);
     }
   }
 }
