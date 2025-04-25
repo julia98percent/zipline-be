@@ -12,6 +12,7 @@ import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.repository.label.LabelRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.label.dto.request.LabelRequestDTO;
+import com.zipline.service.label.dto.response.LabelResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,5 +34,20 @@ public class LabelServiceImpl implements LabelService {
 
 		Label label = labelRequestDTO.toEntity(user);
 		labelRepository.save(label);
+	}
+
+	@Transactional
+	public LabelResponseDTO modifyLabel(Long userUid, Long labelUid, LabelRequestDTO labelRequestDTO) {
+		Label label = labelRepository.findByUidAndUserUid(labelUid, userUid)
+			.orElseThrow(() -> new LabelException(LabelErrorCode.LABEL_NOT_FOUND));
+
+		if (!label.getName().equals(labelRequestDTO.getName()) &&
+			labelRepository.existsByUserUidAndName(userUid, labelRequestDTO.getName())) {
+			throw new LabelException(LabelErrorCode.LABEL_DUPLICATE);
+		}
+
+		label.updateName(labelRequestDTO.getName());
+
+		return new LabelResponseDTO(label);
 	}
 }
