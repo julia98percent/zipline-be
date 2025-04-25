@@ -6,6 +6,10 @@ import com.zipline.service.message.dto.response.MessageHistoryResponseDTO;
 import java.util.List;
 
 public interface MessageService {
-  String sendMessage(List<SendMessageRequestDTO> request);
+
+  void saveMessageHistory(String messageGroupId, Long userUID);
+
+  String sendMessage(List<SendMessageRequestDTO> request, Long userUID);
+
   MessageHistoryResponseDTO getMessageHistory(MessageHistoryRequestDTO request);
 }

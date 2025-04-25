@@ -6,6 +6,7 @@ import com.zipline.service.message.dto.request.SendMessageRequestDTO;
 import com.zipline.service.message.MessageService;
 import com.zipline.service.message.dto.response.MessageHistoryResponseDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.security.Principal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +29,15 @@ public class MessageController {
   }
 
   @PostMapping("")
-  public ResponseEntity<String> sendMessage(@RequestBody List<SendMessageRequestDTO> request) {
-      String result = messageService.sendMessage(request);
-      return ResponseEntity.ok(result);
+  public ResponseEntity<String> sendMessage(@RequestBody List<SendMessageRequestDTO> request,
+      Principal principal) {
+    String result = messageService.sendMessage(request, Long.parseLong(principal.getName()));
+    return ResponseEntity.ok(result);
   }
 
   @GetMapping("")
-  public ResponseEntity<Object> getMessageHistory(@RequestParam(required = false) String criteria, @RequestParam(required = false) String cond, @RequestParam(required = false) String value) {
+  public ResponseEntity<Object> getMessageHistory(@RequestParam(required = false) String criteria,
+      @RequestParam(required = false) String cond, @RequestParam(required = false) String value) {
 
     MessageHistoryRequestDTO requestDTO = MessageHistoryRequestDTO.builder()
         .criteria(criteria)
