@@ -56,5 +56,8 @@ cloud:
 survey:
   questionUid-delimiter: ${SURVEY_DELIMITER}
 file:
-  allowed-mime-types: ${FILE_ALLOWED_MEME_TYPES} 
-
+  allowed-mime-types: ${FILE_ALLOWED_MEME_TYPES}
+cache:
+  keys:
+    lv1-regions: ${CACHE_KEY_LV1_REGIONS}
+    children-regions-prefix: ${CACHE_KEY_CHILDREN_REGIONS_PREFIX}

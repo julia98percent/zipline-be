@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/test/region")
+@RequestMapping("/api/v1/region")
 @Tag(name = "지역 api", description = "지역 조회 api")
 @RestController
 public class RegionController{

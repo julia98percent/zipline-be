@@ -11,6 +11,7 @@ import com.zipline.service.region.dto.RegionResponseDTO;
 import com.zipline.service.region.dto.RegionResponseDTO.FlatRegionDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +28,15 @@ public class RegionServiceImpl implements RegionService {
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
 
-    private static final String LV1_REGIONS_CACHE_KEY = "regions:level:1";
-    private static final String CHILDREN_REGIONS_CACHE_KEY_PREFIX = "regions:children:";
+    @Value("${cache.keys.lv1-regions}")
+    private String lv1RegionsCacheKey;
+
+    @Value("${cache.keys.children-regions-prefix}")
+    private String childrenRegionsCacheKeyPrefix;
 
     @Override
     public ApiResponse<RegionResponseDTO> getLv1Regions() {
-        List<FlatRegionDTO> lv1Regions = getCachedFlatRegions(LV1_REGIONS_CACHE_KEY, () -> {
+        List<FlatRegionDTO> lv1Regions = getCachedFlatRegions(lv1RegionsCacheKey, () -> {
             List<Region> regions = regionRepository.findByLevel(1);
             return regions.stream()
                     .map(FlatRegionDTO::from)
@@ -46,7 +50,7 @@ public class RegionServiceImpl implements RegionService {
 
     @Override
     public ApiResponse<RegionResponseDTO> getChildrenRegions(Long cortaNo) {
-        String cacheKey = CHILDREN_REGIONS_CACHE_KEY_PREFIX + cortaNo;
+        String cacheKey = childrenRegionsCacheKeyPrefix + cortaNo;
         List<FlatRegionDTO> childrenRegions = getCachedFlatRegions(cacheKey, () -> {
             List<Region> regions = regionRepository.findByParentCortarNo(cortaNo);
             return regions.stream()
