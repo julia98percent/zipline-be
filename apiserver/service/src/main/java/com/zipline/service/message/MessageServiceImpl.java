@@ -67,13 +67,14 @@ public class MessageServiceImpl implements MessageService {
       return response;
 
     } catch (Exception e) {
+      log.info(e.getMessage());
       throw new MessageException(MessageErrorCode.MESSAGE_SEND_FAILED);
     }
   }
 
-  public MessageHistoryResponseDTO getMessageHistory(MessageHistoryRequestDTO requestDTO) {
+  public MessageHistoryResponseDTO getMessageHistory(MessageHistoryRequestDTO requestDTO, Long userUID) {
     try {
-      Map<String, String> queryParams = messageHistoryParamFormatter.formatQueryParams(requestDTO);
+      Map<String, String> queryParams = messageHistoryParamFormatter.formatQueryParams(requestDTO, userUID);
 
       return webClient.get()
           .uri(uriBuilder -> {

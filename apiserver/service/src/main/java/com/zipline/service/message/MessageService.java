@@ -11,5 +11,5 @@ public interface MessageService {
 
   String sendMessage(List<SendMessageRequestDTO> request, Long userUID);
 
-  MessageHistoryResponseDTO getMessageHistory(MessageHistoryRequestDTO request);
+  MessageHistoryResponseDTO getMessageHistory(MessageHistoryRequestDTO request, Long userUID);
 }

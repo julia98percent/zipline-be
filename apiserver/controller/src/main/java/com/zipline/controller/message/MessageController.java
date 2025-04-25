@@ -37,7 +37,7 @@ public class MessageController {
 
   @GetMapping("")
   public ResponseEntity<Object> getMessageHistory(@RequestParam(required = false) String criteria,
-      @RequestParam(required = false) String cond, @RequestParam(required = false) String value) {
+      @RequestParam(required = false) String cond, @RequestParam(required = false) String value, Principal principal) {
 
     MessageHistoryRequestDTO requestDTO = MessageHistoryRequestDTO.builder()
         .criteria(criteria)
@@ -46,7 +46,7 @@ public class MessageController {
         .build();
 
     ApiResponse<MessageHistoryResponseDTO> result = ApiResponse.ok("문자 발송 내역 조회에 성공했습니다.",
-        messageService.getMessageHistory(requestDTO));
+        messageService.getMessageHistory(requestDTO, Long.parseLong(principal.getName())));
     return ResponseEntity.status(HttpStatus.OK).body(result);
   }
 
