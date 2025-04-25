@@ -46,6 +46,14 @@ public class MessageHistoryParamFormatter {
       valueBuilder.append(groupId);
     }
 
+    if(requestDTO.getLimit() != null && requestDTO.getLimit() > 0) {
+      queryParams.put("limit", String.valueOf(requestDTO.getLimit()));
+    }
+
+    if(requestDTO.getStartKey() != null && !requestDTO.getStartKey().isEmpty()) {
+      queryParams.put("startKey", requestDTO.getStartKey());
+    }
+
     queryParams.put("criteria", criteriaBuilder.toString());
     queryParams.put("cond", condBuilder.toString());
     queryParams.put("value", valueBuilder.toString());
