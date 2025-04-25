@@ -32,20 +32,20 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
      * 네이버 크롤링이 필요한 지역 목록 조회
      */
     @Query("SELECT r FROM Region r WHERE r.level = :level " +
-           "AND (r.naverLastCrawledAt < :cutoffDate " +
-           "OR r.naverStatus != 'COMPLETED')")
+            "AND (r.naverLastCrawledAt < :cutoffDate " +
+            "OR r.naverStatus != 'COMPLETED')")
     List<Region> findRegionsNeedingUpdateForNaver(@Param("level") int level,
-                                                 @Param("cutoffDate") LocalDateTime cutoffDate);
+                                                  @Param("cutoffDate") LocalDateTime cutoffDate);
 
     /**
      * 네이버 크롤링이 필요한 지역 코드 페이징 조회
      */
     @Query("SELECT r.cortarNo FROM Region r WHERE r.level = :level " +
-           "AND (r.naverLastCrawledAt < :cutoffDate " +
-           "OR r.naverStatus != 'COMPLETED')")
+            "AND (r.naverLastCrawledAt < :cutoffDate " +
+            "OR r.naverStatus != 'COMPLETED')")
     Page<Long> findRegionsNeedingUpdateForNaverWithPage(@Param("level") int level,
-                                                       @Param("cutoffDate") LocalDateTime cutoffDate,
-                                                       Pageable pageable);
+                                                        @Param("cutoffDate") LocalDateTime cutoffDate,
+                                                        Pageable pageable);
 
     /**
      * 상위 지역 코드로 하위 지역 목록 조회
@@ -60,7 +60,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     @Transactional
     @Query("UPDATE Region r SET r.naverLastCrawledAt = :lastCrawledAt WHERE r.cortarNo = :cortarNo")
     void updateNaverLastCrawledAt(@Param("cortarNo") Long cortarNo,
-                                 @Param("lastCrawledAt") LocalDateTime lastCrawledAt);
+                                  @Param("lastCrawledAt") LocalDateTime lastCrawledAt);
 
     /**
      * 모든 지역 코드 목록 조회
@@ -91,7 +91,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
      */
     @Query("SELECT r.cortarNo FROM Region r WHERE r.level BETWEEN :minLevel AND :maxLevel")
     List<Long> findCortarNosByLevelBetween(@Param("minLevel") int minLevel,
-                                          @Param("maxLevel") int maxLevel);
+                                           @Param("maxLevel") int maxLevel);
 
     /**
      * 네이버 크롤링 상태 업데이트
@@ -100,7 +100,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     @Transactional
     @Query("UPDATE Region r SET r.naverStatus = :status WHERE r.cortarNo = :cortarNo")
     void updateNaverStatus(@Param("cortarNo") Long cortarNo,
-                          @Param("status") CrawlStatus status);
+                           @Param("status") CrawlStatus status);
 
     /**
      * 네이버 크롤링 상태와 최종 시간 함께 업데이트
@@ -109,6 +109,6 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     @Transactional
     @Query("UPDATE Region r SET r.naverStatus = :status, r.naverLastCrawledAt = :lastCrawledAt WHERE r.cortarNo = :cortarNo")
     void updateNaverStatusAndLastCrawledAt(@Param("cortarNo") Long cortarNo,
-                                         @Param("status") CrawlStatus status,
-                                         @Param("lastCrawledAt") LocalDateTime lastCrawledAt);
+                                           @Param("status") CrawlStatus status,
+                                           @Param("lastCrawledAt") LocalDateTime lastCrawledAt);
 }
