@@ -1,9 +1,6 @@
 package com.zipline.service.message.dto.request;
-import com.zipline.entity.enums.MessageType;
+
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
 
