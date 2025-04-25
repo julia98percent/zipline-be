@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.zipline.entity.enums.QuestionType;
-import com.zipline.entity.enums.SurveyStatus;
 import com.zipline.entity.survey.Choice;
 import com.zipline.entity.survey.Question;
 import com.zipline.entity.survey.Survey;
@@ -22,6 +21,12 @@ import com.zipline.entity.survey.SurveyAnswer;
 import com.zipline.entity.survey.SurveyResponse;
 import com.zipline.entity.user.User;
 import com.zipline.global.config.S3Folder;
+import com.zipline.global.exception.auth.AuthException;
+import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
+import com.zipline.global.exception.survey.SurveyException;
+import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
+import com.zipline.global.exception.user.UserException;
+import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.global.util.S3FileUploader;
@@ -52,10 +57,10 @@ public class SurveyServiceImpl implements SurveyService {
 	private final SurveyAnswerFactory surveyAnswerFactory;
 
 	@Transactional
-	public ApiResponse<Map<String, Long>> createSurvey(SurveyCreateRequestDTO requestDTO, Long agentUID) {
+	public Map<String, String> createSurvey(SurveyCreateRequestDTO requestDTO, Long agentUID) {
 		User user = userRepository.findById(agentUID)
-			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다.", HttpStatus.BAD_REQUEST));
-		Survey survey = new Survey(requestDTO.getTitle(), user, SurveyStatus.ACTIVE, LocalDateTime.now(), null);
+			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+		Survey survey = new Survey(requestDTO.getTitle(), user);
 
 		requestDTO.getQuestions().forEach(questionDTO -> {
 			Question question = new Question(questionDTO.getTitle(), QuestionType.valueOf(questionDTO.getType()),
@@ -69,12 +74,12 @@ public class SurveyServiceImpl implements SurveyService {
 		});
 		surveyRepository.save(survey);
 		user.setUrl(String.valueOf(survey.getUid()));
-		return ApiResponse.create("설문 등록 완료", Collections.singletonMap("surveyURL", survey.getUid()));
+		return Collections.singletonMap("surveyURL", survey.getUlid());
 	}
 
 	@Transactional
 	public void createDefaultSurveyForUser(User user) {     //default questions
-		Survey survey = new Survey("기본 설문지", user, SurveyStatus.ACTIVE, LocalDateTime.now(), null);
+		Survey survey = new Survey("기본 설문지", user);
 
 		Question nameQuestion = new Question(
 			"이름",
@@ -101,8 +106,8 @@ public class SurveyServiceImpl implements SurveyService {
 
 	@Transactional(readOnly = true)
 	public ApiResponse<SurveyResponseDTO> getSurvey(Long surveyUID) {
-		Survey savedSurvey = surveyRepository.findByUidAndStatus(surveyUID, SurveyStatus.ACTIVE)
-			.orElseThrow(() -> new SurveyNotFoundException("해당하는 설문이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+		Survey savedSurvey = surveyRepository.findByUidAndDeletedAtIsNull(surveyUID)
+			.orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
 		List<Question> questions = questionRepository.findAllBySurveyUidWithChoices(savedSurvey.getUid());
 		SurveyResponseDTO result = SurveyResponseDTO.from(savedSurvey, questions);
 		return ApiResponse.ok("설문 조회 성공", result);
@@ -111,8 +116,8 @@ public class SurveyServiceImpl implements SurveyService {
 	@Transactional
 	public ApiResponse<Void> submitSurvey(Long surveyUid, List<SurveySubmitRequestDTO> requestDTOList,
 		List<MultipartFile> files) {
-		Survey savedSurvey = surveyRepository.findByUidAndStatus(surveyUid, SurveyStatus.ACTIVE)
-			.orElseThrow(() -> new SurveyNotFoundException("해당하는 설문이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+		Survey savedSurvey = surveyRepository.findByUidAndDeletedAtIsNull(surveyUid)
+			.orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
 
 		SurveyResponse surveyResponse = new SurveyResponse(savedSurvey, null, LocalDateTime.now());
 		surveyResponseRepository.save(surveyResponse);
@@ -170,10 +175,10 @@ public class SurveyServiceImpl implements SurveyService {
 	public ApiResponse<SurveyResponseDetailDTO> getSubmittedSurvey(Long surveyResponseUid, Long userUid) {
 		SurveyResponse savedSurveyResponse = surveyResponseRepository.findSurveyResponseWithSurveyAndUserById(
 				surveyResponseUid)
-			.orElseThrow(() -> new SurveyNotFoundException("해당하는 설문 응답이 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+			.orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
 
 		if (!savedSurveyResponse.getSurvey().getUser().getUid().equals(userUid)) {
-			throw new PermissionDeniedException("권한이 없습니다.", HttpStatus.FORBIDDEN);
+			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 		}
 
 		List<SurveyAnswer> surveyAnswers = surveyAnswerRepository.findByWithQuestionsAndChoicesSurveyResponseUid(
