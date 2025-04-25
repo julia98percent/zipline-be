@@ -1,5 +1,6 @@
 package com.zipline.entity.label;
 
+import com.zipline.entity.BaseTimeEntity;
 import com.zipline.entity.user.User;
 
 import jakarta.persistence.Column;
@@ -18,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "labels")
 @Getter
 @NoArgsConstructor
-public class Label {
+public class Label extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long uid;
