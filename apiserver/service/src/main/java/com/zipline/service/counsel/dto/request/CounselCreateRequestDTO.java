@@ -1,5 +1,6 @@
 package com.zipline.service.counsel.dto.request;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,6 +25,16 @@ public class CounselCreateRequestDTO {
 	@Schema(description = "상담 일시", example = "2025-04-10T15:00:00", required = true)
 	@NotNull(message = "상담 일자는 필수값 입니다.")
 	private LocalDateTime counselDate;
+
+	@Schema(description = "상담 종류", example = "임대", required = true)
+	@NotBlank(message = "상담 종류는 필수값 입니다.")
+	private String type;
+
+	@Schema(description = "의뢰 기한", example = "2025-02-01")
+	private LocalDate dueDate;
+
+	@Schema(description = "상담 관련 매물 UID", example = "1")
+	private Long propertyUid;
 
 	@Valid
 	@Schema(description = "상담 문항 리스트", required = true)
