@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.label.LabelService;
 import com.zipline.service.label.dto.request.LabelRequestDTO;
+import com.zipline.service.label.dto.response.LabelListResponseDTO;
 import com.zipline.service.label.dto.response.LabelResponseDTO;
 
 import jakarta.validation.Valid;
@@ -54,5 +56,13 @@ public class LabelController {
 		labelService.deleteLabel(userUid, labelUid);
 		ApiResponse<Void> responseBody = ApiResponse.ok("라벨 삭제 성공");
 		return ResponseEntity.ok(responseBody);
+	}
+
+	@GetMapping("")
+	public ResponseEntity<ApiResponse<LabelListResponseDTO>> getLabelList(
+		@AuthenticationPrincipal UserDetails userDetails) {
+		Long userUid = Long.parseLong(userDetails.getUsername());
+		LabelListResponseDTO listResponseDTO = labelService.getLabelList(userUid);
+		return ResponseEntity.ok(ApiResponse.ok("라벨 조회 완료", listResponseDTO));
 	}
 }

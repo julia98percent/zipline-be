@@ -1,5 +1,6 @@
 package com.zipline.repository.label;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,7 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.zipline.entity.label.Label;
 
 public interface LabelRepository extends JpaRepository<Label, Long> {
-	boolean existsByUserUidAndName(Long userUid, String name);
+	boolean existsByUserUidAndNameAndDeletedAtIsNull(Long userUid, String name);
 
-	Optional<Label> findByUidAndUserUid(Long labelUid, Long userUid);
+	Optional<Label> findByUidAndUserUidAndDeletedAtIsNull(Long labelUid, Long userUid);
+
+	List<Label> findAllByUserUidAndDeletedAtIsNull(Long userUid);
 }

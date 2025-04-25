@@ -1,6 +1,7 @@
 package com.zipline.service.label;
 
 import com.zipline.service.label.dto.request.LabelRequestDTO;
+import com.zipline.service.label.dto.response.LabelListResponseDTO;
 import com.zipline.service.label.dto.response.LabelResponseDTO;
 
 public interface LabelService {
@@ -9,4 +10,6 @@ public interface LabelService {
 	LabelResponseDTO modifyLabel(Long userUid, Long labelUid, LabelRequestDTO dto);
 
 	void deleteLabel(Long userUid, Long labelUid);
+
+	LabelListResponseDTO getLabelList(Long userUid);
 }
