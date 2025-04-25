@@ -1,4 +1,4 @@
-package com.zipline.service.message;
+package com.zipline.global.util;
 
 import java.security.SecureRandom;
 import java.time.Instant;
