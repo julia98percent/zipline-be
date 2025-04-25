@@ -25,6 +25,6 @@ public enum CounselType {
 		return Arrays.stream(CounselType.values())
 			.filter(e -> e.description.equals(type))
 			.findFirst()
-			.orElseThrow(() -> new CounselException(CounselErrorCode.COUNSEL_NOT_FOUND));
+			.orElseThrow(() -> new CounselException(CounselErrorCode.INVALID_COUNSEL_TYPE));
 	}
 }
