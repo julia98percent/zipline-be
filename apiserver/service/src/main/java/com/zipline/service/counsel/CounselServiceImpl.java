@@ -9,19 +9,21 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.counsel.Counsel;
 import com.zipline.entity.counsel.CounselDetail;
 import com.zipline.entity.customer.Customer;
+import com.zipline.entity.enums.CounselType;
 import com.zipline.entity.user.User;
-import com.zipline.global.exception.auth.AuthException;
+import com.zipline.global.exception.agentProperty.PropertyException;
+import com.zipline.global.exception.agentProperty.errorcode.PropertyErrorCode;
 import com.zipline.global.exception.counsel.CounselException;
-import com.zipline.global.exception.customer.CustomerException;
-import com.zipline.global.exception.user.errorcode.UserErrorCode;
-import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
 import com.zipline.global.exception.counsel.errorcode.CounselErrorCode;
+import com.zipline.global.exception.customer.CustomerException;
 import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
 import com.zipline.global.exception.user.UserException;
-import com.zipline.global.response.ApiResponse;
+import com.zipline.global.exception.user.errorcode.UserErrorCode;
+import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.counsel.CounselDetailRepository;
 import com.zipline.repository.counsel.CounselRepository;
 import com.zipline.repository.customer.CustomerRepository;
@@ -40,53 +42,57 @@ public class CounselServiceImpl implements CounselService {
 	private final CustomerRepository customerRepository;
 	private final UserRepository userRepository;
 	private final CounselDetailRepository counselDetailRepository;
+	private final AgentPropertyRepository agentPropertyRepository;
 
 	@Transactional
-	public ApiResponse<Map<String, Long>> createCounsel(Long customerUid, CounselCreateRequestDTO requestDTO,
+	public Map<String, Long> createCounsel(Long customerUid, CounselCreateRequestDTO requestDTO,
 		Long userUid) {
-		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
+		Customer savedCustomer = customerRepository.findByUidAndUserUidAndDeletedAtIsNull(customerUid, userUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 		User savedUser = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-		Counsel counsel = new Counsel(requestDTO.getTitle(), requestDTO.getCounselDate(), null, null, savedUser,
-			savedCustomer, null);
+
+		AgentProperty savedProperty = null;
+		if (requestDTO.getPropertyUid() != null) {
+			savedProperty = agentPropertyRepository
+				.findByUidAndUserUidAndDeletedAtIsNull(requestDTO.getPropertyUid(), userUid)
+				.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
+		}
+
+		Counsel counsel = new Counsel(requestDTO.getTitle(), requestDTO.getCounselDate(),
+			CounselType.from(requestDTO.getType()),
+			requestDTO.getDueDate(), savedUser, savedCustomer, savedProperty);
+
 		for (CounselCreateRequestDTO.CounselDetailDTO counselDetailDTO : requestDTO.getCounselDetails()) {
-			counsel.addDetail(
-				new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), counsel));
+			counsel.addDetail(new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), counsel));
 		}
 
 		Counsel savedCounsel = counselRepository.save(counsel);
-		return ApiResponse.create("상담 생성에 성공하였습니다.", Collections.singletonMap("counselUid", savedCounsel.getUid()));
+		return Collections.singletonMap("counselUid", savedCounsel.getUid());
 	}
 
 	@Transactional(readOnly = true)
-	public ApiResponse<CounselResponseDTO> getCounsel(Long counselUid, Long userUid) {
-		Counsel savedCounsel = counselRepository.findByUidAndDeletedAtIsNull(counselUid)
+	public CounselResponseDTO getCounsel(Long counselUid, Long userUid) {
+		Counsel savedCounsel = counselRepository.findByUidAndUserUidAndDeletedAtIsNull(counselUid, userUid)
 			.orElseThrow(() -> new CounselException(CounselErrorCode.COUNSEL_NOT_FOUND));
-
-		if (!savedCounsel.getUser().getUid().equals(userUid)) {
-			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
-		}
 
 		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
 			counselUid);
-		CounselResponseDTO counselResponseDTO = new CounselResponseDTO(savedCounsel, savedCounselDetails);
-		return ApiResponse.ok("상담 상세 조회 성공", counselResponseDTO);
+		return new CounselResponseDTO(savedCounsel, savedCounselDetails);
 	}
 
 	@Transactional
-	public ApiResponse<Map<String, Long>> modifyCounsel(Long counselUid, CounselModifyRequestDTO requestDTO,
+	public Map<String, Long> modifyCounsel(Long counselUid, CounselModifyRequestDTO requestDTO,
 		Long userUid) {
-		Counsel savedCounsel = counselRepository.findByUidAndDeletedAtIsNull(counselUid)
+		Counsel savedCounsel = counselRepository.findByUidAndUserUidAndDeletedAtIsNull(counselUid, userUid)
 			.orElseThrow(() -> new CounselException(CounselErrorCode.COUNSEL_NOT_FOUND));
 
 		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
 			counselUid);
-		if (!savedCounsel.getUser().getUid().equals(userUid)) {
-			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
-		}
+
 		LocalDateTime deletedAt = LocalDateTime.now();
-		savedCounsel.update(requestDTO.getTitle(), requestDTO.getCounselDate());
+		savedCounsel.update(requestDTO.getTitle(), requestDTO.getCounselDate(), CounselType.from(requestDTO.getType()),
+			requestDTO.getDueDate());
 		savedCounselDetails.forEach(detail -> detail.delete(deletedAt));
 
 		List<CounselDetail> counselDetails = new ArrayList<>();
@@ -96,22 +102,18 @@ public class CounselServiceImpl implements CounselService {
 		}
 
 		counselDetailRepository.saveAll(counselDetails);
-		return ApiResponse.ok("상담 수정에 성공하였습니다.", Collections.singletonMap("counselUid", savedCounsel.getUid()));
+		return Collections.singletonMap("counselUid", savedCounsel.getUid());
 	}
 
 	@Transactional
-	public ApiResponse<Void> deleteCounsel(Long counselUid, Long userUid) {
-		Counsel savedCounsel = counselRepository.findByUidAndDeletedAtIsNull(counselUid)
+	public void deleteCounsel(Long counselUid, Long userUid) {
+		Counsel savedCounsel = counselRepository.findByUidAndUserUidAndDeletedAtIsNull(counselUid, userUid)
 			.orElseThrow(() -> new CounselException(CounselErrorCode.COUNSEL_NOT_FOUND));
-		if (!savedCounsel.getUser().getUid().equals(userUid)) {
-			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
-		}
+
 		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
 			counselUid);
 		LocalDateTime deletedAt = LocalDateTime.now();
 		savedCounsel.delete(deletedAt);
-
 		savedCounselDetails.forEach(counselDetail -> counselDetail.delete(deletedAt));
-		return ApiResponse.ok("상담 삭제에 성공하였습니다.");
 	}
 }

@@ -1,5 +1,6 @@
 package com.zipline.service.counsel.dto.request;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,6 +30,13 @@ public class CounselModifyRequestDTO {
 	@Schema(description = "상담 문항 리스트", required = true)
 	@NotEmpty(message = "상담에는 최소 한개의 문항이 필요합니다.")
 	private List<CounselDetailDTO> counselDetails;
+
+	@Schema(description = "상담 종류", example = "임대", required = true)
+	@NotBlank(message = "상담 종류는 필수값 입니다.")
+	private String type;
+
+	@Schema(description = "의뢰 기한", example = "2025-02-01")
+	private LocalDate dueDate;
 
 	@Schema(description = "상담 문항 정보")
 	@Getter

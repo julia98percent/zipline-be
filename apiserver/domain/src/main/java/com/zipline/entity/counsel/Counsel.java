@@ -1,5 +1,6 @@
 package com.zipline.entity.counsel;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,12 +61,12 @@ public class Counsel extends BaseTimeEntity {
 	private CounselType type;
 
 	@Column(name = "due_date")
-	private LocalDateTime dueDate;
+	private LocalDate dueDate;
 
 	@OneToMany(mappedBy = "counsel", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	private List<CounselDetail> details = new ArrayList<>();
 
-	public Counsel(String title, LocalDateTime counselDate, CounselType type, LocalDateTime dueDate, User user,
+	public Counsel(String title, LocalDateTime counselDate, CounselType type, LocalDate dueDate, User user,
 		Customer customer, AgentProperty agentProperty) {
 		this.title = title;
 		this.counselDate = counselDate;
@@ -80,8 +81,10 @@ public class Counsel extends BaseTimeEntity {
 		this.details.add(detail);
 	}
 
-	public void update(String title, LocalDateTime counselDate) {
+	public void update(String title, LocalDateTime counselDate, CounselType type, LocalDate dueDate) {
 		this.title = title;
 		this.counselDate = counselDate;
+		this.type = type;
+		this.dueDate = dueDate;
 	}
 }
