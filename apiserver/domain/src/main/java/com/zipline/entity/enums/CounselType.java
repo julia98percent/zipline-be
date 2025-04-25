@@ -1,5 +1,10 @@
 package com.zipline.entity.enums;
 
+import java.util.Arrays;
+
+import com.zipline.global.exception.counsel.CounselException;
+import com.zipline.global.exception.counsel.errorcode.CounselErrorCode;
+
 import lombok.Getter;
 
 @Getter
@@ -14,5 +19,12 @@ public enum CounselType {
 
 	CounselType(String description) {
 		this.description = description;
+	}
+
+	public static CounselType from(String type) {
+		return Arrays.stream(CounselType.values())
+			.filter(e -> e.description.equals(type))
+			.findFirst()
+			.orElseThrow(() -> new CounselException(CounselErrorCode.COUNSEL_NOT_FOUND));
 	}
 }

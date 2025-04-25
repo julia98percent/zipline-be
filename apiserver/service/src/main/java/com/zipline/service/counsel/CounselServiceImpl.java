@@ -9,10 +9,14 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.counsel.Counsel;
 import com.zipline.entity.counsel.CounselDetail;
 import com.zipline.entity.customer.Customer;
+import com.zipline.entity.enums.CounselType;
 import com.zipline.entity.user.User;
+import com.zipline.global.exception.agentProperty.PropertyException;
+import com.zipline.global.exception.agentProperty.errorcode.PropertyErrorCode;
 import com.zipline.global.exception.auth.AuthException;
 import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
 import com.zipline.global.exception.counsel.CounselException;
@@ -21,6 +25,7 @@ import com.zipline.global.exception.customer.CustomerException;
 import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
+import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.counsel.CounselDetailRepository;
 import com.zipline.repository.counsel.CounselRepository;
 import com.zipline.repository.customer.CustomerRepository;
@@ -39,6 +44,7 @@ public class CounselServiceImpl implements CounselService {
 	private final CustomerRepository customerRepository;
 	private final UserRepository userRepository;
 	private final CounselDetailRepository counselDetailRepository;
+	private final AgentPropertyRepository agentPropertyRepository;
 
 	@Transactional
 	public Map<String, Long> createCounsel(Long customerUid, CounselCreateRequestDTO requestDTO,
@@ -47,11 +53,20 @@ public class CounselServiceImpl implements CounselService {
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 		User savedUser = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-		Counsel counsel = new Counsel(requestDTO.getTitle(), requestDTO.getCounselDate(), null, null, savedUser,
-			savedCustomer, null);
+
+		AgentProperty savedProperty = null;
+		if (requestDTO.getPropertyUid() != null) {
+			savedProperty = agentPropertyRepository
+				.findByUidAndUserUidAndDeletedAtIsNull(requestDTO.getPropertyUid(), userUid)
+				.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
+		}
+
+		Counsel counsel = new Counsel(requestDTO.getTitle(), requestDTO.getCounselDate(),
+			CounselType.from(requestDTO.getType()),
+			requestDTO.getDueDate(), savedUser, savedCustomer, savedProperty);
+
 		for (CounselCreateRequestDTO.CounselDetailDTO counselDetailDTO : requestDTO.getCounselDetails()) {
-			counsel.addDetail(
-				new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), counsel));
+			counsel.addDetail(new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), counsel));
 		}
 
 		Counsel savedCounsel = counselRepository.save(counsel);
