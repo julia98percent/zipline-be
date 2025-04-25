@@ -3,6 +3,7 @@ package com.zipline.controller.label;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,5 +45,14 @@ public class LabelController {
 		Long userUid = Long.parseLong(userDetails.getUsername());
 		LabelResponseDTO responseDTO = labelService.modifyLabel(userUid, labelUid, labelRequestDTO);
 		return ResponseEntity.ok(ApiResponse.ok("라벨 수정 완료", responseDTO));
+	}
+
+	@DeleteMapping("/{labelUid}")
+	public ResponseEntity<ApiResponse<Void>> deleteLabel(@PathVariable Long labelUid,
+		@AuthenticationPrincipal UserDetails userDetails) {
+		Long userUid = Long.parseLong(userDetails.getUsername());
+		labelService.deleteLabel(userUid, labelUid);
+		ApiResponse<Void> responseBody = ApiResponse.ok("라벨 삭제 성공");
+		return ResponseEntity.ok(responseBody);
 	}
 }

@@ -7,4 +7,6 @@ public interface LabelService {
 	void createLabel(Long userUid, LabelRequestDTO dto);
 
 	LabelResponseDTO modifyLabel(Long userUid, Long labelUid, LabelRequestDTO dto);
+
+	void deleteLabel(Long userUid, Long labelUid);
 }
