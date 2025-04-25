@@ -14,7 +14,6 @@ public class RegionResponseDTO {
 
     private List<FlatRegionDTO> regions;
 
-    // Make the constructor public to allow access from outside the package
     public RegionResponseDTO(List<FlatRegionDTO> regions) {
         this.regions = regions;
     }
@@ -45,7 +44,6 @@ public class RegionResponseDTO {
             this.parentCortarNo = parentCortarNo;
         }
 
-        // Add the static from method to convert Region to FlatRegionDTO
         public static FlatRegionDTO from(Region region) {
             return FlatRegionDTO.builder()
                     .cortarNo(region.getCortarNo())

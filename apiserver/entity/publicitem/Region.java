@@ -22,10 +22,10 @@ public class Region {
     private Integer level;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore // Prevent serialization of the parent to avoid recursion
+    @JsonIgnore
     private Region parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore // Prevent serialization of children to avoid recursion
+    @JsonIgnore
     private List<Region> children;
 }
