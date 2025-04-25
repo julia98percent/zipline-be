@@ -1,5 +1,6 @@
 package com.zipline.service.counsel.dto.response;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,13 +14,17 @@ import lombok.Getter;
 public class CounselResponseDTO {
 	private Long counselUid;
 	private String title;
-	private List<CounselDetailResponseDTO> counselDetails;
+	private String type;
 	private LocalDateTime counselDate;
+	private LocalDate dueDate;
+	private List<CounselDetailResponseDTO> counselDetails;
 
 	public CounselResponseDTO(Counsel counsel, List<CounselDetail> counselDetails) {
 		this.counselUid = counsel.getUid();
 		this.title = counsel.getTitle();
+		this.type = counsel.getType().getDescription();
 		this.counselDate = counsel.getCounselDate();
+		this.dueDate = counsel.getDueDate();
 		this.counselDetails = counselDetails
 			.stream()
 			.map(CounselDetailResponseDTO::new)

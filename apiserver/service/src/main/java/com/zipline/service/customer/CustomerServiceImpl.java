@@ -127,7 +127,7 @@ public class CustomerServiceImpl implements CustomerService {
 		List<Counsel> savedCounsels = counselRepository.findByCustomerUidAndUserUidAndDeletedAtIsNullOrderByCreatedAtDesc(
 			customerUid, userUid);
 
-		return savedCounsels.stream().map(CounselListResponseDTO::new).toList();
+		return savedCounsels.stream().map(CounselListResponseDTO::createWithoutCustomerName).toList();
 	}
 
 	@Transactional(readOnly = true)
