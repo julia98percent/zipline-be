@@ -16,7 +16,7 @@ import com.zipline.service.survey.dto.response.SurveyResponseListDTO;
 
 public interface SurveyService {
 
-	ApiResponse<Map<String, Long>> createSurvey(SurveyCreateRequestDTO requestDTO, Long agentUID);
+	Map<String, String> createSurvey(SurveyCreateRequestDTO requestDTO, Long agentUID);
 
 	void createDefaultSurveyForUser(User user);
 
