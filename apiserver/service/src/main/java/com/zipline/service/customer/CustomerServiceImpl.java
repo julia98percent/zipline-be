@@ -2,7 +2,10 @@ package com.zipline.service.customer;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -94,6 +97,41 @@ public class CustomerServiceImpl implements CustomerService {
 		if (!savedCustomer.getUser().getUid().equals(userUID)) {
 			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 		}
+		List<Long> labelUids = customerModifyRequestDTO.getLabelUids();
+
+		if (labelUids != null) {
+			// 기존 라벨 매핑 가져오기
+			List<LabelCustomer> existingMappings = labelCustomerRepository.findAllByCustomerUid(savedCustomer.getUid());
+
+			// 수정 요청한 labelUid Set 만들기
+			Set<Long> requestedLabelUids = new HashSet<>(labelUids);
+
+			// 1. 기존 매핑 중 요청에 없는 것은 삭제
+			List<LabelCustomer> toDelete = existingMappings.stream()
+				.filter(mapping -> !requestedLabelUids.contains(mapping.getLabel().getUid()))
+				.toList();
+			labelCustomerRepository.deleteAll(toDelete);
+
+			// 2. 요청한 labelUid 중 아직 매핑되지 않은 것은 추가
+			Set<Long> existingLabelUids = existingMappings.stream()
+				.map(mapping -> mapping.getLabel().getUid())
+				.collect(Collectors.toSet());
+
+			List<LabelCustomer> toAdd = new ArrayList<>();
+			for (Long labelUid : labelUids) {
+				if (!existingLabelUids.contains(labelUid)) {
+					Label label = labelRepository.findById(labelUid)
+						.orElseThrow(() -> new LabelException(LabelErrorCode.LABEL_NOT_FOUND));
+
+					if (!label.getUser().getUid().equals(userUID)) {
+						throw new LabelException(LabelErrorCode.LABEL_NOT_FOUND);
+					}
+
+					toAdd.add(new LabelCustomer(savedCustomer, label));
+				}
+			}
+			labelCustomerRepository.saveAll(toAdd);
+		}
 
 		savedCustomer.modifyCustomer(customerModifyRequestDTO.getName(), customerModifyRequestDTO.getPhoneNo(),
 			customerModifyRequestDTO.getTelProvider(),
@@ -107,7 +145,9 @@ public class CustomerServiceImpl implements CustomerService {
 			customerModifyRequestDTO.getMinDeposit(), customerModifyRequestDTO.getMaxDeposit(),
 			customerModifyRequestDTO.getBirthday());
 
-		CustomerDetailResponseDTO customerDetailResponseDTO = new CustomerDetailResponseDTO(savedCustomer);
+		List<LabelCustomer> updatedLabelMappings = labelCustomerRepository.findAllByCustomerUid(savedCustomer.getUid());
+		CustomerDetailResponseDTO customerDetailResponseDTO = new CustomerDetailResponseDTO(savedCustomer,
+			updatedLabelMappings);
 		return ApiResponse.ok("고객 수정에 성공하였습니다.", customerDetailResponseDTO);
 	}
 
@@ -146,7 +186,7 @@ public class CustomerServiceImpl implements CustomerService {
 			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 		}
 
-		return new CustomerDetailResponseDTO(savedCustomer);
+		return new CustomerDetailResponseDTO(savedCustomer, null);
 	}
 
 	@Transactional(readOnly = true)

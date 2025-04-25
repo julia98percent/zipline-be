@@ -1,8 +1,10 @@
 package com.zipline.service.customer.dto.response;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import com.zipline.entity.customer.Customer;
+import com.zipline.entity.label.LabelCustomer;
 
 import lombok.Getter;
 
@@ -25,8 +27,9 @@ public class CustomerDetailResponseDTO {
 	private BigInteger minDeposit;
 	private BigInteger maxDeposit;
 	private String birthDay;
+	private List<LabelDTO> labels;
 
-	public CustomerDetailResponseDTO(Customer customer) {
+	public CustomerDetailResponseDTO(Customer customer, List<LabelCustomer> labelCustomers) {
 		this.uid = customer.getUid();
 		this.name = customer.getName();
 		this.phoneNo = customer.getPhoneNo();
@@ -44,5 +47,19 @@ public class CustomerDetailResponseDTO {
 		this.minDeposit = customer.getMinDeposit();
 		this.maxDeposit = customer.getMaxDeposit();
 		this.birthDay = customer.getBirthday();
+		this.labels = labelCustomers.stream()
+			.map(lc -> new LabelDTO(lc.getLabel().getUid(), lc.getLabel().getName()))
+			.toList();
+	}
+
+	@Getter
+	public static class LabelDTO {
+		private Long uid;
+		private String name;
+
+		public LabelDTO(Long uid, String name) {
+			this.uid = uid;
+			this.name = name;
+		}
 	}
 }
