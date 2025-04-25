@@ -1,7 +1,6 @@
 package com.zipline.service.message;
 
 
-import com.zipline.repository.message.MessageHistoryRepository;
 import com.zipline.service.message.dto.request.MessageHistoryRequestDTO;
 import java.util.HashMap;
 import java.util.List;
@@ -15,12 +14,10 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 
 public class MessageHistoryParamFormatter {
-  private final MessageHistoryRepository messageHistoryRepository;
 
-  public Map<String, String> formatQueryParams(MessageHistoryRequestDTO requestDTO, Long userUID) {
+  public Map<String, String> formatQueryParams(MessageHistoryRequestDTO requestDTO, List<String> userGroupIds) {
     Map<String, String> queryParams = new HashMap<>();
 
-    List<String> userGroupIds = messageHistoryRepository.findGroupUidsByUserId(userUID);
 
     // 기존 검색 조건 처리
     StringBuilder criteriaBuilder = new StringBuilder();

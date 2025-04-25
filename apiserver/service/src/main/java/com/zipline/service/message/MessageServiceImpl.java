@@ -74,11 +74,17 @@ public class MessageServiceImpl implements MessageService {
 
   public MessageHistoryResponseDTO getMessageHistory(MessageHistoryRequestDTO requestDTO, Long userUID) {
     try {
-      Map<String, String> queryParams = messageHistoryParamFormatter.formatQueryParams(requestDTO, userUID);
+      List<String> userGroupIds = messageHistoryRepository.findGroupUidsByUserId(userUID);
+
+      if (userGroupIds.isEmpty()) {
+        return MessageHistoryResponseDTO.emptyResponse();
+      }
+
+      Map<String, String> queryParams = messageHistoryParamFormatter.formatQueryParams(requestDTO, userGroupIds);
 
       return webClient.get()
           .uri(uriBuilder -> {
-            uriBuilder.path("/list-old/");
+            uriBuilder.path("/groups/");
             queryParams.forEach(uriBuilder::queryParam);
             return uriBuilder.build();
           })
