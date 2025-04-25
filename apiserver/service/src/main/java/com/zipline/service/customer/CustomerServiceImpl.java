@@ -1,6 +1,7 @@
 package com.zipline.service.customer;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -11,11 +12,15 @@ import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.counsel.Counsel;
 import com.zipline.entity.customer.Customer;
+import com.zipline.entity.label.Label;
+import com.zipline.entity.label.LabelCustomer;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.auth.AuthException;
 import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
 import com.zipline.global.exception.customer.CustomerException;
 import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
+import com.zipline.global.exception.label.LabelException;
+import com.zipline.global.exception.label.errorcode.LabelErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.request.PageRequestDTO;
@@ -24,6 +29,8 @@ import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.contract.CustomerContractRepository;
 import com.zipline.repository.counsel.CounselRepository;
 import com.zipline.repository.customer.CustomerRepository;
+import com.zipline.repository.label.LabelCustomerRepository;
+import com.zipline.repository.label.LabelRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
 import com.zipline.service.contract.dto.response.ContractListResponseDTO;
@@ -46,6 +53,8 @@ public class CustomerServiceImpl implements CustomerService {
 	private final CounselRepository counselRepository;
 	private final AgentPropertyRepository agentPropertyRepository;
 	private final CustomerContractRepository customerContractRepository;
+	private final LabelRepository labelRepository;
+	private final LabelCustomerRepository labelCustomerRepository;
 
 	@Transactional
 	public ApiResponse<Void> registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUID) {
@@ -53,7 +62,26 @@ public class CustomerServiceImpl implements CustomerService {
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		Customer customer = customerRegisterRequestDTO.toEntity(loginedUser);
 		customerRepository.save(customer);
-		return ApiResponse.create("유저 등록에 성공하였습니다.");
+		List<Long> labelUids = customerRegisterRequestDTO.getLabelUids();
+
+		if (labelUids != null && !labelUids.isEmpty()) {
+			List<LabelCustomer> labelCustomers = new ArrayList<>();
+
+			for (Long labelUid : labelUids) {
+				Label label = labelRepository.findById(labelUid)
+					.orElseThrow(() -> new LabelException(LabelErrorCode.LABEL_NOT_FOUND));
+
+				if (!label.getUser().getUid().equals(userUID)) {
+					throw new LabelException(LabelErrorCode.LABEL_NOT_FOUND);
+				}
+
+				labelCustomers.add(new LabelCustomer(customer, label));
+			}
+
+			labelCustomerRepository.saveAll(labelCustomers);
+		}
+
+		return ApiResponse.create("고객 등록에 성공하였습니다.");
 	}
 
 	@Transactional
