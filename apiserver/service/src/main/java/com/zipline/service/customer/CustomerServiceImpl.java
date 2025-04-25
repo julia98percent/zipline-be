@@ -81,7 +81,7 @@ public class CustomerServiceImpl implements CustomerService {
 			labelCustomerRepository.saveAll(labelCustomers);
 		}
 
-		return ApiResponse.create("유저 등록에 성공하였습니다.");
+		return ApiResponse.create("고객 등록에 성공하였습니다.");
 	}
 
 	@Transactional
