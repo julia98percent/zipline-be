@@ -62,15 +62,16 @@ public class CustomerServiceImpl implements CustomerService {
 		Customer customer = customerRegisterRequestDTO.toEntity(loginedUser);
 		customerRepository.save(customer);
 
-		List<Long> labelUids = customerRegisterRequestDTO.getLabelUids();
-		if (labelUids != null && !labelUids.isEmpty()) {
-			List<Label> labels = labelRepository.findAllByUidInAndUserUidAndDeletedAtIsNull(labelUids, userUid);
+		List<Long> requestLabelUids = customerRegisterRequestDTO.getLabelUids();
+		if (requestLabelUids != null && !requestLabelUids.isEmpty()) {
+			List<Label> validLabels = labelRepository.findAllByUidInAndUserUidAndDeletedAtIsNull(requestLabelUids,
+				userUid);
 
-			if (labels.size() != labelUids.size()) {
+			if (validLabels.size() != requestLabelUids.size()) {
 				throw new LabelException(LabelErrorCode.LABEL_NOT_FOUND);
 			}
 
-			List<LabelCustomer> labelCustomers = labels.stream()
+			List<LabelCustomer> labelCustomers = validLabels.stream()
 				.map(label -> new LabelCustomer(customer, label))
 				.toList();
 
