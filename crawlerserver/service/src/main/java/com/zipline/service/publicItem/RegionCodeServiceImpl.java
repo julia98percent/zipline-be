@@ -7,14 +7,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.domain.dto.publicitem.RegionDTO;
-import com.zipline.domain.entity.enums.CrawlStatus;
 import com.zipline.domain.entity.publicitem.Region;
 import com.zipline.global.util.RandomSleepUtil;
 import com.zipline.infrastructure.publicItem.repository.RegionRepository;
@@ -33,9 +31,9 @@ public class RegionCodeServiceImpl implements RegionCodeService {
     public void crawlAndSaveRegions() {
         log.info("지역 정보 수집 시작");
         initializeKoreaIfNotExists();
-        collectRegionsForLevel(KOREA_CORTAR_NO, 1);
-        collectRegionsForParents(1, 2);
-        collectRegionsForParents(2, 3);
+        collectRegionsForLevel(1);
+        collectRegionsForLevel(2);
+        collectRegionsForLevel(3);
         logCollectionSummary();
     }
 
@@ -46,19 +44,23 @@ public class RegionCodeServiceImpl implements RegionCodeService {
         }
     }
 
-    private void collectRegionsForLevel(Long parentCortarNo, int targetLevel) {
-        String response = fetchRegionsFromApi(API_BASE_URL + parentCortarNo);
+    private String formatCortarNo(Long cortarNo) {
+        return String.format("%010d", cortarNo);
+    }
+
+    private void collectRegionsForParent(Long parentCortarNo, int targetLevel) {
+        String formattedCortarNo = formatCortarNo(parentCortarNo);
+        String response = fetchRegionsFromApi(API_BASE_URL + formattedCortarNo);
         if (response != null) {
             List<RegionDTO> regions = parseRegions(response);
             regions.forEach(region -> saveRegion(parentCortarNo, region, targetLevel));
         }
     }
-
-    private void collectRegionsForParents(int parentLevel, int targetLevel) {
-        List<Region> parents = regionRepository.findByLevel(parentLevel);
+    private void collectRegionsForLevel(int targetLevel) {
+        List<Region> parents = regionRepository.findByLevel(targetLevel - 1);
         for (Region parent : parents) {
             RandomSleepUtil.sleepShort();
-            collectRegionsForLevel(parent.getCortarNo(), targetLevel);
+            collectRegionsForParent(parent.getCortarNo(), targetLevel);
         }
     }
 
@@ -110,11 +112,10 @@ public class RegionCodeServiceImpl implements RegionCodeService {
     }
 
     private void saveRegion(Long parentCortarNo, RegionDTO dto, int level) {
-        Region parentRegion = parentCortarNo > 0 ?
+        Region parentRegion = parentCortarNo == null ?
+            null :
             regionRepository.findByCortarNo(parentCortarNo)
-                .orElseThrow(() -> new IllegalArgumentException("Parent region not found: " + parentCortarNo))
-            : null;
-
+                .orElseThrow(() -> new IllegalArgumentException("부모지역 미발견: " + parentCortarNo));
         Region region = dto.toEntity(level, parentRegion);
         regionRepository.save(region);
     }
