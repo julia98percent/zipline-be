@@ -2,10 +2,10 @@ package com.zipline.controller.message;
 
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.message.MessageTemplateService;
-import com.zipline.service.message.dto.message.request.MessageTemplateRequestDTO;
 import com.zipline.service.message.dto.message.response.MessageTemplateResponseDTO;
 import com.zipline.service.message.dto.request.MessageTemplateRequestDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,6 +43,13 @@ public class MessageTemplateController {
   public ResponseEntity<ApiResponse<List<MessageTemplateResponseDTO>>> getMessageTemplateList(Principal principal) {
     List<MessageTemplateResponseDTO> messageTemplateList =messageTemplateService.getMessageTemplateList(Long.parseLong(principal.getName()));
     ApiResponse<List<MessageTemplateResponseDTO>> response = ApiResponse.ok("문자 템플릿 목록 조회 성공", messageTemplateList);
+    return ResponseEntity.status(HttpStatus.OK).body(response);
+  }
+
+  @PatchMapping("/{templateUid}")
+  public ResponseEntity<ApiResponse<MessageTemplateResponseDTO>> modifyMessageTemplate(@PathVariable Long templateUid, @Valid @RequestBody MessageTemplateRequestDTO request, Principal principal) {
+    MessageTemplateResponseDTO modifiedMessageTemplate =messageTemplateService.modifyMessageTemplate(templateUid, request, Long.parseLong(principal.getName()));
+    ApiResponse<MessageTemplateResponseDTO> response = ApiResponse.ok("문자 템플릿 수정 성공", modifiedMessageTemplate);
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 
