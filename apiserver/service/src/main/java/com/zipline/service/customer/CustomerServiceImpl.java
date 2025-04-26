@@ -150,7 +150,6 @@ public class CustomerServiceImpl implements CustomerService {
 		Page<Customer> customerPage = customerRepository.findByUserUidWithLabels(userUid, pageRequestDTO.toPageable());
 		List<Customer> customers = customerPage.getContent();
 
-		// 여기가 포인트! 여러 Customer의 labelCustomers를 한꺼번에 접근
 		customers.forEach(customer -> customer.getLabelCustomers().size());
 
 		List<CustomerListResponseDTO.CustomerResponseDTO> customerResponseDTOList = customers.stream()
