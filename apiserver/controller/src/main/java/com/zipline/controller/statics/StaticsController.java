@@ -16,7 +16,7 @@ import java.security.Principal;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/test/statics")
+@RequestMapping("/api/v1/statics")
 @Tag(name = "통계 API", description = "통계 관련 API")
 @RestController
 public class StaticsController {
