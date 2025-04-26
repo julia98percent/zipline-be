@@ -9,12 +9,12 @@ import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.repository.message.MessageTemplateRepository;
 import com.zipline.repository.user.UserRepository;
+import com.zipline.service.message.dto.message.response.MessageTemplateResponseDTO;
 import com.zipline.service.message.dto.request.MessageTemplateRequestDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,7 +55,7 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
   }
 
 	@Override
-	@ReadOnlyProperty
+	@Transactional(readOnly = true)
 	public List<MessageTemplateResponseDTO> getMessageTemplateList(Long userUid) {
 		List<MessageTemplate> messageTemplateList = messageTemplateRepository.findByUserUid(userUid);
 		return messageTemplateList.stream()

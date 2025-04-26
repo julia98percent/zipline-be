@@ -1,9 +1,9 @@
 package com.zipline.controller.message;
 
-import com.zipline.service.message.dto.request.MessageTemplateRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.message.MessageTemplateService;
 import com.zipline.service.message.dto.message.response.MessageTemplateResponseDTO;
+import com.zipline.service.message.dto.request.MessageTemplateRequestDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import java.util.List;
@@ -36,7 +36,7 @@ public class MessageTemplateController {
   }
 
   @GetMapping("")
-  public ResponseEntity<ApiResponse<List<MessageTemplateResponseDTO>>> getMessageTemplate(Principal principal) {
+  public ResponseEntity<ApiResponse<List<MessageTemplateResponseDTO>>> getMessageTemplateList(Principal principal) {
     List<MessageTemplateResponseDTO> messageTemplateList =messageTemplateService.getMessageTemplateList(Long.parseLong(principal.getName()));
     ApiResponse<List<MessageTemplateResponseDTO>> response = ApiResponse.ok("문자 템플릿 목록 조회 성공", messageTemplateList);
     return ResponseEntity.status(HttpStatus.OK).body(response);
