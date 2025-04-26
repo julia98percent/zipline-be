@@ -28,7 +28,6 @@ import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.request.PageRequestDTO;
-import com.zipline.global.response.ApiResponse;
 import com.zipline.global.util.S3FileUploader;
 import com.zipline.repository.survey.QuestionRepository;
 import com.zipline.repository.survey.SurveyAnswerRepository;
@@ -57,8 +56,8 @@ public class SurveyServiceImpl implements SurveyService {
 	private final SurveyAnswerFactory surveyAnswerFactory;
 
 	@Transactional
-	public Map<String, String> createSurvey(SurveyCreateRequestDTO requestDTO, Long agentUID) {
-		User user = userRepository.findById(agentUID)
+	public Map<String, String> createSurvey(SurveyCreateRequestDTO requestDTO, Long userUid) {
+		User user = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		Survey survey = new Survey(requestDTO.getTitle(), user);
 
@@ -85,7 +84,7 @@ public class SurveyServiceImpl implements SurveyService {
 			"이름",
 			QuestionType.SUBJECTIVE,
 			"고객님의 이름을 입력해주세요.",
-			true,
+			false,
 			survey
 		);
 
@@ -101,20 +100,19 @@ public class SurveyServiceImpl implements SurveyService {
 		survey.getQuestions().add(phoneQuestion);
 
 		surveyRepository.save(survey);
-		user.setUrl(String.valueOf(survey.getUid()));
+		user.setUrl(String.valueOf(survey.getUlid()));
 	}
 
 	@Transactional(readOnly = true)
-	public ApiResponse<SurveyResponseDTO> getSurvey(Long surveyUID) {
-		Survey savedSurvey = surveyRepository.findByUidAndDeletedAtIsNull(surveyUID)
+	public SurveyResponseDTO getSurvey(Long surveyUid) {
+		Survey savedSurvey = surveyRepository.findByUidAndDeletedAtIsNull(surveyUid)
 			.orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
 		List<Question> questions = questionRepository.findAllBySurveyUidWithChoices(savedSurvey.getUid());
-		SurveyResponseDTO result = SurveyResponseDTO.from(savedSurvey, questions);
-		return ApiResponse.ok("설문 조회 성공", result);
+		return SurveyResponseDTO.from(savedSurvey, questions);
 	}
 
 	@Transactional
-	public ApiResponse<Void> submitSurvey(Long surveyUid, List<SurveySubmitRequestDTO> requestDTOList,
+	public void submitSurvey(Long surveyUid, List<SurveySubmitRequestDTO> requestDTOList,
 		List<MultipartFile> files) {
 		Survey savedSurvey = surveyRepository.findByUidAndDeletedAtIsNull(surveyUid)
 			.orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
@@ -133,7 +131,6 @@ public class SurveyServiceImpl implements SurveyService {
 		allAnswers.addAll(generalAnswers);
 		allAnswers.addAll(fileAnswers);
 		surveyAnswerRepository.saveAll(allAnswers);
-		return ApiResponse.create("설문 제출에 성공하였습니다.");
 	}
 
 	@Transactional(readOnly = true)
@@ -166,13 +163,11 @@ public class SurveyServiceImpl implements SurveyService {
 			Comparator.comparing(SurveyResponseListDTO.SurveyResponseListDataDTO::getSubmittedAt,
 				Comparator.reverseOrder()));
 
-		SurveyResponseListDTO result = new SurveyResponseListDTO(surveyResponseListDataDTOs,
-			savedSurveyResponses);
-		return result;
+		return new SurveyResponseListDTO(surveyResponseListDataDTOs, savedSurveyResponses);
 	}
 
 	@Transactional(readOnly = true)
-	public ApiResponse<SurveyResponseDetailDTO> getSubmittedSurvey(Long surveyResponseUid, Long userUid) {
+	public SurveyResponseDetailDTO getSubmittedSurvey(Long surveyResponseUid, Long userUid) {
 		SurveyResponse savedSurveyResponse = surveyResponseRepository.findSurveyResponseWithSurveyAndUserById(
 				surveyResponseUid)
 			.orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
@@ -183,9 +178,7 @@ public class SurveyServiceImpl implements SurveyService {
 
 		List<SurveyAnswer> surveyAnswers = surveyAnswerRepository.findByWithQuestionsAndChoicesSurveyResponseUid(
 			savedSurveyResponse.getUid());
-		SurveyResponseDetailDTO responseDTO = new SurveyResponseDetailDTO(savedSurveyResponse, surveyAnswers);
-
-		return ApiResponse.ok("설문 상세조회에 성공하였습니다.", responseDTO);
+		return new SurveyResponseDetailDTO(savedSurveyResponse, surveyAnswers);
 	}
 
 	private List<SurveyAnswer> handleFileAnswers(List<MultipartFile> files, List<Question> questions,
