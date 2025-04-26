@@ -11,13 +11,11 @@ import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.agentProperty.PropertyException;
-import com.zipline.global.exception.auth.AuthException;
-import com.zipline.global.exception.customer.CustomerException;
 import com.zipline.global.exception.agentProperty.errorcode.PropertyErrorCode;
-import com.zipline.global.exception.user.errorcode.UserErrorCode;
-import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
+import com.zipline.global.exception.customer.CustomerException;
 import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
 import com.zipline.global.exception.user.UserException;
+import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.customer.CustomerRepository;
@@ -39,11 +37,10 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 
 	@Transactional(readOnly = true)
 	public AgentPropertyResponseDTO getProperty(Long propertyUid, Long userUid) {
-		AgentProperty agentProperty = agentPropertyRepository.findByUidAndDeletedAtIsNull(propertyUid)
+		AgentProperty agentProperty = agentPropertyRepository.findByUidAndUserUidAndDeletedAtIsNull(propertyUid,
+				userUid)
 			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
 
-		if (!agentProperty.getUser().getUid().equals(userUid))
-			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 		return AgentPropertyResponseDTO.of(agentProperty);
 	}
 
@@ -52,7 +49,8 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 		User loggedInUser = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-		Customer customer = customerRepository.findById(agentPropertyRequestDTO.getCustomerUid())
+		Customer customer = customerRepository.findByUidAndUserUidAndDeletedAtIsNull(
+				agentPropertyRequestDTO.getCustomerUid(), userUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		AgentProperty agentProperty = agentPropertyRequestDTO.toEntity(loggedInUser, customer);
@@ -64,17 +62,13 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 	@Transactional
 	public AgentPropertyResponseDTO modifyProperty(AgentPropertyRequestDTO agentPropertyRequestDTO, Long propertyUid,
 		Long userUid) {
-		User loggedInUser = userRepository.findById(userUid)
-			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-		AgentProperty agentProperty = agentPropertyRepository.findByUidAndDeletedAtIsNull(propertyUid)
+		AgentProperty agentProperty = agentPropertyRepository.findByUidAndUserUidAndDeletedAtIsNull(propertyUid,
+				userUid)
 			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
 
 		Customer customer = customerRepository.findById(agentPropertyRequestDTO.getCustomerUid())
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
-
-		if (!agentProperty.getUser().getUid().equals(userUid))
-			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 
 		agentProperty.modifyProperty(customer, agentPropertyRequestDTO.getAddress(),
 			agentPropertyRequestDTO.getLegalDistrictCode(), agentPropertyRequestDTO.getDeposit(),
@@ -95,11 +89,9 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 
 	@Transactional
 	public void deleteProperty(Long propertyUid, Long userUid) {
-		AgentProperty agentProperty = agentPropertyRepository.findByUidAndDeletedAtIsNull(propertyUid)
+		AgentProperty agentProperty = agentPropertyRepository.findByUidAndUserUidAndDeletedAtIsNull(propertyUid,
+				userUid)
 			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
-
-		if (!agentProperty.getUser().getUid().equals(userUid))
-			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
 
 		agentProperty.delete(LocalDateTime.now());
 	}
