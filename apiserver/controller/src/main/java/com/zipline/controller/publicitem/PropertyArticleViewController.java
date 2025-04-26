@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/test/property-articles")
+@RequestMapping("/api/v1/property-articles")
 @RequiredArgsConstructor
 @Tag(name = "공개 매물 목록 검색", description = "공개 매물 목록 검색 API")
 public class PropertyArticleViewController {
