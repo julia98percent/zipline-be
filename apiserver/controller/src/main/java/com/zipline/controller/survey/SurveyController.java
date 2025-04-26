@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 @Tag(name = "설문 API", description = "설문 관련 API")
 @RestController
 public class SurveyController {
@@ -54,7 +54,8 @@ public class SurveyController {
 	@Operation(summary = "설문 조회", description = "공인중개사가 생성한 설문을 조회합니다.")
 	@GetMapping("/surveys/{surveyUid}")
 	public ResponseEntity<ApiResponse<SurveyResponseDTO>> getSurvey(@PathVariable Long surveyUid) {
-		ApiResponse<SurveyResponseDTO> response = surveyService.getSurvey(surveyUid);
+		SurveyResponseDTO result = surveyService.getSurvey(surveyUid);
+		ApiResponse<SurveyResponseDTO> response = ApiResponse.ok("설문 조회 성공", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
@@ -62,8 +63,9 @@ public class SurveyController {
 	@GetMapping("/surveys/responses/{surveyResponseUid}")
 	public ResponseEntity<ApiResponse<SurveyResponseDetailDTO>> getSubmittedSurvey(@PathVariable Long surveyResponseUid,
 		Principal principal) {
-		ApiResponse<SurveyResponseDetailDTO> response = surveyService.getSubmittedSurvey(surveyResponseUid,
+		SurveyResponseDetailDTO result = surveyService.getSubmittedSurvey(surveyResponseUid,
 			Long.parseLong(principal.getName()));
+		ApiResponse<SurveyResponseDetailDTO> response = ApiResponse.ok("설문 상세조회에 성공하였습니다.", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
@@ -83,7 +85,8 @@ public class SurveyController {
 	public ResponseEntity<ApiResponse<Void>> submitSurvey(@PathVariable Long surveyUid,
 		@RequestPart(name = "requestDTO") List<SurveySubmitRequestDTO> requestDTO,
 		@RequestPart(name = "files", required = false) List<MultipartFile> files) {
-		ApiResponse<Void> response = surveyService.submitSurvey(surveyUid, requestDTO, files);
+		surveyService.submitSurvey(surveyUid, requestDTO, files);
+		ApiResponse<Void> response = ApiResponse.create("설문 제출에 성공하였습니다.");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 }
