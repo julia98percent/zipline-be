@@ -64,6 +64,7 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
 	}
 
   @Override
+  @Transactional
   public void deleteMessageTemplate(Long templateUid, Long userUid) {
     MessageTemplate template = messageTemplateRepository.findByUidAndDeletedAtIsNull(templateUid)
         .orElseThrow(() -> new MessageTemplateException(MessageTemplateErrorCode.TEMPLATE_NOT_FOUND));
