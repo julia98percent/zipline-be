@@ -1,7 +1,10 @@
 package com.zipline.service.customer;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -82,6 +85,40 @@ public class CustomerServiceImpl implements CustomerService {
 		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
+		List<Long> requestLabelUids = customerModifyRequestDTO.getLabelUids();
+
+		if (requestLabelUids != null && !requestLabelUids.isEmpty()) {
+			Set<Long> requestedLabelUids = new HashSet<>(requestLabelUids);
+
+			List<Label> validLabels = labelRepository.findAllByUidInAndUserUidAndDeletedAtIsNull(requestLabelUids,
+				userUid);
+			if (validLabels.size() != requestedLabelUids.size()) {
+				throw new LabelException(LabelErrorCode.LABEL_NOT_FOUND);
+			}
+
+			List<LabelCustomer> existingLabelMappings = labelCustomerRepository.findAllByCustomerUid(
+				savedCustomer.getUid());
+			Set<Long> existingLabelUids = existingLabelMappings.stream()
+				.map(mapping -> mapping.getLabel().getUid())
+				.collect(Collectors.toSet());
+
+			List<LabelCustomer> toDeleteLabelMappings = existingLabelMappings.stream()
+				.filter(mapping -> !requestedLabelUids.contains(mapping.getLabel().getUid()))
+				.toList();
+			labelCustomerRepository.deleteAll(toDeleteLabelMappings);
+
+			Set<Long> labelUidsToAdd = new HashSet<>(requestedLabelUids);
+			labelUidsToAdd.removeAll(existingLabelUids);
+
+			if (!labelUidsToAdd.isEmpty()) {
+				List<LabelCustomer> toAddLabelMappings = validLabels.stream()
+					.filter(label -> labelUidsToAdd.contains(label.getUid()))
+					.map(label -> new LabelCustomer(savedCustomer, label))
+					.toList();
+				labelCustomerRepository.saveAll(toAddLabelMappings);
+			}
+		}
+
 		savedCustomer.modifyCustomer(customerModifyRequestDTO.getName(), customerModifyRequestDTO.getPhoneNo(),
 			customerModifyRequestDTO.getTelProvider(),
 			customerModifyRequestDTO.getLegalDistrictCode(),
@@ -94,7 +131,9 @@ public class CustomerServiceImpl implements CustomerService {
 			customerModifyRequestDTO.getMinDeposit(), customerModifyRequestDTO.getMaxDeposit(),
 			customerModifyRequestDTO.getBirthday());
 
-		return new CustomerDetailResponseDTO(savedCustomer);
+		List<LabelCustomer> updatedLabelMappings = labelCustomerRepository.findAllByCustomerUid(
+			savedCustomer.getUid());
+		return new CustomerDetailResponseDTO(savedCustomer, updatedLabelMappings);
 	}
 
 	@Transactional
@@ -120,7 +159,7 @@ public class CustomerServiceImpl implements CustomerService {
 	public CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid) {
 		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
-		return new CustomerDetailResponseDTO(savedCustomer);
+		return new CustomerDetailResponseDTO(savedCustomer, null);
 	}
 
 	@Transactional(readOnly = true)
