@@ -10,7 +10,9 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,5 +42,12 @@ public class MessageTemplateController {
     List<MessageTemplateResponseDTO> messageTemplateList =messageTemplateService.getMessageTemplateList(Long.parseLong(principal.getName()));
     ApiResponse<List<MessageTemplateResponseDTO>> response = ApiResponse.ok("문자 템플릿 목록 조회 성공", messageTemplateList);
     return ResponseEntity.status(HttpStatus.OK).body(response);
+  }
+
+  @DeleteMapping("/{templateUid}")
+  public ResponseEntity<ApiResponse<Void>> deleteMessageTemplate(@PathVariable Long templateUid, Principal principal) {
+    messageTemplateService.deleteMessageTemplate(templateUid, Long.parseLong(principal.getName()));
+    ApiResponse<Void> responseBody = ApiResponse.ok("문자 템플릿 삭제 성공");
+    return ResponseEntity.ok(responseBody);
   }
 }
