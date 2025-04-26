@@ -1,9 +1,9 @@
 package com.zipline.controller.message;
 
 import com.zipline.global.response.ApiResponse;
+import com.zipline.service.message.MessageService;
 import com.zipline.service.message.dto.request.MessageHistoryRequestDTO;
 import com.zipline.service.message.dto.request.SendMessageRequestDTO;
-import com.zipline.service.message.MessageService;
 import com.zipline.service.message.dto.response.MessageHistoryResponseDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
@@ -36,7 +36,7 @@ public class MessageController {
   }
 
   @GetMapping("")
-  public ResponseEntity<Object> getMessageHistory(@RequestParam(required = false) String criteria,
+  public ResponseEntity<ApiResponse<MessageHistoryResponseDTO>> getMessageHistory(@RequestParam(required = false) String criteria,
       @RequestParam(required = false) String cond, @RequestParam(required = false) String value,
       @RequestParam(required = false) String startKey , @RequestParam(required = false) Integer limit ,Principal principal) {
 
