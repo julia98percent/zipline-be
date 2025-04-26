@@ -3,7 +3,6 @@ package com.zipline.service.customer;
 import java.util.List;
 
 import com.zipline.global.request.PageRequestDTO;
-import com.zipline.global.response.ApiResponse;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
 import com.zipline.service.contract.dto.response.ContractListResponseDTO;
 import com.zipline.service.counsel.dto.response.CounselListResponseDTO;
@@ -14,15 +13,14 @@ import com.zipline.service.customer.dto.response.CustomerListResponseDTO;
 
 public interface CustomerService {
 
-	ApiResponse<Void> registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUID);
+	void registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUid);
 
-	ApiResponse<CustomerDetailResponseDTO> modifyCustomer(Long customerUid,
-		CustomerModifyRequestDTO customerModifyRequestDTO,
-		Long userUID);
+	CustomerDetailResponseDTO modifyCustomer(Long customerUid, CustomerModifyRequestDTO customerModifyRequestDTO,
+		Long userUid);
 
-	ApiResponse<Void> deleteCustomer(Long customerUID, Long userUID);
+	void deleteCustomer(Long customerUID, Long userUid);
 
-	ApiResponse<CustomerListResponseDTO> getCustomers(PageRequestDTO pageRequestDTO, Long userUID);
+	CustomerListResponseDTO getCustomers(PageRequestDTO pageRequestDTO, Long userUid);
 
 	CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid);
 

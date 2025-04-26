@@ -1,7 +1,6 @@
 package com.zipline.service.customer;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,8 +17,6 @@ import com.zipline.entity.customer.Customer;
 import com.zipline.entity.label.Label;
 import com.zipline.entity.label.LabelCustomer;
 import com.zipline.entity.user.User;
-import com.zipline.global.exception.auth.AuthException;
-import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
 import com.zipline.global.exception.customer.CustomerException;
 import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
 import com.zipline.global.exception.label.LabelException;
@@ -27,7 +24,6 @@ import com.zipline.global.exception.label.errorcode.LabelErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.request.PageRequestDTO;
-import com.zipline.global.response.ApiResponse;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.contract.CustomerContractRepository;
 import com.zipline.repository.counsel.CounselRepository;
@@ -60,77 +56,68 @@ public class CustomerServiceImpl implements CustomerService {
 	private final LabelCustomerRepository labelCustomerRepository;
 
 	@Transactional
-	public ApiResponse<Void> registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUID) {
-		User loginedUser = userRepository.findById(userUID)
+	public void registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUid) {
+		User loginedUser = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 		Customer customer = customerRegisterRequestDTO.toEntity(loginedUser);
 		customerRepository.save(customer);
-		List<Long> labelUids = customerRegisterRequestDTO.getLabelUids();
 
-		if (labelUids != null && !labelUids.isEmpty()) {
-			List<LabelCustomer> labelCustomers = new ArrayList<>();
+		List<Long> requestLabelUids = customerRegisterRequestDTO.getLabelUids();
+		if (requestLabelUids != null && !requestLabelUids.isEmpty()) {
+			List<Label> validLabels = labelRepository.findAllByUidInAndUserUidAndDeletedAtIsNull(requestLabelUids,
+				userUid);
 
-			for (Long labelUid : labelUids) {
-				Label label = labelRepository.findById(labelUid)
-					.orElseThrow(() -> new LabelException(LabelErrorCode.LABEL_NOT_FOUND));
-
-				if (!label.getUser().getUid().equals(userUID)) {
-					throw new LabelException(LabelErrorCode.LABEL_NOT_FOUND);
-				}
-
-				labelCustomers.add(new LabelCustomer(customer, label));
+			if (validLabels.size() != requestLabelUids.size()) {
+				throw new LabelException(LabelErrorCode.LABEL_NOT_FOUND);
 			}
+
+			List<LabelCustomer> labelCustomers = validLabels.stream()
+				.map(label -> new LabelCustomer(customer, label))
+				.toList();
 
 			labelCustomerRepository.saveAll(labelCustomers);
 		}
-
-		return ApiResponse.create("고객 등록에 성공하였습니다.");
 	}
 
 	@Transactional
-	public ApiResponse<CustomerDetailResponseDTO> modifyCustomer(Long customerUid,
-		CustomerModifyRequestDTO customerModifyRequestDTO, Long userUID) {
+	public CustomerDetailResponseDTO modifyCustomer(Long customerUid,
+		CustomerModifyRequestDTO customerModifyRequestDTO, Long userUid) {
 
 		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
-		if (!savedCustomer.getUser().getUid().equals(userUID)) {
-			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
-		}
-		List<Long> labelUids = customerModifyRequestDTO.getLabelUids();
+		List<Long> requestLabelUids = customerModifyRequestDTO.getLabelUids();
 
-		if (labelUids != null) {
-			// 기존 라벨 매핑 가져오기
-			List<LabelCustomer> existingMappings = labelCustomerRepository.findAllByCustomerUid(savedCustomer.getUid());
+		if (requestLabelUids != null && !requestLabelUids.isEmpty()) {
+			Set<Long> requestedLabelUids = new HashSet<>(requestLabelUids);
 
-			// 수정 요청한 labelUid Set 만들기
-			Set<Long> requestedLabelUids = new HashSet<>(labelUids);
+			List<Label> validLabels = labelRepository.findAllByUidInAndUserUidAndDeletedAtIsNull(requestLabelUids,
+				userUid);
+			if (validLabels.size() != requestedLabelUids.size()) {
+				throw new LabelException(LabelErrorCode.LABEL_NOT_FOUND);
+			}
 
-			// 1. 기존 매핑 중 요청에 없는 것은 삭제
-			List<LabelCustomer> toDelete = existingMappings.stream()
-				.filter(mapping -> !requestedLabelUids.contains(mapping.getLabel().getUid()))
-				.toList();
-			labelCustomerRepository.deleteAll(toDelete);
-
-			// 2. 요청한 labelUid 중 아직 매핑되지 않은 것은 추가
-			Set<Long> existingLabelUids = existingMappings.stream()
+			List<LabelCustomer> existingLabelMappings = labelCustomerRepository.findAllByCustomerUid(
+				savedCustomer.getUid());
+			Set<Long> existingLabelUids = existingLabelMappings.stream()
 				.map(mapping -> mapping.getLabel().getUid())
 				.collect(Collectors.toSet());
 
-			List<LabelCustomer> toAdd = new ArrayList<>();
-			for (Long labelUid : labelUids) {
-				if (!existingLabelUids.contains(labelUid)) {
-					Label label = labelRepository.findById(labelUid)
-						.orElseThrow(() -> new LabelException(LabelErrorCode.LABEL_NOT_FOUND));
+			List<LabelCustomer> toDeleteLabelMappings = existingLabelMappings.stream()
+				.filter(mapping -> !requestedLabelUids.contains(mapping.getLabel().getUid()))
+				.toList();
+			labelCustomerRepository.deleteAll(toDeleteLabelMappings);
 
-					if (!label.getUser().getUid().equals(userUID)) {
-						throw new LabelException(LabelErrorCode.LABEL_NOT_FOUND);
-					}
+			Set<Long> labelUidsToAdd = new HashSet<>(requestedLabelUids);
+			labelUidsToAdd.removeAll(existingLabelUids);
 
-					toAdd.add(new LabelCustomer(savedCustomer, label));
-				}
+			if (!labelUidsToAdd.isEmpty()) {
+				List<LabelCustomer> toAddLabelMappings = validLabels.stream()
+					.filter(label -> labelUidsToAdd.contains(label.getUid()))
+					.map(label -> new LabelCustomer(savedCustomer, label))
+					.toList();
+				labelCustomerRepository.saveAll(toAddLabelMappings);
 			}
-			labelCustomerRepository.saveAll(toAdd);
 		}
 
 		savedCustomer.modifyCustomer(customerModifyRequestDTO.getName(), customerModifyRequestDTO.getPhoneNo(),
@@ -145,47 +132,34 @@ public class CustomerServiceImpl implements CustomerService {
 			customerModifyRequestDTO.getMinDeposit(), customerModifyRequestDTO.getMaxDeposit(),
 			customerModifyRequestDTO.getBirthday());
 
-		List<LabelCustomer> updatedLabelMappings = labelCustomerRepository.findAllByCustomerUid(savedCustomer.getUid());
-		CustomerDetailResponseDTO customerDetailResponseDTO = new CustomerDetailResponseDTO(savedCustomer,
-			updatedLabelMappings);
-		return ApiResponse.ok("고객 수정에 성공하였습니다.", customerDetailResponseDTO);
+		List<LabelCustomer> updatedLabelMappings = labelCustomerRepository.findAllByCustomerUid(
+			savedCustomer.getUid());
+		return new CustomerDetailResponseDTO(savedCustomer, updatedLabelMappings);
 	}
 
 	@Transactional
-	public ApiResponse<Void> deleteCustomer(Long customerUID, Long userUID) {
+	public void deleteCustomer(Long customerUID, Long userUid) {
 		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUID)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
-
-		if (!savedCustomer.getUser().getUid().equals(userUID)) {
-			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
-		}
-
-		savedCustomer.delete(LocalDateTime.now());
-		return ApiResponse.ok("고객 삭제에 성공하였습니다.");
+		LocalDateTime deletedAt = LocalDateTime.now();
+		savedCustomer.delete(deletedAt);
 	}
 
 	@Transactional(readOnly = true)
-	public ApiResponse<CustomerListResponseDTO> getCustomers(PageRequestDTO pageRequestDTO, Long userUID) {
-		Page<Customer> customerPage = customerRepository.findByUserUidAndDeletedAtIsNull(userUID,
+	public CustomerListResponseDTO getCustomers(PageRequestDTO pageRequestDTO, Long userUid) {
+		Page<Customer> customerPage = customerRepository.findByUserUidAndDeletedAtIsNull(userUid,
 			pageRequestDTO.toPageable());
 		List<CustomerListResponseDTO.CustomerResponseDTO> customerResponseDTOList = customerPage.getContent().stream()
 			.map(CustomerListResponseDTO.CustomerResponseDTO::new)
 			.toList();
 
-		CustomerListResponseDTO result = new CustomerListResponseDTO(customerResponseDTOList, customerPage);
-
-		return ApiResponse.ok("고객 목록 조회에 성공하였습니다.", result);
+		return new CustomerListResponseDTO(customerResponseDTOList, customerPage);
 	}
 
 	@Transactional(readOnly = true)
 	public CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid) {
 		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
-
-		if (!savedCustomer.getUser().getUid().equals(userUid)) {
-			throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
-		}
-
 		return new CustomerDetailResponseDTO(savedCustomer, null);
 	}
 
@@ -194,7 +168,6 @@ public class CustomerServiceImpl implements CustomerService {
 		validateCustomerExistence(customerUid, userUid);
 		List<Counsel> savedCounsels = counselRepository.findByCustomerUidAndUserUidAndDeletedAtIsNullOrderByCreatedAtDesc(
 			customerUid, userUid);
-
 		return savedCounsels.stream().map(CounselListResponseDTO::createWithoutCustomerName).toList();
 	}
 
@@ -217,10 +190,9 @@ public class CustomerServiceImpl implements CustomerService {
 		validateCustomerExistence(customerUid, userUid);
 		List<CustomerContract> savedCustomerContract = customerContractRepository.findByCustomerUidAndUserUid(
 			customerUid, userUid);
-		List<ContractListResponseDTO.ContractListDTO> result = savedCustomerContract.stream()
-			.map(cc -> new ContractListResponseDTO.ContractListDTO(cc))
+		return savedCustomerContract.stream()
+			.map(ContractListResponseDTO.ContractListDTO::new)
 			.toList();
-		return result;
 	}
 
 	private void validateCustomerExistence(Long customerUid, Long userUid) {
