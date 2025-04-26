@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "message_templates")
 @Entity
 @Getter
-public class MessageTemplate  extends BaseTimeEntity {
+public class MessageTemplate extends BaseTimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long uid;
@@ -43,6 +43,5 @@ public class MessageTemplate  extends BaseTimeEntity {
   public void updateInfo(String name, String content) {
     this.name = name;
     this.content = content;
-    this.updatedAt = LocalDateTime.now();
   }
 }
