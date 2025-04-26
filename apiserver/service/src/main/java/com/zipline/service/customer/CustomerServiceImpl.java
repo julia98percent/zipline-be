@@ -147,8 +147,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Transactional(readOnly = true)
 	public CustomerListResponseDTO getCustomers(PageRequestDTO pageRequestDTO, Long userUid) {
-		Page<Customer> customerPage = customerRepository.findByUserUidAndDeletedAtIsNull(userUid,
-			pageRequestDTO.toPageable());
+		Page<Customer> customerPage = customerRepository.findByUserUidWithLabels(userUid, pageRequestDTO.toPageable());
 		List<CustomerListResponseDTO.CustomerResponseDTO> customerResponseDTOList = customerPage.getContent().stream()
 			.map(CustomerListResponseDTO.CustomerResponseDTO::new)
 			.toList();
