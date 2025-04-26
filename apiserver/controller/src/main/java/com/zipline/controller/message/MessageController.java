@@ -1,15 +1,21 @@
 package com.zipline.controller.message;
 
-import com.zipline.service.message.dto.message.request.SendMessageRequestDTO;
+import com.zipline.global.response.ApiResponse;
 import com.zipline.service.message.MessageService;
+import com.zipline.service.message.dto.request.MessageHistoryRequestDTO;
+import com.zipline.service.message.dto.request.SendMessageRequestDTO;
+import com.zipline.service.message.dto.response.MessageHistoryResponseDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.security.Principal;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/v1/messages")
@@ -23,8 +29,20 @@ public class MessageController {
   }
 
   @PostMapping("")
-  public ResponseEntity<String> sendMessage(@RequestBody List<SendMessageRequestDTO> request) {
-      String result = messageService.sendMessage(request);
-      return ResponseEntity.ok(result);
+  public ResponseEntity<String> sendMessage(@RequestBody List<SendMessageRequestDTO> request,
+      Principal principal) {
+    String result = messageService.sendMessage(request, Long.parseLong(principal.getName()));
+    return ResponseEntity.ok(result);
   }
+
+  @GetMapping("")
+  public ResponseEntity<ApiResponse<MessageHistoryResponseDTO>> getMessageHistory(@ModelAttribute MessageHistoryRequestDTO requestDTO,
+Principal principal) {
+    
+    ApiResponse<MessageHistoryResponseDTO> result = ApiResponse.ok("문자 발송 내역 조회에 성공했습니다.",
+        messageService.getMessageHistory(requestDTO, Long.parseLong(principal.getName())));
+    return ResponseEntity.status(HttpStatus.OK).body(result);
+  }
+
+
 }

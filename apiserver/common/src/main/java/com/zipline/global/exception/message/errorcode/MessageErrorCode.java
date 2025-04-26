@@ -5,8 +5,9 @@ import org.springframework.http.HttpStatus;
 import com.zipline.global.exception.ErrorCode;
 
 public enum MessageErrorCode implements ErrorCode {
-	MESSAGE_SEND_FAILED("MSG-001", "메시지 전송에 실패하였습니다.", HttpStatus.BAD_GATEWAY);
-
+	MESSAGE_SEND_FAILED("MSG-001", "메시지 전송에 실패하였습니다.", HttpStatus.BAD_GATEWAY),
+	MESSAGE_HISTORY_INTERNAL_FAILED("MSG-002", "메시지 전송 목록을 가져오는데에 실패하였습니다.",  HttpStatus.BAD_REQUEST),
+	MESSAGE_HISTORY_EXTERNAL_FAILED("MSG-003", "메시지 전송 목록을 가져오는데에 실패하였습니다.",  HttpStatus.BAD_GATEWAY);
 	private final String code;
 	private final String message;
 	private final HttpStatus status;
