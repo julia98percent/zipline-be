@@ -35,8 +35,4 @@ public class LabelCustomer {
 		this.customer = customer;
 		this.label = label;
 	}
-
-	public static LabelCustomer create(Customer customer, Label label) {
-		return new LabelCustomer(customer, label);
-	}
 }

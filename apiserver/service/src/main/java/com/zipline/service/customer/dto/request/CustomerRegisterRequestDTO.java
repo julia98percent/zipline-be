@@ -13,7 +13,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 public class CustomerRegisterRequestDTO {
@@ -47,16 +49,16 @@ public class CustomerRegisterRequestDTO {
 	private String trafficSource;
 
 	@Schema(description = "임대인 여부", example = "true")
-	private boolean isLandlord;
+	private boolean landlord;
 
 	@Schema(description = "임차인 여부", example = "true")
-	private boolean isTenant;
+	private boolean tenant;
 
 	@Schema(description = "매수인 여부", example = "false")
-	private boolean isBuyer;
+	private boolean buyer;
 
 	@Schema(description = "매도인 여부", example = "false")
-	private boolean isSeller;
+	private boolean seller;
 
 	@Schema(description = "최대 가격", example = "100000000")
 	@DecimalMin(value = "0", message = "최대 가격은 0 이상이어야 합니다.")
@@ -87,10 +89,10 @@ public class CustomerRegisterRequestDTO {
 			.minRent(minRent)
 			.maxRent(maxRent)
 			.trafficSource(trafficSource)
-			.isLandlord(isLandlord)
-			.isTenant(isTenant)
-			.isBuyer(isBuyer)
-			.isSeller(isSeller)
+			.isLandlord(landlord)
+			.isTenant(tenant)
+			.isBuyer(buyer)
+			.isSeller(seller)
 			.maxPrice(maxPrice)
 			.minPrice(minPrice)
 			.minDeposit(minDeposit)

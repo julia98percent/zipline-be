@@ -13,4 +13,6 @@ public interface LabelRepository extends JpaRepository<Label, Long> {
 	Optional<Label> findByUidAndUserUidAndDeletedAtIsNull(Long labelUid, Long userUid);
 
 	List<Label> findAllByUserUidAndDeletedAtIsNull(Long userUid);
+
+	List<Label> findAllByUidInAndUserUidAndDeletedAtIsNull(List<Long> labelUids, Long userUid);
 }
