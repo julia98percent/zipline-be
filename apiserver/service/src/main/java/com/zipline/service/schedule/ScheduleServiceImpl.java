@@ -5,6 +5,8 @@ import com.zipline.entity.schedule.Schedule;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.customer.CustomerException;
 import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
+import com.zipline.global.exception.schedule.ScheduleException;
+import com.zipline.global.exception.schedule.errorcode.ScheduleErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.repository.customer.CustomerRepository;
@@ -26,8 +28,12 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     @Transactional
     public void createSchedule(ScheduleCreateRequestDTO request, Long userUid) {
+        validateScheduleTimeRequest(request);
+
         User user = userRepository.findById(userUid)
             .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+        Customer customer = findCustomerIsExist(request.getCustomerId());
 
 
         Schedule schedule = Schedule.builder()
@@ -40,5 +46,19 @@ public class ScheduleServiceImpl implements ScheduleService {
             .build();
 
         scheduleRepository.save(schedule);
+    }
+
+    private Customer findCustomerIsExist(Integer customerId) {
+        if (customerId == null) {
+            return null;
+        }
+        return customerRepository.findById(customerId.longValue())
+            .orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
+    }
+
+    private void validateScheduleTimeRequest(ScheduleCreateRequestDTO request) {
+        if (request.getStartDateTime().isAfter(request.getEndDateTime())) {
+            throw  new ScheduleException(ScheduleErrorCode.INVALID_SCHEDULE_TIME);
+        }
     }
 }
