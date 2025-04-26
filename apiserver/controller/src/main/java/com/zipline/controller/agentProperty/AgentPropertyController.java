@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,11 +20,12 @@ import com.zipline.service.agentProperty.dto.request.AgentPropertyRequestDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyResponseDTO;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/properties")
+@RequestMapping("/api/v1/properties")
 public class AgentPropertyController {
 
 	private final AgentPropertyService agentPropertyService;
@@ -45,7 +47,7 @@ public class AgentPropertyController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
-	@PostMapping("/{propertyUid}")
+	@PatchMapping("/{propertyUid}")
 	public ResponseEntity<ApiResponse<AgentPropertyResponseDTO>> modifyProperty(
 		@RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, @PathVariable Long propertyUid,
 		Principal principal) {
