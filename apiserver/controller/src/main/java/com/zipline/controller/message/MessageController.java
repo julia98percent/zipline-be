@@ -11,10 +11,10 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -36,18 +36,9 @@ public class MessageController {
   }
 
   @GetMapping("")
-  public ResponseEntity<ApiResponse<MessageHistoryResponseDTO>> getMessageHistory(@RequestParam(required = false) String criteria,
-      @RequestParam(required = false) String cond, @RequestParam(required = false) String value,
-      @RequestParam(required = false) String startKey , @RequestParam(required = false) Integer limit ,Principal principal) {
-
-    MessageHistoryRequestDTO requestDTO = MessageHistoryRequestDTO.builder()
-        .criteria(criteria)
-        .cond(cond)
-        .value(value)
-        .limit(limit)
-        .startKey(startKey)
-        .build();
-
+  public ResponseEntity<ApiResponse<MessageHistoryResponseDTO>> getMessageHistory(@ModelAttribute MessageHistoryRequestDTO requestDTO,
+Principal principal) {
+    
     ApiResponse<MessageHistoryResponseDTO> result = ApiResponse.ok("문자 발송 내역 조회에 성공했습니다.",
         messageService.getMessageHistory(requestDTO, Long.parseLong(principal.getName())));
     return ResponseEntity.status(HttpStatus.OK).body(result);
