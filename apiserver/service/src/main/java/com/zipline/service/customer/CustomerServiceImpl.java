@@ -147,9 +147,12 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Transactional(readOnly = true)
 	public CustomerListResponseDTO getCustomers(PageRequestDTO pageRequestDTO, Long userUid) {
-		Page<Customer> customerPage = customerRepository.findByUserUidAndDeletedAtIsNull(userUid,
-			pageRequestDTO.toPageable());
-		List<CustomerListResponseDTO.CustomerResponseDTO> customerResponseDTOList = customerPage.getContent().stream()
+		Page<Customer> customerPage = customerRepository.findByUserUidWithLabels(userUid, pageRequestDTO.toPageable());
+		List<Customer> customers = customerPage.getContent();
+
+		customers.forEach(customer -> customer.getLabelCustomers().size());
+
+		List<CustomerListResponseDTO.CustomerResponseDTO> customerResponseDTOList = customers.stream()
 			.map(CustomerListResponseDTO.CustomerResponseDTO::new)
 			.toList();
 
@@ -158,9 +161,11 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Transactional(readOnly = true)
 	public CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid) {
-		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
+		Customer savedCustomer = customerRepository.findByUidAndUserUidAndDeletedAtIsNull(customerUid, userUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
-		return new CustomerDetailResponseDTO(savedCustomer, null);
+
+		List<LabelCustomer> labelCustomerList = labelCustomerRepository.findAllByCustomerUid(customerUid);
+		return new CustomerDetailResponseDTO(savedCustomer, labelCustomerList);
 	}
 
 	@Transactional(readOnly = true)

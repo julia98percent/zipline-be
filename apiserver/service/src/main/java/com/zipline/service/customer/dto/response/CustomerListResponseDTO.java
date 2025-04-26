@@ -36,6 +36,7 @@ public class CustomerListResponseDTO {
 		private boolean isLandlord;
 		private boolean isBuyer;
 		private boolean isSeller;
+		private List<LabelDTO> labels;
 
 		public CustomerResponseDTO(Customer customer) {
 			this.uid = customer.getUid();
@@ -46,6 +47,21 @@ public class CustomerListResponseDTO {
 			this.isLandlord = customer.isLandlord();
 			this.isBuyer = customer.isBuyer();
 			this.isSeller = customer.isSeller();
+			this.labels = customer.getLabelCustomers() != null ? customer.getLabelCustomers()
+				.stream()
+				.map(lc -> new LabelDTO(lc.getLabel().getUid(), lc.getLabel().getName()))
+				.toList() : List.of();
+		}
+
+		@Getter
+		public static class LabelDTO {
+			private Long uid;
+			private String name;
+
+			public LabelDTO(Long uid, String name) {
+				this.uid = uid;
+				this.name = name;
+			}
 		}
 	}
 }

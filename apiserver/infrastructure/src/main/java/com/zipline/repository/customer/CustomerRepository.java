@@ -14,8 +14,10 @@ import com.zipline.entity.customer.Customer;
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 	Optional<Customer> findByUidAndDeletedAtIsNull(Long customerUid);
 
-	@Query("SELECT c FROM Customer c WHERE c.user.uid = :userUID AND c.deletedAt IS NULL ORDER BY c.uid DESC")
-	Page<Customer> findByUserUidAndDeletedAtIsNull(Long userUID, Pageable pageable);
+	@Query(value = "SELECT c FROM Customer c " +
+		"WHERE c.user.uid = :userUid AND c.deletedAt IS NULL",
+		countQuery = "SELECT COUNT(c) FROM Customer c WHERE c.user.uid = :userUid AND c.deletedAt IS NULL")
+	Page<Customer> findByUserUidWithLabels(Long userUid, Pageable pageable);
 
 	boolean existsByUidAndUserUidAndDeletedAtIsNull(Long customerUid, Long userUid);
 
