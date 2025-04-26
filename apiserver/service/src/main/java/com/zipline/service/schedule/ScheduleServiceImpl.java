@@ -29,8 +29,6 @@ public class ScheduleServiceImpl implements ScheduleService {
         User user = userRepository.findById(userUid)
             .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        Customer customer = customerRepository.findById(request.getCustomerId().longValue())
-            .orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
         Schedule schedule = Schedule.builder()
             .title(request.getTitle())

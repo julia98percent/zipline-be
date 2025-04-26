@@ -41,7 +41,7 @@ public class Schedule extends BaseTimeEntity {
   private LocalDateTime endDate;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "customer_uid", nullable = false)
+  @JoinColumn(name = "customer_uid")
   private Customer customer;
 
   @ManyToOne(fetch = FetchType.LAZY)
