@@ -14,22 +14,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/region")
+@RequestMapping("/api/test/region")
 @Tag(name = "지역 api", description = "지역 조회 api")
 @RestController
 public class RegionController{
 
     private final RegionService regionService;
 
-    @Operation(summary = "레벨1 지역을 전체 조회합니다", description = "레벨1 지역을 전체 조회합니다.")
-    @GetMapping("/level1")
-    public ResponseEntity<ApiResponse<RegionResponseDTO>> getLv1Regions(){
-        ApiResponse<RegionResponseDTO> response = regionService.getLv1Regions();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
     @Operation(summary = "자식 지역을 전체 조회합니다", description = "자식 지역을 전체 조회합니다.")
-    @GetMapping("/level/{cortaNo}")
+    @GetMapping("/{cortaNo}")
     public ResponseEntity<ApiResponse<RegionResponseDTO>> getBranchRegions(@PathVariable Long cortaNo){
         ApiResponse<RegionResponseDTO> response = regionService.getChildrenRegions(cortaNo);
         return ResponseEntity.status(HttpStatus.OK).body(response);

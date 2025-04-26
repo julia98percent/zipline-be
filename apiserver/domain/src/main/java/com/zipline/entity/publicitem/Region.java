@@ -1,13 +1,10 @@
 package com.zipline.entity.publicitem;
 
-import com.zipline.entity.enums.CrawlStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,25 +43,4 @@ public class Region {
     @OneToMany(mappedBy = "parent")
     @Builder.Default
     private List<Region> children = new ArrayList<>();
-
-    @Column(name = "naver_status")
-    @Enumerated(EnumType.STRING)
-    private CrawlStatus naverStatus;
-
-    @Column(name = "naver_last_crawled_at")
-    private LocalDateTime naverLastCrawledAt;
-
-    @Column(name = "zigbang_status")
-    @Enumerated(EnumType.STRING)
-    private CrawlStatus zigbangStatus;
-
-    @Column(name = "zigbang_last_crawled_at")
-    private LocalDateTime zigbangLastCrawledAt;
-
-    @Column(name = "dabang_status")
-    @Enumerated(EnumType.STRING)
-    private CrawlStatus dabangStatus;
-
-    @Column(name = "dabang_last_crawled_at")
-    private LocalDateTime dabangLastCrawledAt;
 }

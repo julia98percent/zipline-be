@@ -1,5 +1,6 @@
 package com.zipline.repository.survey;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,6 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
 	Optional<Survey> findByUserUidAndDeletedAtIsNull(Long userUid);
 
 	Optional<Survey> findFirstByUserOrderByCreatedAtDesc(User user);
+
+    long countByCreatedAtAfter(LocalDateTime oneMonthAgo);
 }

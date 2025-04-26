@@ -28,35 +28,17 @@ public class RegionServiceImpl implements RegionService {
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${cache.keys.lv1-regions}")
-    private String lv1RegionsCacheKey;
-
     @Value("${cache.keys.children-regions-prefix}")
     private String childrenRegionsCacheKeyPrefix;
 
     @Override
-    public ApiResponse<RegionResponseDTO> getLv1Regions() {
-        List<FlatRegionDTO> lv1Regions = getCachedFlatRegions(lv1RegionsCacheKey, () -> {
-            List<Region> regions = regionRepository.findByLevel(1);
-            return regions.stream()
-                    .map(FlatRegionDTO::from)
-                    .collect(Collectors.toList());
-        });
-        if (lv1Regions.isEmpty()) {
-            throw new RegionException(RegionErrorCode.REGION_NOT_FOUND);
-        }
-        return ApiResponse.ok("레벨 1 지역 조회 성공", new RegionResponseDTO(lv1Regions));
-    }
-
-    @Override
     public ApiResponse<RegionResponseDTO> getChildrenRegions(Long cortaNo) {
         String cacheKey = childrenRegionsCacheKeyPrefix + cortaNo;
-        List<FlatRegionDTO> childrenRegions = getCachedFlatRegions(cacheKey, () -> {
-            List<Region> regions = regionRepository.findByParentCortarNo(cortaNo);
-            return regions.stream()
-                    .map(FlatRegionDTO::from)
-                    .collect(Collectors.toList());
-        });
+        List<FlatRegionDTO> childrenRegions = getCachedFlatRegions(cacheKey,
+                () -> regionRepository.findByParentCortarNo(cortaNo).stream()
+                        .map(FlatRegionDTO::from)
+                        .collect(Collectors.toList())
+        );
         if (childrenRegions.isEmpty()) {
             throw new RegionException(RegionErrorCode.REGION_NOT_FOUND);
         }
@@ -64,28 +46,62 @@ public class RegionServiceImpl implements RegionService {
     }
 
     private List<FlatRegionDTO> getCachedFlatRegions(String cacheKey, RegionSupplier<List<FlatRegionDTO>> regionSupplier) {
+        List<FlatRegionDTO> cachedRegions = getFromCache(cacheKey);
+        if (cachedRegions != null) return cachedRegions;
+        List<FlatRegionDTO> regions = getFromDatabase(regionSupplier);
+        cacheData(cacheKey, regions);
+        return regions;
+    }
+
+    /**
+     * 캐시에서 데이터를 조회합니다.
+     */
+    private List<FlatRegionDTO> getFromCache(String cacheKey) {
+        String cachedData = getDataFromRedis(cacheKey);
+        if (cachedData == null) return null;
+        return deserializeData(cachedData, cacheKey);
+    }
+
+    private String getDataFromRedis(String cacheKey) {
         try {
-            String cachedData = redisTemplate.opsForValue().get(cacheKey);
-            if (cachedData != null) {
-                log.debug("캐시키: {}", cacheKey);
-                log.debug("캐시 데이터: {}", cachedData);
-                try {
-                    return objectMapper.readValue(cachedData, new TypeReference<List<FlatRegionDTO>>() {});
-                } catch (Exception e) {
-                    log.error("디시리얼라이즈 실패: {}", cacheKey, e);
-                    redisTemplate.delete(cacheKey);
-                    throw new RegionException(RegionErrorCode.CACHE_ACCESS_UNAVAILABLE);
-                }
-            }
-            log.debug("캐시키 없음: {}", cacheKey);
-            List<FlatRegionDTO> regions = regionSupplier.get();
-            String serializedData = objectMapper.writeValueAsString(regions);
-            redisTemplate.opsForValue().set(cacheKey, serializedData, 1, TimeUnit.HOURS);
-            log.debug("캐싱된 데이터 키: {}", cacheKey);
-            return regions;
+            return redisTemplate.opsForValue().get(cacheKey);
         } catch (Exception e) {
-            log.error("캐시 접근 에러: {}", cacheKey, e);
+            log.warn("Redis 캐시 접근 실패: {}", cacheKey, e);
+            return null;
+        }
+    }
+
+    private List<FlatRegionDTO> deserializeData(String cachedData, String cacheKey) {
+        try {
+            return objectMapper.readValue(cachedData, new TypeReference<List<FlatRegionDTO>>() {});
+        } catch (Exception e) {
+            log.warn("캐시 데이터 역직렬화 실패: {}", cacheKey, e);
+            return null;
+        }
+    }
+
+    /**
+     * 데이터베이스에서 데이터를 조회합니다.
+     */
+    private List<FlatRegionDTO> getFromDatabase(RegionSupplier<List<FlatRegionDTO>> regionSupplier) {
+        try {
+            return regionSupplier.get();
+        } catch (Exception e) {
+            log.error("데이터베이스 조회 실패", e);
             throw new RegionException(RegionErrorCode.CACHE_ACCESS_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * 데이터를 캐시에 저장합니다.
+     */
+    private void cacheData(String cacheKey, List<FlatRegionDTO> data) {
+        if (data == null) return;
+        try {
+            String serializedData = objectMapper.writeValueAsString(data);
+            redisTemplate.opsForValue().set(cacheKey, serializedData, 60, TimeUnit.DAYS);
+        } catch (Exception e) {
+            log.warn("Redis 캐싱 실패: {}", cacheKey, e);
         }
     }
 

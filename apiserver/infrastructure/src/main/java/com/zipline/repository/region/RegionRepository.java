@@ -8,10 +8,5 @@ import java.util.List;
 
 @Repository
 public interface RegionRepository extends JpaRepository<Region, Long> {
-    /**
-     * 레벨별 지역 목록 조회
-     */
-    List<Region> findByLevel(Integer level);
-
     List<Region> findByParentCortarNo(Long parentCortarNo);
 }
