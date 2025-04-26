@@ -89,7 +89,7 @@ public class Customer extends BaseTimeEntity {
 	@Column(name = "birth_day", length = 8)
 	private String birthday;
 
-	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<LabelCustomer> labelCustomers = new ArrayList<>();
 
 	@Builder
