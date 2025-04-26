@@ -4,7 +4,6 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
-
   sql:
     init:
       mode: always
@@ -26,6 +25,12 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 100MB
+  cache:
+    type: redis
+  redis:
+    host: ${REDIS_URL}
+    port: ${REDIS_PORT}
+    timeout: ${REDIS_TIMEOUT}
 server:
   port: ${PORT_API}
   tomcat:
@@ -56,5 +61,7 @@ cloud:
 survey:
   questionUid-delimiter: ${SURVEY_DELIMITER}
 file:
-  allowed-mime-types: ${FILE_ALLOWED_MEME_TYPES} 
-
+  allowed-mime-types: ${FILE_ALLOWED_MEME_TYPES}
+cache:
+  keys:
+    children-regions-prefix: ${CACHE_KEY_CHILDREN_REGIONS_PREFIX}
