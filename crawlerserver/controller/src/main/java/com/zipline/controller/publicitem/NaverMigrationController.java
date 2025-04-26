@@ -3,6 +3,7 @@ package com.zipline.controller.publicitem;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.ResponseEntity;
+//TODO: 임포트 분리
 import org.springframework.web.bind.annotation.*;
 
 import com.zipline.global.response.ApiResponse;
@@ -21,7 +22,7 @@ public class NaverMigrationController {
 	private final NaverRawArticleMigrationService migrationService;
 	private final CrawlingStatusManager crawlingStatusManager;
 
-	@GetMapping("/start")
+	@PostMapping("/start")
 	public ResponseEntity<ApiResponse<Void>> startMigration() {
 		CompletableFuture.runAsync(() -> {
 			crawlingStatusManager.executeWithLock(() -> {
@@ -32,7 +33,7 @@ public class NaverMigrationController {
 		return ResponseEntity.ok(ApiResponse.ok("네이버 원본 매물 데이터 마이그레이션이 시작되었습니다."));
 	}
 
-	@GetMapping("/region/{cortarNo}")
+	@PostMapping("/region/{cortarNo}")
 	public ResponseEntity<ApiResponse<Void>> migrateRegion(@PathVariable Long cortarNo) {
 		CompletableFuture.runAsync(() -> {
 			crawlingStatusManager.executeWithLock(() -> {
@@ -43,7 +44,7 @@ public class NaverMigrationController {
 		return ResponseEntity.ok(ApiResponse.ok("지역 " + cortarNo + " 네이버 원본 매물 데이터 마이그레이션이 시작되었습니다."));
 	}
 
-	@GetMapping("/retry")
+	@PostMapping("/retry")
 	public ResponseEntity<ApiResponse<Void>> retryFailedMigrations() {
 		CompletableFuture.runAsync(() -> {
 			crawlingStatusManager.executeWithLock(() -> {
