@@ -59,6 +59,24 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
 				.toList();
 	}
 
+	@Override
+	@Transactional
+	public MessageTemplateResponseDTO modifyMessageTemplate(Long templateUid, MessageTemplateRequestDTO request, Long userUid) {
+		MessageTemplate messageTemplate = messageTemplateRepository.findByUidAndUserUidAndDeletedAtIsNull(templateUid, userUid).orElseThrow(() -> new MessageTemplateException(
+				MessageTemplateErrorCode.TEMPLATE_NOT_FOUND));
+
+		if (!messageTemplate.getName().equals(request.getName())) {
+			messageTemplateRepository.findByNameAndUserUidAndDeletedAtIsNull(request.getName(), userUid)
+					.ifPresent(template -> {
+						throw new MessageTemplateException(MessageTemplateErrorCode.DUPLICATE_TEMPLATE_NAME);
+					});
+		}
+
+		messageTemplate.updateInfo(request.getName(), request.getContent());
+
+		return new MessageTemplateResponseDTO(messageTemplate);
+	}
+
   @Override
   @Transactional
   public void deleteMessageTemplate(Long templateUid, Long userUid) {
