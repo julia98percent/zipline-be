@@ -51,7 +51,7 @@ public class UserController {
 	}
 
 	@PostMapping("/signup")
-	public ResponseEntity<ApiResponse<Void>> signup(@RequestBody SignUpRequestDTO signUpRequestDto) {
+	public ResponseEntity<ApiResponse<Void>> signup(@RequestBody @Valid SignUpRequestDTO signUpRequestDto) {
 		userService.signup(signUpRequestDto);
 		ApiResponse<Void> response = ApiResponse.create("회원가입 성공");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -59,7 +59,7 @@ public class UserController {
 
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<TokenResponseDTO>> login(
-		@RequestBody LoginRequestDTO loginRequestDTO,
+		@RequestBody @Valid LoginRequestDTO loginRequestDTO,
 		HttpServletResponse response) {
 
 		TokenRequestDTO tokenRequestDto = userService.login(loginRequestDTO); // 로그인 & 토큰 발급
