@@ -1,12 +1,12 @@
 package com.zipline.global.exception.message.errorcode;
 
+import com.zipline.global.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-import com.zipline.global.exception.ErrorCode;
-
 public enum MessageTemplateErrorCode implements ErrorCode {
-	DUPLICATE_TEMPLATE_CATEGORY("MSG-TEMPLATE-001", "해당 카테고리의 메시지 템플릿이 이미 존재합니다.", HttpStatus.CONFLICT),
-	TEMPLATE_NOT_FOUND("MSG-TEMPLATE-002", "해당하는 문자 템플릿을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+	DUPLICATE_TEMPLATE_CATEGORY("MSG-TEMPLATE-001", "해당 카테고리의 문자 템플릿이 이미 존재합니다.", HttpStatus.CONFLICT),
+	DUPLICATE_TEMPLATE_NAME("MSG-TEMPLATE-002", "같은 이름의 문자 템플릿이 이미 존재합니다.", HttpStatus.CONFLICT),
+	TEMPLATE_NOT_FOUND("MSG-TEMPLATE-003", "해당하는 문자 템플릿을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
 	private final String code;
 	private final String message;

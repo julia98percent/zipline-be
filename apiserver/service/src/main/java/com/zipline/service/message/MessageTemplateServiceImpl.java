@@ -31,11 +31,11 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
   public void createMessageTemplate(MessageTemplateRequestDTO requestDTO, Long userUid) {
     if (requestDTO.getCategory().equals(MessageTemplateCategory.BIRTHDAY)
         || requestDTO.getCategory().equals(MessageTemplateCategory.EXPIRED_NOTI)) {
-      messageTemplateRepository.findByCategoryAndUserUidAndDeletedAtIsNull(requestDTO.getCategory(),
-          userUid).ifPresent(template -> {
-        throw new MessageTemplateException(MessageTemplateErrorCode.DUPLICATE_TEMPLATE_CATEGORY);
-      });
-
+			messageTemplateRepository.findByCategoryAndUserUidAndDeletedAtIsNull(requestDTO.getCategory(),
+					userUid).ifPresent(template -> {
+				throw new MessageTemplateException(MessageTemplateErrorCode.DUPLICATE_TEMPLATE_CATEGORY);
+			});
+		}
       User user = userRepository.findById(userUid)
           .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
@@ -49,7 +49,6 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
 
       messageTemplateRepository.save(messageTemplate);
     }
-  }
 
 	@Override
 	@Transactional(readOnly = true)
@@ -58,6 +57,24 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
 		return messageTemplateList.stream()
 				.map(MessageTemplateResponseDTO::new)
 				.toList();
+	}
+
+	@Override
+	@Transactional
+	public MessageTemplateResponseDTO modifyMessageTemplate(Long templateUid, MessageTemplateRequestDTO request, Long userUid) {
+		MessageTemplate messageTemplate = messageTemplateRepository.findByUidAndUserUidAndDeletedAtIsNull(templateUid, userUid).orElseThrow(() -> new MessageTemplateException(
+				MessageTemplateErrorCode.TEMPLATE_NOT_FOUND));
+
+		if (!messageTemplate.getName().equals(request.getName())) {
+			messageTemplateRepository.findByNameAndUserUidAndDeletedAtIsNull(request.getName(), userUid)
+					.ifPresent(template -> {
+						throw new MessageTemplateException(MessageTemplateErrorCode.DUPLICATE_TEMPLATE_NAME);
+					});
+		}
+
+		messageTemplate.updateInfo(request.getName(), request.getContent());
+
+		return new MessageTemplateResponseDTO(messageTemplate);
 	}
 
   @Override
