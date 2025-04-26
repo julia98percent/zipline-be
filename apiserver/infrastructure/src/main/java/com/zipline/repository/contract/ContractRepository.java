@@ -23,4 +23,8 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     long countByCreatedAtAfter(LocalDateTime oneMonthAgo);
 
 	long countByStatusIn(List<ContractStatus> ongoingStatuses);
+
+    long countByUserUidAndCreatedAtAfter(Long userId, LocalDateTime oneMonthAgo);
+
+    long countByUserUidAndStatusIn(Long userId, List<ContractStatus> statuses);
 }
