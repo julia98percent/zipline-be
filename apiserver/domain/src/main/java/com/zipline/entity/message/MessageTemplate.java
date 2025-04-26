@@ -1,5 +1,6 @@
 package com.zipline.entity.message;
 
+import com.zipline.entity.BaseTimeEntity;
 import com.zipline.entity.enums.MessageTemplateCategory;
 import com.zipline.entity.user.User;
 import jakarta.persistence.Entity;
@@ -9,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "message_templates")
 @Entity
 @Getter
-public class MessageTemplate {
+public class MessageTemplate  extends BaseTimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long uid;
@@ -31,20 +31,12 @@ public class MessageTemplate {
   @ManyToOne(fetch = FetchType.LAZY)
   private User user;
 
-
-  private LocalDateTime createdAt;
-  private LocalDateTime updatedAt;
-  private LocalDateTime deletedAt;
-
   @Builder
   public MessageTemplate(String name , MessageTemplateCategory category , String content,
-    User user, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+    User user) {
     this.name = name;
     this.category = category;
     this.content = content;
     this.user = user;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-    this.deletedAt = deletedAt;
   }
 }

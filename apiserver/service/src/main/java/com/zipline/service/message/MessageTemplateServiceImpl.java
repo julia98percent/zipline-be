@@ -39,15 +39,12 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
       User user = userRepository.findById(userUid)
           .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-      LocalDateTime now = LocalDateTime.now();
 
       MessageTemplate messageTemplate = MessageTemplate.builder()
           .name(requestDTO.getName())
           .category(requestDTO.getCategory())
           .content(requestDTO.getContent())
           .user(user)
-          .createdAt(now)
-          .updatedAt(now)
           .build();
 
       messageTemplateRepository.save(messageTemplate);
@@ -62,4 +59,14 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
 				.map(MessageTemplateResponseDTO::new)
 				.toList();
 	}
+
+  @Override
+  @Transactional
+  public void deleteMessageTemplate(Long templateUid, Long userUid) {
+    MessageTemplate template = messageTemplateRepository.findByUidAndUserUidAndDeletedAtIsNull(templateUid, userUid)
+        .orElseThrow(() -> new MessageTemplateException(MessageTemplateErrorCode.TEMPLATE_NOT_FOUND));
+
+
+    template.delete(LocalDateTime.now());
+  }
 }
