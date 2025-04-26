@@ -20,11 +20,13 @@ import com.zipline.service.agentProperty.dto.request.AgentPropertyRequestDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyResponseDTO;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "매물", description = "매물 관련 api")
 @RequestMapping("/api/v1/properties")
 public class AgentPropertyController {
 
