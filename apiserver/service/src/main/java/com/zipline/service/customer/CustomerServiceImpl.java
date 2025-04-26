@@ -158,9 +158,11 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Transactional(readOnly = true)
 	public CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid) {
-		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
+		Customer savedCustomer = customerRepository.findByUidAndUserUidAndDeletedAtIsNull(customerUid, userUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
-		return new CustomerDetailResponseDTO(savedCustomer, null);
+
+		List<LabelCustomer> labelCustomerList = labelCustomerRepository.findAllByCustomerUid(customerUid);
+		return new CustomerDetailResponseDTO(savedCustomer, labelCustomerList);
 	}
 
 	@Transactional(readOnly = true)
