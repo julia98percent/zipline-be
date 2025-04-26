@@ -44,8 +44,9 @@ public class CustomerController {
 	@GetMapping("/customers")
 	public ResponseEntity<ApiResponse<CustomerListResponseDTO>> getCustomers(PageRequestDTO pageRequestDTO,
 		Principal principal) {
-		ApiResponse<CustomerListResponseDTO> response = customerService.getCustomers(pageRequestDTO,
+		CustomerListResponseDTO result = customerService.getCustomers(pageRequestDTO,
 			Long.parseLong(principal.getName()));
+		ApiResponse<CustomerListResponseDTO> response = ApiResponse.ok("고객 목록 조회에 성공하였습니다.", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
@@ -72,8 +73,8 @@ public class CustomerController {
 	public ResponseEntity<ApiResponse<Void>> registerCustomer(
 		@Valid @RequestBody CustomerRegisterRequestDTO customerRegisterRequestDTO, Principal principal) {
 
-		ApiResponse<Void> response = customerService.registerCustomer(customerRegisterRequestDTO,
-			Long.parseLong(principal.getName()));
+		customerService.registerCustomer(customerRegisterRequestDTO, Long.parseLong(principal.getName()));
+		ApiResponse<Void> response = ApiResponse.create("고객 등록에 성공하였습니다.");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
@@ -99,15 +100,16 @@ public class CustomerController {
 	public ResponseEntity<ApiResponse<CustomerDetailResponseDTO>> modifyCustomer(@PathVariable Long customerUid,
 		@Valid @RequestBody CustomerModifyRequestDTO customerModifyRequestDTO, Principal principal) {
 
-		ApiResponse<CustomerDetailResponseDTO> response = customerService.modifyCustomer(
+		CustomerDetailResponseDTO result = customerService.modifyCustomer(
 			customerUid, customerModifyRequestDTO, Long.parseLong(principal.getName()));
+		ApiResponse<CustomerDetailResponseDTO> response = ApiResponse.ok("고객 수정에 성공하였습니다.", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	@DeleteMapping("/customers/{customerUid}")
 	public ResponseEntity<ApiResponse<Void>> deleteCustomer(@PathVariable Long customerUid, Principal principal) {
-		ApiResponse<Void> response = customerService.deleteCustomer(customerUid,
-			Long.parseLong(principal.getName()));
+		customerService.deleteCustomer(customerUid, Long.parseLong(principal.getName()));
+		ApiResponse<Void> response = ApiResponse.ok("고객 삭제에 성공하였습니다.");
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
