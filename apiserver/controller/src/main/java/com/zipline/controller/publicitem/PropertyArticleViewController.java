@@ -2,6 +2,10 @@ package com.zipline.controller.publicitem;
 
 import java.time.LocalDateTime;
 
+import com.zipline.entity.enums.Category;
+import com.zipline.service.publicitem.PropertyArticleViewService;
+import com.zipline.service.publicitem.dto.PropertyArticlePageResponseDTO;
+import com.zipline.service.publicitem.dto.PropertyArticleSearchDTO;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -13,15 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.zipline.domain.dto.publicitem.PropertyArticlePageResponseDTO;
-import com.zipline.domain.dto.publicitem.PropertyArticleSearchDTO;
-import com.zipline.domain.entity.enums.Category;
-import com.zipline.service.publicItem.PropertyArticleViewService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/property-articles")
+@RequestMapping("/api/test/property-articles")
 @RequiredArgsConstructor
 public class PropertyArticleViewController {
 
@@ -45,8 +45,6 @@ public class PropertyArticleViewController {
 		@RequestParam(required = false) Long maxMonthlyRent,
 		@RequestParam(required = false) Double minArea,
 		@RequestParam(required = false) Double maxArea,
-		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
 		@RequestParam(defaultValue = "createdAt") String sortBy,
 		@RequestParam(defaultValue = "desc") String sortDirection,
 		@RequestParam(defaultValue = "0") Integer page,
@@ -65,8 +63,6 @@ public class PropertyArticleViewController {
 			.maxMonthlyRent(maxMonthlyRent)
 			.minArea(minArea)
 			.maxArea(maxArea)
-			.startDate(startDate)
-			.endDate(endDate)
 			.sortBy(sortBy)
 			.sortDirection(sortDirection)
 			.page(page)

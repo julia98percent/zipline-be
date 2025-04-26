@@ -1,5 +1,13 @@
-package com.zipline.service.publicItem;
+package com.zipline.service.publicitem;
 
+import com.zipline.entity.publicitem.PropertyArticle;
+import com.zipline.global.exception.publicitem.PublicItemException;
+import com.zipline.global.exception.publicitem.errorcode.PublicItemErrorCode;
+import com.zipline.repository.publicitem.PropertyArticleViewRepository;
+import com.zipline.repository.publicitem.PropertyArticleViewSpecification;
+import com.zipline.service.publicitem.dto.PropertyArticlePageResponseDTO;
+import com.zipline.service.publicitem.dto.PropertyArticleSearchDTO;
+import com.zipline.service.publicitem.dto.PropertyArticleViewDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -8,13 +16,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zipline.domain.dto.publicitem.PropertyArticlePageResponseDTO;
-import com.zipline.domain.dto.publicitem.PropertyArticleSearchDTO;
-import com.zipline.domain.dto.publicitem.PropertyArticleViewDTO;
-import com.zipline.domain.entity.publicitem.PropertyArticle;
-import com.zipline.global.exception.custom.publicItem.InvalidPropertySearchException;
-import com.zipline.infrastructure.publicItem.repository.PropertyArticleViewRepository;
-import com.zipline.infrastructure.publicItem.repository.PropertyArticleViewSpecification;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,14 +67,13 @@ public class PropertyArticleViewServiceimpl implements PropertyArticleViewServic
 			// DTO 변환
 			Page<PropertyArticleViewDTO> dtoPage = articlePage.map(PropertyArticleViewDTO::from);
 			return PropertyArticlePageResponseDTO.from(dtoPage);
-		} catch (InvalidPropertySearchException e) {
-			// 이미 적절한 예외이므로 그대로 던짐
+		} catch (PublicItemException e) {
 			log.error("매물 검색 파라미터 오류: {}", e.getMessage());
-			throw e;
+			throw new PublicItemException(PublicItemErrorCode.PUBLIC_ITEM_PARAM_ERROR);
 		} catch (Exception e) {
-			// 예상치 못한 오류는 로깅 후 적절한 예외로 변환
 			log.error("매물 검색 중 오류 발생: {}", e.getMessage(), e);
-			throw new RuntimeException("매물 검색 중 오류가 발생했습니다.", e);
+			throw new PublicItemException(PublicItemErrorCode.PUBLIC_ITEM_ERROR);
+			//throw new RuntimeException("매물 검색 중 오류가 발생했습니다.", e);
 		}
 	}
 
@@ -82,23 +82,23 @@ public class PropertyArticleViewServiceimpl implements PropertyArticleViewServic
 	 */
 	private void validateSearchParameters(PropertyArticleSearchDTO searchDTO) {
 		if (searchDTO.getMinPrice() != null && searchDTO.getMaxPrice() != null &&
-			searchDTO.getMinPrice() > searchDTO.getMaxPrice()) {
-			throw new InvalidPropertySearchException("최소 가격은 최대 가격보다 클 수 없습니다.");
+				searchDTO.getMinPrice() > searchDTO.getMaxPrice()) {
+			throw new PublicItemException(PublicItemErrorCode.INVALID_PRICE_RANGE);
 		}
 
 		if (searchDTO.getMinDeposit() != null && searchDTO.getMaxDeposit() != null &&
-			searchDTO.getMinDeposit() > searchDTO.getMaxDeposit()) {
-			throw new InvalidPropertySearchException("최소 보증금은 최대 보증금보다 클 수 없습니다.");
+				searchDTO.getMinDeposit() > searchDTO.getMaxDeposit()) {
+			throw new PublicItemException(PublicItemErrorCode.INVALID_DEPOSIT_RANGE);
 		}
 
 		if (searchDTO.getMinMonthlyRent() != null && searchDTO.getMaxMonthlyRent() != null &&
-			searchDTO.getMinMonthlyRent() > searchDTO.getMaxMonthlyRent()) {
-			throw new InvalidPropertySearchException("최소 월세는 최대 월세보다 클 수 없습니다.");
+				searchDTO.getMinMonthlyRent() > searchDTO.getMaxMonthlyRent()) {
+			throw new PublicItemException(PublicItemErrorCode.INVALID_MONTHLY_RENT_RANGE);
 		}
 
 		if (searchDTO.getMinArea() != null && searchDTO.getMaxArea() != null &&
-			searchDTO.getMinArea() > searchDTO.getMaxArea()) {
-			throw new InvalidPropertySearchException("최소 면적은 최대 면적보다 클 수 없습니다.");
+				searchDTO.getMinArea() > searchDTO.getMaxArea()) {
+			throw new PublicItemException(PublicItemErrorCode.INVALID_AREA_RANGE);
 		}
 	}
 

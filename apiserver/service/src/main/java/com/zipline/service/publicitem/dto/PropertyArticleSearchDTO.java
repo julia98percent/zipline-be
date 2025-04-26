@@ -1,6 +1,6 @@
-package com.zipline.domain.dto.publicitem;
+package com.zipline.service.publicitem.dto;
 
-import com.zipline.domain.entity.enums.Category;
+import com.zipline.entity.enums.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

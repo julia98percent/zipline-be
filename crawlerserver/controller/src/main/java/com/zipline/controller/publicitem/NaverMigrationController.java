@@ -3,10 +3,7 @@ package com.zipline.controller.publicitem;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.zipline.global.response.ApiResponse;
 import com.zipline.global.util.CrawlingStatusManager;
@@ -24,7 +21,7 @@ public class NaverMigrationController {
 	private final NaverRawArticleMigrationService migrationService;
 	private final CrawlingStatusManager crawlingStatusManager;
 
-	@PostMapping("/start")
+	@GetMapping("/start")
 	public ResponseEntity<ApiResponse<Void>> startMigration() {
 		CompletableFuture.runAsync(() -> {
 			crawlingStatusManager.executeWithLock(() -> {
@@ -35,7 +32,7 @@ public class NaverMigrationController {
 		return ResponseEntity.ok(ApiResponse.ok("네이버 원본 매물 데이터 마이그레이션이 시작되었습니다."));
 	}
 
-	@PostMapping("/region/{cortarNo}")
+	@GetMapping("/region/{cortarNo}")
 	public ResponseEntity<ApiResponse<Void>> migrateRegion(@PathVariable Long cortarNo) {
 		CompletableFuture.runAsync(() -> {
 			crawlingStatusManager.executeWithLock(() -> {
@@ -46,7 +43,7 @@ public class NaverMigrationController {
 		return ResponseEntity.ok(ApiResponse.ok("지역 " + cortarNo + " 네이버 원본 매물 데이터 마이그레이션이 시작되었습니다."));
 	}
 
-	@PostMapping("/retry")
+	@GetMapping("/retry")
 	public ResponseEntity<ApiResponse<Void>> retryFailedMigrations() {
 		CompletableFuture.runAsync(() -> {
 			crawlingStatusManager.executeWithLock(() -> {
