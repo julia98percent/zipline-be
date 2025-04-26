@@ -4,9 +4,7 @@ import com.zipline.global.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 public enum RegionErrorCode implements ErrorCode {
-REGION_NOT_FOUND("REGION-001", "존재하지 않는 지역입니다.", HttpStatus.NOT_FOUND),
-    //TODO:
-CACHE_ACCESS_UNAVAILABLE("REGION-002", "캐시 접근이 불가능합니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+REGION_NOT_FOUND("REGION-001", "존재하지 않는 지역입니다.", HttpStatus.NOT_FOUND);
 
     private final String code;
     private final String message;
