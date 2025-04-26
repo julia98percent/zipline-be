@@ -39,4 +39,10 @@ public class MessageTemplate  extends BaseTimeEntity {
     this.content = content;
     this.user = user;
   }
+
+  public void updateInfo(String name, String content) {
+    this.name = name;
+    this.content = content;
+    this.updatedAt = LocalDateTime.now();
+  }
 }
