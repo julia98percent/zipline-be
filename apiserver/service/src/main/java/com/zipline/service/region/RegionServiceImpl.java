@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class RegionServiceImpl implements RegionService {
 
         @Override
         @Cacheable(value = "regions", key = "'children:' + #cortaNo", unless = "#result.data.isEmpty()")
+        @Transactional(readOnly = true)
         public ApiResponse<List<FlatRegionDTO>> getChildrenRegions(Long cortaNo) {
             List<FlatRegionDTO> childrenRegions = regionRepository.findByParentCortarNo(cortaNo)
                     .stream()
