@@ -3,6 +3,8 @@ package com.zipline.service.message;
 import com.zipline.entity.enums.MessageTemplateCategory;
 import com.zipline.entity.message.MessageTemplate;
 import com.zipline.entity.user.User;
+import com.zipline.global.exception.auth.AuthException;
+import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
 import com.zipline.global.exception.message.MessageTemplateException;
 import com.zipline.global.exception.message.errorcode.MessageTemplateErrorCode;
 import com.zipline.global.exception.user.UserException;
@@ -46,8 +48,6 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
           .category(requestDTO.getCategory())
           .content(requestDTO.getContent())
           .user(user)
-          .createdAt(now)
-          .updatedAt(now)
           .build();
 
       messageTemplateRepository.save(messageTemplate);
@@ -62,4 +62,16 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
 				.map(MessageTemplateResponseDTO::new)
 				.toList();
 	}
+
+  @Override
+  public void deleteMessageTemplate(Long templateUid, Long userUid) {
+    MessageTemplate template = messageTemplateRepository.findByUidAndDeletedAtIsNull(templateUid)
+        .orElseThrow(() -> new MessageTemplateException(MessageTemplateErrorCode.TEMPLATE_NOT_FOUND));
+
+    if (!template.getUser().getUid().equals(userUid)) {
+      throw new AuthException(AuthErrorCode.PERMISSION_DENIED);
+    }
+
+    template.delete(LocalDateTime.now());
+  }
 }
