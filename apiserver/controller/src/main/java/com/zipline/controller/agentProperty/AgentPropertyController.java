@@ -41,7 +41,7 @@ public class AgentPropertyController {
 
 	@PostMapping("")
 	public ResponseEntity<ApiResponse<Void>> registerProperty(
-		@RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, Principal principal) {
+		@Valid @RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, Principal principal) {
 		agentPropertyService.registerProperty(agentPropertyRequestDTO, Long.parseLong(principal.getName()));
 		ApiResponse<Void> response = ApiResponse.create("매물 등록 성공");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -49,7 +49,7 @@ public class AgentPropertyController {
 
 	@PatchMapping("/{propertyUid}")
 	public ResponseEntity<ApiResponse<AgentPropertyResponseDTO>> modifyProperty(
-		@RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, @PathVariable Long propertyUid,
+		@Valid @RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, @PathVariable Long propertyUid,
 		Principal principal) {
 		AgentPropertyResponseDTO propertyResponseDTO = agentPropertyService.modifyProperty(agentPropertyRequestDTO,
 			propertyUid, Long.parseLong(principal.getName()));
