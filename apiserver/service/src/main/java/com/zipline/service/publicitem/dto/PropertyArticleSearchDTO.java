@@ -31,5 +31,30 @@ public class PropertyArticleSearchDTO {
     private String sortDirection;
     private Integer page;
     private Integer size;
-}
 
+    public static PropertyArticleSearchDTO fromRequestParams(
+        String regionCode, String buildingName, String buildingType, Category category,
+        Long minPrice, Long maxPrice, Long minDeposit, Long maxDeposit,
+        Long minMonthlyRent, Long maxMonthlyRent, Double minArea, Double maxArea,
+        String sortBy, String sortDirection, Integer page, Integer size) {
+
+        return PropertyArticleSearchDTO.builder()
+            .regionCode(regionCode)
+            .buildingName(buildingName)
+            .buildingType(buildingType)
+            .category(category)
+            .minPrice(minPrice)
+            .maxPrice(maxPrice)
+            .minDeposit(minDeposit)
+            .maxDeposit(maxDeposit)
+            .minMonthlyRent(minMonthlyRent)
+            .maxMonthlyRent(maxMonthlyRent)
+            .minArea(minArea)
+            .maxArea(maxArea)
+            .sortBy(sortBy)
+            .sortDirection(sortDirection)
+            .page(page)
+            .size(size)
+            .build();
+    }
+}

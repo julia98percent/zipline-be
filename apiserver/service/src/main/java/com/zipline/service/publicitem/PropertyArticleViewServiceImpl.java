@@ -7,7 +7,7 @@ import com.zipline.repository.publicitem.PropertyArticleViewRepository;
 import com.zipline.service.publicitem.dto.PropertyArticlePageResponseDTO;
 import com.zipline.service.publicitem.dto.PropertyArticleSearchDTO;
 import com.zipline.service.publicitem.dto.PropertyArticleViewDTO;
-import com.zipline.service.publicitem.PropertyArticleSpecificationBuilder;
+import com.zipline.service.publicitem.spec.PropertyArticleSpecificationBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +37,7 @@ public class PropertyArticleViewServiceImpl implements PropertyArticleViewServic
 	 *
 	 * @param searchDTO 검색 조건
 	 * @return 페이징된 매물 목록
+	 * @todo 추후 Region Repository 와 specificationBuilder 활용해서 부모 지역코드로도 검색 가능하게 변경
 	 */
 	@Override
 	@Transactional(readOnly = true)
