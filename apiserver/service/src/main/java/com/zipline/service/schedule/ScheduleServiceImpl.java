@@ -53,11 +53,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         scheduleRepository.save(schedule);
     }
 
-    private Customer findCustomerIsExist(Integer customerId) {
+    private Customer findCustomerIsExist(Long customerId) {
         if (customerId == null) {
             return null;
         }
-        return customerRepository.findById(customerId.longValue())
+        return customerRepository.findById(customerId)
             .orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
     }
 

@@ -36,5 +36,5 @@ public class ScheduleCreateRequestDTO {
   @Size(min = 2, max = 200, message = "일정 설명은 2자 이상 200자 이하로 입력해주세요.")
   private String description;
 
-  private Integer customerId;
+  private Long customerId;
 }
