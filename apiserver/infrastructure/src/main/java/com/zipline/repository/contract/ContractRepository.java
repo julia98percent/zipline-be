@@ -20,11 +20,7 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
 	@Query("SELECT c FROM Contract c WHERE c.user.uid = :userUID AND c.deletedAt IS NULL ORDER BY c.uid DESC")
 	Page<Contract> findByUserUidAndDeletedAtIsNull(Long userUid, Pageable pageable);
 
-    long countByCreatedAtAfter(LocalDateTime oneMonthAgo);
+	int countByUserUidAndCreatedAtAfter(Long userId, LocalDateTime oneMonthAgo);
 
-	long countByStatusIn(List<ContractStatus> ongoingStatuses);
-
-    long countByUserUidAndCreatedAtAfter(Long userId, LocalDateTime oneMonthAgo);
-
-    long countByUserUidAndStatusIn(Long userId, List<ContractStatus> statuses);
+    int countByUserUidAndStatusIn(Long userId, List<ContractStatus> statuses);
 }

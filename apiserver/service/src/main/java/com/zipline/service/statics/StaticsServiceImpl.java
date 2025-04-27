@@ -23,13 +23,13 @@ public class StaticsServiceImpl implements StaticsService {
   private final SurveyRepository surveyRepository;
 
   @Override
-  public long getRecentContractCount(Long userId) {
+  public int getRecentContractCount(Long userId) {
     LocalDateTime oneMonthAgo = LocalDateTime.now().minus(RANGE_FOR_RECENT_DATE, ChronoUnit.DAYS);
     return contractRepository.countByUserUidAndCreatedAtAfter(userId, oneMonthAgo);
   }
 
   @Override
-  public long getOngoingContractCount(Long userId) {
+  public int getOngoingContractCount(Long userId) {
     List<ContractStatus> ongoingStatuses = Arrays.asList(
         ContractStatus.LISTED,
         ContractStatus.NEGOTIATING,
@@ -40,7 +40,7 @@ public class StaticsServiceImpl implements StaticsService {
   }
 
   @Override
-  public long getCompletedContractCount(Long userId) {
+  public int getCompletedContractCount(Long userId) {
     List<ContractStatus> completedStatuses = Arrays.asList(
         ContractStatus.PAID_COMPLETE,
         ContractStatus.REGISTERED,
@@ -50,7 +50,7 @@ public class StaticsServiceImpl implements StaticsService {
   }
 
   @Override
-  public long getRecentCustomerCount(Long userId) {
+  public int getRecentCustomerCount(Long userId) {
     LocalDateTime oneMonthAgo = LocalDateTime.now().minus(RANGE_FOR_RECENT_DATE, ChronoUnit.DAYS);
     return surveyRepository.countByUserUidAndCreatedAtAfter(userId, oneMonthAgo);
   }
