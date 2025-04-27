@@ -13,18 +13,16 @@ import com.zipline.global.util.CrawlingStatusManager;
 import com.zipline.service.publicItem.NaverRawArticleService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
-@RequestMapping("/api/admin/crawl/naver-raw")
+@RequestMapping("/api/v1/crawl/naver")
 @RequiredArgsConstructor
 public class NaverRawArticleController {
 
 	private final NaverRawArticleService naverRawArticleService;
 	private final CrawlingStatusManager crawlingStatusManager;
 
-	@GetMapping("/articles/all")
+	@GetMapping("/all")
 	public ResponseEntity<ApiResponse<Void>> crawlAllRawArticleFromNaver() {
 		CompletableFuture.runAsync(() -> {
 			crawlingStatusManager.executeWithLock(() -> {
@@ -35,7 +33,7 @@ public class NaverRawArticleController {
 		return ResponseEntity.ok(ApiResponse.ok("레벨 " + 3 + " 원본 매물 정보 수집이 시작되었습니다."));
 	}
 
-	@GetMapping("/articles/{cortarNo}")
+	@GetMapping("/region/{cortarNo}")
 	public ResponseEntity<ApiResponse<Void>> crawlRawArticlesByRegion(@PathVariable Long cortarNo) {
 		CompletableFuture.runAsync(() -> {
 			crawlingStatusManager.executeWithLock(() -> {

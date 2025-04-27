@@ -11,25 +11,21 @@ import org.springframework.web.bind.annotation.RestController;
 import com.zipline.domain.dto.publicitem.ProxyStatusDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.global.util.CrawlingStatusManager;
-import com.zipline.infrastructure.publicItem.repository.RegionRepository;
 import com.zipline.infrastructure.publicItem.util.ProxyPool;
 import com.zipline.service.publicItem.ProxyNaverRawArticleService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
-@RequestMapping("/api/admin/crawl/naver-raw_p")
+@RequestMapping("/api/v1/crawl/naver-proxy")
 @RequiredArgsConstructor
 public class NaverProxyRawArticleController {
 
 	private final ProxyNaverRawArticleService proxyNaverRawArticleService;
 	private final CrawlingStatusManager crawlingStatusManager;
 	private final ProxyPool proxyPool;
-	private final RegionRepository regionRepository;
 
-	@GetMapping("articles/all")
+	@GetMapping("/all")
 	public ResponseEntity<ApiResponse<Void>> crawlAllRawArticleFromNaverWithProxy() {
 		CompletableFuture.runAsync(() -> {
 			crawlingStatusManager.executeWithLock(() -> {
@@ -40,7 +36,7 @@ public class NaverProxyRawArticleController {
 		return ResponseEntity.ok(ApiResponse.ok("프록시를 통한 레벨 원본 매물 정보 수집이 시작되었습니다."));
 	}
 
-	@GetMapping("articles/{cortarNo}")
+	@GetMapping("/region/{cortarNo}")
 	public ResponseEntity<ApiResponse<Void>> crawlRawArticlesWithProxyByRegion(@PathVariable Long cortarNo) {
 		CompletableFuture.runAsync(() -> {
 			crawlingStatusManager.executeWithLock(() -> {

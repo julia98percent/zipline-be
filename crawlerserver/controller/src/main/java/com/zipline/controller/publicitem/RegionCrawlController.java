@@ -12,11 +12,9 @@ import com.zipline.global.util.CrawlingStatusManager;
 import com.zipline.service.publicItem.RegionCodeService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
-@RequestMapping("/api/admin/crawl/region")
+@RequestMapping("/api/v1/crawl/region")
 @RequiredArgsConstructor
 public class RegionCrawlController {
 
