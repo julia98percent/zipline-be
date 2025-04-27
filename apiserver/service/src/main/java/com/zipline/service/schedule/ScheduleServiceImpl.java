@@ -30,6 +30,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
+    private final ScheduleFieldUpdateProcessor scheduleFieldUpdateProcessor;
 
     @Override
     @Transactional
@@ -78,14 +79,24 @@ public class ScheduleServiceImpl implements ScheduleService {
                 userUid)
             .orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
 
-        Customer customer = findCustomerIsExist(request.getCustomerUid());
+        String newDescription = scheduleFieldUpdateProcessor.processUpdate(
+            request.getDescription(),
+            schedule.getDescription(),
+            !request.hasDescription()
+        );
+
+        Customer newCustomer = scheduleFieldUpdateProcessor.processCustomerUpdate(
+            request.getCustomerUid(),
+            schedule.getCustomer(),
+            !request.hasCustomerUid()
+        );
 
         schedule.updateSchedule(
             request.getTitle(),
-            request.getDescription(),
+            newDescription,
             request.getStartDate(),
             request.getEndDate(),
-            customer
+            newCustomer
         );
 
         return ScheduleResponseDTO.from(schedule);

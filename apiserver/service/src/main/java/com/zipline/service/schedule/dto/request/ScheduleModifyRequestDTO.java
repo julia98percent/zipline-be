@@ -1,5 +1,9 @@
 package com.zipline.service.schedule.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,4 +26,29 @@ public class ScheduleModifyRequestDTO {
 
   private String description;
   private Long customerUid;
+
+  @JsonIgnore
+  private boolean descriptionFieldPresent;
+  @JsonIgnore
+  private boolean customerUidFieldPresent;
+
+  @JsonProperty("description")
+  private void descriptionPresent(String description) {
+    this.description = description;
+    this.descriptionFieldPresent = true;
+  }
+
+  @JsonProperty("customerUid")
+  private void customerUidPresent(Long customerUid) {
+    this.customerUid = customerUid;
+    this.customerUidFieldPresent = true;
+  }
+
+  public boolean hasDescription() {
+    return descriptionFieldPresent;
+  }
+
+  public boolean hasCustomerUid() {
+    return customerUidFieldPresent;
+  }
 }
