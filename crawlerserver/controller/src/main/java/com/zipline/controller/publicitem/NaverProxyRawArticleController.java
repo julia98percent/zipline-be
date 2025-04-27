@@ -11,14 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.zipline.domain.dto.publicitem.ProxyStatusDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.global.util.CrawlingStatusManager;
-import com.zipline.infrastructure.publicItem.repository.RegionRepository;
 import com.zipline.infrastructure.publicItem.util.ProxyPool;
 import com.zipline.service.publicItem.ProxyNaverRawArticleService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/crawl/naver-proxy")
 @RequiredArgsConstructor
@@ -27,7 +24,6 @@ public class NaverProxyRawArticleController {
 	private final ProxyNaverRawArticleService proxyNaverRawArticleService;
 	private final CrawlingStatusManager crawlingStatusManager;
 	private final ProxyPool proxyPool;
-	private final RegionRepository regionRepository;
 
 	@GetMapping("/all")
 	public ResponseEntity<ApiResponse<Void>> crawlAllRawArticleFromNaverWithProxy() {
