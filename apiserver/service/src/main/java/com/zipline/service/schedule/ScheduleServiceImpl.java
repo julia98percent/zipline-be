@@ -17,6 +17,7 @@ import com.zipline.service.schedule.dto.request.ScheduleCreateRequestDTO;
 import com.zipline.service.schedule.dto.response.ScheduleResponseDTO;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -70,7 +71,10 @@ public class ScheduleServiceImpl implements ScheduleService {
     public List<ScheduleResponseDTO> getScheduleList(DateRangeRequest request, Long userUid) {
         validateScheduleTimeRequest(request.getStartDate(), request.getEndDate());
 
-        return scheduleRepository.findSchedulesInDateRange(userUid, request.getStartDate(), request.getEndDate())
+        LocalDateTime startOfDay = request.getStartDate().toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = request.getEndDate().toLocalDate().atTime(LocalTime.MAX);
+
+        return scheduleRepository.findSchedulesInDateRange(userUid, startOfDay, endOfDay)
             .stream()
             .map(ScheduleResponseDTO::from)
             .toList();
