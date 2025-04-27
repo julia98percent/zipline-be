@@ -2,12 +2,17 @@ package com.zipline.controller.schedule;
 
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.schedule.ScheduleService;
+import com.zipline.service.schedule.dto.request.DateRangeRequest;
 import com.zipline.service.schedule.dto.request.ScheduleCreateRequestDTO;
+import com.zipline.service.schedule.dto.response.ScheduleResponseDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +38,20 @@ public class ScheduleController {
     ApiResponse<Void> responseBody = ApiResponse.ok("일정 생성 성공");
     return ResponseEntity.ok(responseBody);
   }
+
+  @GetMapping("")
+  public ResponseEntity<ApiResponse<List<ScheduleResponseDTO>>> getScheduleList(
+      @Valid @ModelAttribute DateRangeRequest dateRange,
+      Principal principal) {
+
+    List<ScheduleResponseDTO> scheduleList = scheduleService.getScheduleList(dateRange,
+        Long.parseLong(principal.getName())
+    );
+
+    ApiResponse<List<ScheduleResponseDTO>> response = ApiResponse.ok("일정 목록 조회 성공", scheduleList);
+    return ResponseEntity.ok(response);
+  }
+
 
   @DeleteMapping("/{scheduleUid}")
   public ResponseEntity<ApiResponse<Void>> deleteSchedule(@PathVariable Long scheduleUid,
