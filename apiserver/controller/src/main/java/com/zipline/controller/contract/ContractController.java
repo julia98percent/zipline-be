@@ -21,11 +21,13 @@ import com.zipline.service.contract.dto.request.ContractRequestDTO;
 import com.zipline.service.contract.dto.response.ContractListResponseDTO;
 import com.zipline.service.contract.dto.response.ContractResponseDTO;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/contracts")
+@Tag(name = "계약", description = "계약 관련 API")
+@RequestMapping("/api/v1/contracts")
 public class ContractController {
 
 	private final ContractService contractService;
