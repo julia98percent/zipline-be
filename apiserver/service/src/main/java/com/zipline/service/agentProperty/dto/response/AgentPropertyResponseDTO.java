@@ -17,9 +17,7 @@ public class AgentPropertyResponseDTO {
 
 	private String customer;
 	private String address;
-	private String dong;
-	private String roadName;
-	private String extraAddress;
+	private String legalDistrictCode;
 	private BigInteger deposit;
 	private BigInteger monthlyRent;
 	private BigInteger price;
@@ -43,6 +41,7 @@ public class AgentPropertyResponseDTO {
 		return AgentPropertyResponseDTO.builder()
 			.customer(property.getCustomer().getName())
 			.address(property.getAddress())
+			.legalDistrictCode(property.getLegalDistrictCode())
 			.deposit(property.getDeposit())
 			.monthlyRent(property.getMonthlyRent())
 			.price(property.getPrice())

@@ -12,7 +12,6 @@ import com.zipline.entity.agentProperty.AgentProperty;
 
 @Repository
 public interface AgentPropertyRepository extends JpaRepository<AgentProperty, Long> {
-	Optional<AgentProperty> findByUidAndDeletedAtIsNull(Long propertyUid);
 
 	Optional<AgentProperty> findByUidAndUserUidAndDeletedAtIsNull(Long propertyUid, Long userUid);
 

@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,11 +20,14 @@ import com.zipline.service.agentProperty.dto.request.AgentPropertyRequestDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyResponseDTO;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/properties")
+@Tag(name = "매물", description = "매물 관련 api")
+@RequestMapping("/api/v1/properties")
 public class AgentPropertyController {
 
 	private final AgentPropertyService agentPropertyService;
@@ -39,15 +43,15 @@ public class AgentPropertyController {
 
 	@PostMapping("")
 	public ResponseEntity<ApiResponse<Void>> registerProperty(
-		@RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, Principal principal) {
+		@Valid @RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, Principal principal) {
 		agentPropertyService.registerProperty(agentPropertyRequestDTO, Long.parseLong(principal.getName()));
 		ApiResponse<Void> response = ApiResponse.create("매물 등록 성공");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
-	@PostMapping("/{propertyUid}")
+	@PatchMapping("/{propertyUid}")
 	public ResponseEntity<ApiResponse<AgentPropertyResponseDTO>> modifyProperty(
-		@RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, @PathVariable Long propertyUid,
+		@Valid @RequestBody AgentPropertyRequestDTO agentPropertyRequestDTO, @PathVariable Long propertyUid,
 		Principal principal) {
 		AgentPropertyResponseDTO propertyResponseDTO = agentPropertyService.modifyProperty(agentPropertyRequestDTO,
 			propertyUid, Long.parseLong(principal.getName()));

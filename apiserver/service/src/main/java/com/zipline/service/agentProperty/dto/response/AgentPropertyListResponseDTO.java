@@ -36,6 +36,7 @@ public class AgentPropertyListResponseDTO {
 		private Long uid;
 		private String customerName;
 		private String address;
+		private String legalDistrictCode;
 		private BigInteger deposit;
 		private BigInteger monthlyRent;
 		private BigInteger price;
@@ -55,6 +56,7 @@ public class AgentPropertyListResponseDTO {
 			this.uid = agentProperty.getUid();
 			this.customerName = agentProperty.getCustomer().getName();
 			this.address = agentProperty.getAddress();
+			this.legalDistrictCode = agentProperty.getLegalDistrictCode();
 			this.deposit = agentProperty.getDeposit();
 			this.monthlyRent = agentProperty.getMonthlyRent();
 			this.price = agentProperty.getPrice();
