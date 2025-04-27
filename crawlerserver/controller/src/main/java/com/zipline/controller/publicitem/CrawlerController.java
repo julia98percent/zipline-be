@@ -19,4 +19,10 @@ public class CrawlerController {
     public ResponseEntity<ApiResponse<Boolean>> getCrawlingStatus() {
         return ResponseEntity.ok(ApiResponse.ok("크롤링 상태 조회", crawlingStatusManager.isCrawling()));
     }
-   } 
+
+    @GetMapping("/is-crawling")
+    public ResponseEntity<ApiResponse<Boolean>> isCrawling() {
+        boolean crawlingStatus = crawlingStatusManager.isCrawling();
+        return ResponseEntity.ok(ApiResponse.ok("현재 크롤링 상태", crawlingStatus));
+    }
+}
