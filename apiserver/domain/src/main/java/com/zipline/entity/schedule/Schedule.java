@@ -62,14 +62,10 @@ public class Schedule extends BaseTimeEntity {
   public void updateSchedule(String title, String description,
       LocalDateTime startDate, LocalDateTime endDate,
       Customer customer) {
-      this.title = title;
-    if (description != null) {
-      this.description = description;
-    }
-      this.startDate = startDate;
-      this.endDate = endDate;
-    if (customer != null) {
-      this.customer = customer;
-    }
+    this.title = title;
+    this.description = description;
+    this.startDate = startDate;
+    this.endDate = endDate;
+    this.customer = customer;
   }
 }
