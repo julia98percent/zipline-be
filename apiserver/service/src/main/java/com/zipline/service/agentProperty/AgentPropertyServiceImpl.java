@@ -16,7 +16,9 @@ import com.zipline.global.exception.customer.CustomerException;
 import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
+import com.zipline.global.request.AgentPropertyFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
+import com.zipline.repository.agentProperty.AgentPropertyQueryRepository;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.customer.CustomerRepository;
 import com.zipline.repository.user.UserRepository;
@@ -34,6 +36,7 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 	private final AgentPropertyRepository agentPropertyRepository;
 	private final UserRepository userRepository;
 	private final CustomerRepository customerRepository;
+	private final AgentPropertyQueryRepository agentPropertyQueryRepository;
 
 	@Transactional(readOnly = true)
 	public AgentPropertyResponseDTO getProperty(Long propertyUid, Long userUid) {
@@ -97,9 +100,11 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 	}
 
 	@Transactional(readOnly = true)
-	public AgentPropertyListResponseDTO getAgentPropertyList(PageRequestDTO pageRequestDTO, Long userUid) {
-		Page<AgentProperty> agentPropertyPage = agentPropertyRepository.findByUserUidAndDeletedAtIsNull(userUid,
-			pageRequestDTO.toPageable());
+	public AgentPropertyListResponseDTO getAgentPropertyList(PageRequestDTO pageRequestDTO, Long userUid,
+		AgentPropertyFilterRequestDTO detailFilter) {
+		Page<AgentProperty> agentPropertyPage = agentPropertyQueryRepository.findFilteredProperties(
+			userUid, detailFilter, pageRequestDTO.toPageable()
+		);
 		List<PropertyResponseDTO> agentPropertyResponseDTOList = agentPropertyPage.getContent().stream()
 			.map(PropertyResponseDTO::new)
 			.toList();

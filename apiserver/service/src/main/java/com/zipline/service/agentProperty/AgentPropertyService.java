@@ -1,5 +1,6 @@
 package com.zipline.service.agentProperty;
 
+import com.zipline.global.request.AgentPropertyFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.service.agentProperty.dto.request.AgentPropertyRequestDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
@@ -16,5 +17,6 @@ public interface AgentPropertyService {
 
 	void deleteProperty(Long propertyUid, Long userUid);
 
-	AgentPropertyListResponseDTO getAgentPropertyList(PageRequestDTO pageRequestDTO, Long userUid);
+	AgentPropertyListResponseDTO getAgentPropertyList(PageRequestDTO pageRequestDTO, Long userUid,
+		AgentPropertyFilterRequestDTO detailFilter);
 }
