@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/admin/crawl/region")
+@RequestMapping("/api/v1/crawl/region")
 @RequiredArgsConstructor
 public class RegionCrawlController {
 

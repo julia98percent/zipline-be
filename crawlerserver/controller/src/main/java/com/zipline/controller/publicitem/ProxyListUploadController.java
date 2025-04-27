@@ -13,7 +13,7 @@ import com.zipline.global.response.ApiResponse;
 import com.zipline.service.publicItem.ProxyListUploadService;
 
 @RestController
-@RequestMapping("/api/admin/upload-proxy-list")
+@RequestMapping("/api/v1/crawl/upload-proxy-list")
 public class ProxyListUploadController {
 
 	@Autowired
