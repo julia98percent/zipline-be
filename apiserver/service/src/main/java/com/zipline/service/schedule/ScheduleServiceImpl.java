@@ -18,7 +18,6 @@ import com.zipline.service.schedule.dto.response.ScheduleResponseDTO;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -66,17 +65,19 @@ public class ScheduleServiceImpl implements ScheduleService {
             throw new ScheduleException(ScheduleErrorCode.INVALID_SCHEDULE_TIME);
         }
     }
-    public List<ScheduleResponseDTO> getScheduleList(DateRangeRequest request, Long userUid) {
-        List<Schedule> scheduleList = scheduleRepository.findSchedulesInDateRange(
-                userUid, request.getStartDate(), request.getEndDate());
-        return scheduleList.stream()
-        validateScheduleTimeRequest(request.getStartDate(), request.getEndDate());
-            .map(ScheduleResponseDTO::from)
-            .collect(Collectors.toList());
-    }
 
-  @Transactional
-  public void deleteSchedule(Long scheduleUid, Long userUid) {
+    @Override
+    public List<ScheduleResponseDTO> getScheduleList(DateRangeRequest request, Long userUid) {
+        validateScheduleTimeRequest(request.getStartDate(), request.getEndDate());
+
+        return scheduleRepository.findSchedulesInDateRange(userUid, request.getStartDate(), request.getEndDate())
+            .stream()
+            .map(ScheduleResponseDTO::from)
+            .toList();
+    }
+    @Override
+    @Transactional
+    public void deleteSchedule(Long scheduleUid, Long userUid) {
     Schedule schedule = scheduleRepository.findByUidAndUserUidAndDeletedAtIsNull(
             scheduleUid, userUid)
         .orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
