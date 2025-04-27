@@ -15,6 +15,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.enums.PropertyType;
+import com.zipline.global.exception.agentProperty.PropertyException;
+import com.zipline.global.exception.agentProperty.errorcode.PropertyErrorCode;
 import com.zipline.global.request.AgentPropertyFilterRequestDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -35,14 +37,16 @@ public class AgentPropertyQueryRepository {
 		if (filter.getType() != null && !filter.getType().isBlank()) {
 			try {
 				builder.and(agentProperty.type.eq(PropertyType.valueOf(filter.getType())));
-			} catch (IllegalArgumentException ignored) {
+			} catch (IllegalArgumentException e) {
+				throw new PropertyException(PropertyErrorCode.PROPERTY_TYPE_NOT_FOUND);
 			}
 		}
 
 		if (filter.getCategory() != null && !filter.getCategory().isBlank()) {
 			try {
 				builder.and(agentProperty.realCategory.eq(PropertyCategory.valueOf(filter.getCategory())));
-			} catch (IllegalArgumentException ignored) {
+			} catch (IllegalArgumentException e) {
+				throw new PropertyException(PropertyErrorCode.PROPERTY_CATEGORY_NOT_FOUND);
 			}
 		}
 
