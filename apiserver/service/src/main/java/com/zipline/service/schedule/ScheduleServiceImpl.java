@@ -33,7 +33,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     @Transactional
     public void createSchedule(ScheduleCreateRequestDTO request, Long userUid) {
-        validateScheduleTimeRequest(request);
+        validateScheduleTimeRequest(request.getStartDateTime(), request.getEndDateTime());
 
         User user = userRepository.findById(userUid)
             .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
@@ -61,15 +61,16 @@ public class ScheduleServiceImpl implements ScheduleService {
             .orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
     }
 
-    private void validateScheduleTimeRequest(ScheduleCreateRequestDTO request) {
-        if (request.getStartDateTime().isAfter(request.getEndDateTime())) {
-            throw  new ScheduleException(ScheduleErrorCode.INVALID_SCHEDULE_TIME);
+    private void validateScheduleTimeRequest(LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate.isAfter(endDate)) {
+            throw new ScheduleException(ScheduleErrorCode.INVALID_SCHEDULE_TIME);
         }
     }
     public List<ScheduleResponseDTO> getScheduleList(DateRangeRequest request, Long userUid) {
         List<Schedule> scheduleList = scheduleRepository.findSchedulesInDateRange(
                 userUid, request.getStartDate(), request.getEndDate());
         return scheduleList.stream()
+        validateScheduleTimeRequest(request.getStartDate(), request.getEndDate());
             .map(ScheduleResponseDTO::from)
             .collect(Collectors.toList());
     }
