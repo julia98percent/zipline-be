@@ -14,6 +14,7 @@ import com.zipline.repository.schedule.ScheduleRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.schedule.dto.request.DateRangeRequest;
 import com.zipline.service.schedule.dto.request.ScheduleCreateRequestDTO;
+import com.zipline.service.schedule.dto.request.ScheduleModifyRequestDTO;
 import com.zipline.service.schedule.dto.response.ScheduleResponseDTO;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -65,6 +66,29 @@ public class ScheduleServiceImpl implements ScheduleService {
         if (startDate.isAfter(endDate)) {
             throw new ScheduleException(ScheduleErrorCode.INVALID_SCHEDULE_TIME);
         }
+    }
+
+    @Override
+    @Transactional
+    public ScheduleResponseDTO modifySchedule(Long userUid, Long scheduleUid,
+        ScheduleModifyRequestDTO request) {
+        validateScheduleTimeRequest(request.getStartDate(), request.getEndDate());
+
+        Schedule schedule = scheduleRepository.findByUidAndUserUidAndDeletedAtIsNull(scheduleUid,
+                userUid)
+            .orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
+
+        Customer customer = findCustomerIsExist(request.getCustomerUid());
+
+        schedule.updateSchedule(
+            request.getTitle(),
+            request.getDescription(),
+            request.getStartDate(),
+            request.getEndDate(),
+            customer
+        );
+
+        return ScheduleResponseDTO.from(schedule);
     }
 
     @Override
