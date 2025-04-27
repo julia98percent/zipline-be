@@ -14,6 +14,7 @@ import com.zipline.repository.schedule.ScheduleRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.schedule.dto.request.ScheduleCreateRequestDTO;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -61,4 +62,12 @@ public class ScheduleServiceImpl implements ScheduleService {
             throw  new ScheduleException(ScheduleErrorCode.INVALID_SCHEDULE_TIME);
         }
     }
+  @Transactional
+  public void deleteSchedule(Long scheduleUid, Long userUid) {
+    Schedule schedule = scheduleRepository.findByUidAndUserUidAndDeletedAtIsNull(
+            scheduleUid, userUid)
+        .orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
+
+    schedule.delete(LocalDateTime.now());
+  }
 }

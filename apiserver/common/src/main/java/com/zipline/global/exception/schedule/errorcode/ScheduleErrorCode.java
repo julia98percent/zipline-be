@@ -4,7 +4,9 @@ import com.zipline.global.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 public enum ScheduleErrorCode implements ErrorCode {
-	INVALID_SCHEDULE_TIME("MSG-001", "시작 시간이 종료 시간보다 늦을 수 없습니다.", HttpStatus.BAD_REQUEST);
+	INVALID_SCHEDULE_TIME("MSG-001", "시작 시간이 종료 시간보다 늦을 수 없습니다.", HttpStatus.BAD_REQUEST),
+	SCHEDULE_NOT_FOUND("MSG-002", "해당하는 일정을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+
 	private final String code;
 	private final String message;
 	private final HttpStatus status;
