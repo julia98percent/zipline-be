@@ -1,6 +1,5 @@
 package com.zipline.service.contract;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -125,20 +124,6 @@ public class ContractServiceImpl implements ContractService {
 			customerRepository.findById(contractRequestDTO.getLesseeOrBuyerUid()).get().getName() : null;
 
 		return ContractResponseDTO.of(savedContract, lessorOrSeller.getName(), lesseeOrBuyerName, documentDTO);
-	}
-
-	@Transactional
-	public void deleteContract(Long contractUid, Long userUid) {
-		Contract contract = contractRepository.findByUidAndUserUidAndDeletedAtIsNull(contractUid, userUid)
-			.orElseThrow(() -> new ContractException(ContractErrorCode.CONTRACT_NOT_FOUND));
-
-		contract.delete(LocalDateTime.now());
-
-		List<CustomerContract> customerContracts = customerContractRepository.findAllByContractUid(contractUid);
-		customerContracts.forEach(cc -> cc.delete(LocalDateTime.now()));
-
-		List<ContractDocument> documents = contractDocumentRepository.findAllByContractUid(contractUid);
-		documents.forEach(doc -> doc.delete(LocalDateTime.now()));
 	}
 
 	@Transactional(readOnly = true)

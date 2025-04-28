@@ -20,6 +20,4 @@ public interface ContractService {
 
 	ContractResponseDTO modifyContract(ContractRequestDTO contractRequestDTO, Long contractUid,
 		List<MultipartFile> files, Long userUid);
-
-	void deleteContract(Long contractUid, Long userUid);
 }
