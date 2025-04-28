@@ -8,11 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
-@RequestMapping("/api/admin/crawl")
+@RequestMapping("/api/v1/crawl")
 @RequiredArgsConstructor
 public class CrawlerController {
     private final CrawlingStatusManager crawlingStatusManager;
@@ -21,4 +19,10 @@ public class CrawlerController {
     public ResponseEntity<ApiResponse<Boolean>> getCrawlingStatus() {
         return ResponseEntity.ok(ApiResponse.ok("크롤링 상태 조회", crawlingStatusManager.isCrawling()));
     }
-   } 
+
+    @GetMapping("/is-crawling")
+    public ResponseEntity<ApiResponse<Boolean>> isCrawling() {
+        boolean crawlingStatus = crawlingStatusManager.isCrawling();
+        return ResponseEntity.ok(ApiResponse.ok("현재 크롤링 상태", crawlingStatus));
+    }
+}
