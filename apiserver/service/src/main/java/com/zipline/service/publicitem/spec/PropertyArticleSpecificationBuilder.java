@@ -29,7 +29,6 @@ public class PropertyArticleSpecificationBuilder {
         spec = addBuildingSpecifications(spec, searchDTO);
         spec = addPriceSpecifications(spec, searchDTO);
         spec = addAreaSpecifications(spec, searchDTO);
-        spec = addDateSpecifications(spec, searchDTO);
 
         return spec;
     }
@@ -102,20 +101,6 @@ public class PropertyArticleSpecificationBuilder {
         if (searchDTO.getMinArea() != null || searchDTO.getMaxArea() != null) {
             spec = spec.and(PropertyArticleViewSpecification.exclusiveAreaBetween(
                     searchDTO.getMinArea(), searchDTO.getMaxArea()));
-        }
-
-        return spec;
-    }
-
-    /**
-     * 날짜 관련 검색 조건 추가
-     */
-    private Specification<PropertyArticle> addDateSpecifications(
-            Specification<PropertyArticle> spec, PropertyArticleSearchDTO searchDTO) {
-
-        if (searchDTO.getStartDate() != null || searchDTO.getEndDate() != null) {
-            spec = spec.and(PropertyArticleViewSpecification.createdAtBetween(
-                    searchDTO.getStartDate(), searchDTO.getEndDate()));
         }
 
         return spec;
