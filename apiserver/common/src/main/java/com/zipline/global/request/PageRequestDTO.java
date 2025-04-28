@@ -53,7 +53,6 @@ public class PageRequestDTO {
 	public Pageable toPageable() {
 		return PageRequest.of(getPage(), getSize(), getSort());
 	}
-
 	public void addSortField(String field) {
 		addSortField(field, Direction.ASC);
 	}
@@ -63,16 +62,5 @@ public class PageRequestDTO {
 			sortFields = new LinkedHashMap<>();
 		}
 		sortFields.put(field, direction);
-	}
-
-	public void addSortField(String field, String direction) {
-		if (sortFields == null) {
-			sortFields = new LinkedHashMap<>();
-		}
-		try {
-			sortFields.put(field, Direction.valueOf(direction.toUpperCase()));
-		} catch (IllegalArgumentException e) {
-			throw new IllegalArgumentException("소팅값 잘못됨: " + direction);
-		}
 	}
 }

@@ -46,7 +46,7 @@ public class PageRequestDTOBinder {
                 Sort.Direction sortDirection = Sort.Direction.valueOf(direction);
                 sortFields.put(parts[0].trim(), sortDirection);
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid sort direction: " + parts[1]);
+                throw new IllegalArgumentException("소팅 방향값 에러: " + parts[1]);
             }
         } else {
             sortFields.put(field.trim(), Sort.Direction.ASC);
