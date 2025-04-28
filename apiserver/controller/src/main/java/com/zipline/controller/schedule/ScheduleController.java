@@ -4,6 +4,7 @@ import com.zipline.global.response.ApiResponse;
 import com.zipline.service.schedule.ScheduleService;
 import com.zipline.service.schedule.dto.request.DateRangeRequest;
 import com.zipline.service.schedule.dto.request.ScheduleCreateRequestDTO;
+import com.zipline.service.schedule.dto.request.ScheduleModifyRequestDTO;
 import com.zipline.service.schedule.dto.response.ScheduleResponseDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +54,17 @@ public class ScheduleController {
     return ResponseEntity.ok(response);
   }
 
+  @PatchMapping("/{scheduleUid}")
+  public ResponseEntity<ApiResponse<ScheduleResponseDTO>> modifySchedule(
+      @PathVariable Long scheduleUid,
+      @Valid @RequestBody ScheduleModifyRequestDTO request,
+      Principal principal) {
+    ScheduleResponseDTO response = scheduleService.modifySchedule(
+        Long.parseLong(principal.getName()), scheduleUid,request);
+
+    ApiResponse<ScheduleResponseDTO> responseBody = ApiResponse.ok("일정 수정 성공", response);
+    return ResponseEntity.ok(responseBody);
+  }
 
   @DeleteMapping("/{scheduleUid}")
   public ResponseEntity<ApiResponse<Void>> deleteSchedule(@PathVariable Long scheduleUid,

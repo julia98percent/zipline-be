@@ -39,4 +39,8 @@ public class CustomerContract extends BaseTimeEntity {
 		this.customer = customer;
 		this.contract = contract;
 	}
+
+	public void updateCustomerContract(Customer customer) {
+		this.customer = customer;
+	}
 }

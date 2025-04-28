@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zipline.global.request.AgentPropertyFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.agentProperty.AgentPropertyService;
@@ -70,11 +72,12 @@ public class AgentPropertyController {
 	}
 
 	@GetMapping("")
-	public ResponseEntity<ApiResponse<AgentPropertyListResponseDTO>> getPropertyList(PageRequestDTO pageRequestDTO,
+	public ResponseEntity<ApiResponse<AgentPropertyListResponseDTO>> getPropertyList(
+		@ModelAttribute PageRequestDTO pageRequestDTO,
+		@ModelAttribute AgentPropertyFilterRequestDTO agentPropertyFilterRequestDTO,
 		Principal principal) {
 		AgentPropertyListResponseDTO propertyListResponseDTO = agentPropertyService.getAgentPropertyList(pageRequestDTO,
-			Long.parseLong(
-				principal.getName()));
+			Long.parseLong(principal.getName()), agentPropertyFilterRequestDTO);
 
 		ApiResponse<AgentPropertyListResponseDTO> response = ApiResponse.ok("매물 목록 조회 성공", propertyListResponseDTO);
 		return ResponseEntity.status(HttpStatus.OK).body(response);

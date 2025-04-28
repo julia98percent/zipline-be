@@ -85,11 +85,9 @@ public class S3FileUploader {
 
 	private String createStoreFileName(String originalFileName, String folderName) {
 		String ext = extractExt(originalFileName);
-		String fileName = extractFileName(originalFileName);
 		String nowTime = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE);
 		String uuid = UUID.randomUUID().toString();
-		log.info("fileName = {} ", fileName);
-		return folderName + nowTime + fileName + uuid + "." + ext;
+		return folderName + nowTime + uuid + "." + ext;
 	}
 
 	private String extractExt(String originalFileName) {

@@ -14,6 +14,7 @@ import com.zipline.repository.schedule.ScheduleRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.schedule.dto.request.DateRangeRequest;
 import com.zipline.service.schedule.dto.request.ScheduleCreateRequestDTO;
+import com.zipline.service.schedule.dto.request.ScheduleModifyRequestDTO;
 import com.zipline.service.schedule.dto.response.ScheduleResponseDTO;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
+    private final ScheduleFieldUpdateProcessor scheduleFieldUpdateProcessor;
 
     @Override
     @Transactional
@@ -38,7 +40,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         User user = userRepository.findById(userUid)
             .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        Customer customer = findCustomerIsExist(request.getCustomerId());
+        Customer customer = findCustomerIsExist(request.getCustomerUid());
 
 
         Schedule schedule = Schedule.builder()
@@ -53,11 +55,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         scheduleRepository.save(schedule);
     }
 
-    private Customer findCustomerIsExist(Integer customerId) {
-        if (customerId == null) {
+    private Customer findCustomerIsExist(Long customerUid) {
+        if (customerUid == null) {
             return null;
         }
-        return customerRepository.findById(customerId.longValue())
+        return customerRepository.findById(customerUid)
             .orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
     }
 
@@ -65,6 +67,39 @@ public class ScheduleServiceImpl implements ScheduleService {
         if (startDate.isAfter(endDate)) {
             throw new ScheduleException(ScheduleErrorCode.INVALID_SCHEDULE_TIME);
         }
+    }
+
+    @Override
+    @Transactional
+    public ScheduleResponseDTO modifySchedule(Long userUid, Long scheduleUid,
+        ScheduleModifyRequestDTO request) {
+        validateScheduleTimeRequest(request.getStartDate(), request.getEndDate());
+
+        Schedule schedule = scheduleRepository.findByUidAndUserUidAndDeletedAtIsNull(scheduleUid,
+                userUid)
+            .orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
+
+        String newDescription = scheduleFieldUpdateProcessor.processUpdate(
+            request.getDescription(),
+            schedule.getDescription(),
+            !request.hasDescription()
+        );
+
+        Customer newCustomer = scheduleFieldUpdateProcessor.processCustomerUpdate(
+            request.getCustomerUid(),
+            schedule.getCustomer(),
+            !request.hasCustomerUid()
+        );
+
+        schedule.updateSchedule(
+            request.getTitle(),
+            newDescription,
+            request.getStartDate(),
+            request.getEndDate(),
+            newCustomer
+        );
+
+        return ScheduleResponseDTO.from(schedule);
     }
 
     @Override
