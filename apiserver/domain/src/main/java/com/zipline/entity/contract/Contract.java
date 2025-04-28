@@ -64,4 +64,14 @@ public class Contract extends BaseTimeEntity {
 		this.status = status;
 		this.expectedContractEndDate = expectedContractEndDate;
 	}
+
+	public void modifyContract(String category, LocalDate contractDate, LocalDate contractStartDate,
+		LocalDate contractEndDate, LocalDate expectedContractEndDate, ContractStatus status) {
+		this.category = category;
+		this.contractDate = contractDate;
+		this.contractStartDate = contractStartDate;
+		this.contractEndDate = contractEndDate;
+		this.expectedContractEndDate = expectedContractEndDate;
+		this.status = status;
+	}
 }

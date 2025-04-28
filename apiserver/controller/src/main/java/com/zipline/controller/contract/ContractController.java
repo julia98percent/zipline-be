@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +49,19 @@ public class ContractController {
 		contractService.registerContract(contractRequestDTO, files, Long.parseLong(principal.getName()));
 		ApiResponse<Void> response = ApiResponse.create("계약 등록 성공");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	@PatchMapping(value = "/{contractUid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<ApiResponse<ContractResponseDTO>> modifyContract(
+		@PathVariable Long contractUid,
+		@RequestPart ContractRequestDTO contractRequestDTO,
+		@RequestPart(required = false) List<MultipartFile> files,
+		Principal principal) {
+		ContractResponseDTO contractResponseDTO = contractService.modifyContract(contractRequestDTO, contractUid, files,
+			Long.parseLong(principal.getName()));
+
+		ApiResponse<ContractResponseDTO> response = ApiResponse.ok("계약 수정 성공", contractResponseDTO);
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("")
