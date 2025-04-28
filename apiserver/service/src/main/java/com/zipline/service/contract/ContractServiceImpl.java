@@ -88,15 +88,7 @@ public class ContractServiceImpl implements ContractService {
 
 		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
 
-		Contract contract = Contract.builder()
-			.user(savedUser)
-			.category(contractRequestDTO.getCategory())
-			.contractDate(contractRequestDTO.getContractDate())
-			.contractStartDate(contractRequestDTO.getContractStartDate())
-			.contractEndDate(contractRequestDTO.getContractEndDate())
-			.expectedContractEndDate(contractRequestDTO.getExpectedContractEndDate())
-			.status(status)
-			.build();
+		Contract contract = contractRequestDTO.toEntity(savedUser, status);
 		Contract savedContract = contractRepository.save(contract);
 
 		customerContractRepository.save(CustomerContract.builder()

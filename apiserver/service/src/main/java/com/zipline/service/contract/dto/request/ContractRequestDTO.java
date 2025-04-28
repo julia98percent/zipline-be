@@ -3,6 +3,9 @@ package com.zipline.service.contract.dto.request;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.zipline.entity.contract.Contract;
+import com.zipline.entity.enums.ContractStatus;
+import com.zipline.entity.user.User;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -43,4 +46,15 @@ public class ContractRequestDTO {
 	@Schema(description = "계약 종료 예상일", example = "2026-05-01")
 	private LocalDate expectedContractEndDate;
 
+	public Contract toEntity(User user, ContractStatus status) {
+		return Contract.builder()
+			.user(user)
+			.category(this.category)
+			.contractDate(this.contractDate)
+			.contractStartDate(this.contractStartDate)
+			.contractEndDate(this.contractEndDate)
+			.expectedContractEndDate(this.expectedContractEndDate)
+			.status(status)
+			.build();
+	}
 }
