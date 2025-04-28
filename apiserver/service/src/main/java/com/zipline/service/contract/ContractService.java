@@ -17,4 +17,6 @@ public interface ContractService {
 		Long userUid);
 
 	ContractListResponseDTO getContractList(PageRequestDTO pageRequestDTO, Long userUid);
+
+	void deleteContract(Long contractUid, Long userUid);
 }
