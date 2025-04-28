@@ -1,5 +1,7 @@
 package com.zipline.entity.contract;
 
+import com.zipline.entity.BaseTimeEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "contract_documents")
-public class ContractDocument {
+public class ContractDocument extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "uid", nullable = false)
@@ -28,10 +30,10 @@ public class ContractDocument {
 	@JoinColumn(name = "contract_uid", nullable = false)
 	private Contract contract;
 
-	@Column(name = "document_url", nullable = false)
+	@Column(name = "document_url")
 	private String documentUrl;
 
-	@Column(name = "document_name", nullable = false)
+	@Column(name = "document_name")
 	private String documentName;
 
 	@Builder

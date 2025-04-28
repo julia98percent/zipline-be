@@ -43,7 +43,7 @@ public class ContractController {
 
 	@PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ApiResponse<Void>> registerContract(@RequestPart ContractRequestDTO contractRequestDTO,
-		@RequestPart List<MultipartFile> files,
+		@RequestPart(required = false) List<MultipartFile> files,
 		Principal principal) {
 		contractService.registerContract(contractRequestDTO, files, Long.parseLong(principal.getName()));
 		ApiResponse<Void> response = ApiResponse.create("계약 등록 성공");
