@@ -33,7 +33,7 @@ public class PageRequestDTOBinder {
             return sortFields;
         }
         String decodedText = URLDecoder.decode(text, StandardCharsets.UTF_8);
-        String cleanedText = decodedText.replaceAll("[{}]", "").replaceAll("\"", "");
+        String cleanedText = decodedText.replaceAll("[{}\"]", "");
         Arrays.stream(cleanedText.split(","))
                 .forEach(field -> addSortField(sortFields, field.trim()));
 
