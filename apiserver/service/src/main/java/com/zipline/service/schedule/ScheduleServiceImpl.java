@@ -12,9 +12,13 @@ import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.repository.customer.CustomerRepository;
 import com.zipline.repository.schedule.ScheduleRepository;
 import com.zipline.repository.user.UserRepository;
+import com.zipline.service.schedule.dto.request.DateRangeRequest;
 import com.zipline.service.schedule.dto.request.ScheduleCreateRequestDTO;
+import com.zipline.service.schedule.dto.response.ScheduleResponseDTO;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +33,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     @Transactional
     public void createSchedule(ScheduleCreateRequestDTO request, Long userUid) {
-        validateScheduleTimeRequest(request);
+        validateScheduleTimeRequest(request.getStartDateTime(), request.getEndDateTime());
 
         User user = userRepository.findById(userUid)
             .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
@@ -57,13 +61,27 @@ public class ScheduleServiceImpl implements ScheduleService {
             .orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
     }
 
-    private void validateScheduleTimeRequest(ScheduleCreateRequestDTO request) {
-        if (request.getStartDateTime().isAfter(request.getEndDateTime())) {
-            throw  new ScheduleException(ScheduleErrorCode.INVALID_SCHEDULE_TIME);
+    private void validateScheduleTimeRequest(LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate.isAfter(endDate)) {
+            throw new ScheduleException(ScheduleErrorCode.INVALID_SCHEDULE_TIME);
         }
     }
-  @Transactional
-  public void deleteSchedule(Long scheduleUid, Long userUid) {
+
+    @Override
+    public List<ScheduleResponseDTO> getScheduleList(DateRangeRequest request, Long userUid) {
+        validateScheduleTimeRequest(request.getStartDate(), request.getEndDate());
+
+        LocalDateTime startOfDay = request.getStartDate().toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = request.getEndDate().toLocalDate().atTime(LocalTime.MAX);
+
+        return scheduleRepository.findSchedulesInDateRange(userUid, startOfDay, endOfDay)
+            .stream()
+            .map(ScheduleResponseDTO::from)
+            .toList();
+    }
+    @Override
+    @Transactional
+    public void deleteSchedule(Long scheduleUid, Long userUid) {
     Schedule schedule = scheduleRepository.findByUidAndUserUidAndDeletedAtIsNull(
             scheduleUid, userUid)
         .orElseThrow(() -> new ScheduleException(ScheduleErrorCode.SCHEDULE_NOT_FOUND));
