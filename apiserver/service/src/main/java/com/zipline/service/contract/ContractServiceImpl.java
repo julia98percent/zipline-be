@@ -87,7 +87,7 @@ public class ContractServiceImpl implements ContractService {
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
-
+		contractRequestDTO.validateDateOrder();
 		Contract contract = contractRequestDTO.toEntity(savedUser, status);
 		Contract savedContract = contractRepository.save(contract);
 
@@ -157,6 +157,8 @@ public class ContractServiceImpl implements ContractService {
 		List<MultipartFile> files, Long userUid) {
 		Contract contract = contractRepository.findByUidAndUserUidAndDeletedAtIsNull(contractUid, userUid)
 			.orElseThrow(() -> new ContractException(ContractErrorCode.CONTRACT_NOT_FOUND));
+
+		contractRequestDTO.validateDateOrder();
 
 		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
 		contract.modifyContract(

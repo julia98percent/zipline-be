@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.enums.ContractStatus;
 import com.zipline.entity.user.User;
+import com.zipline.global.exception.contract.ContractException;
+import com.zipline.global.exception.contract.errorcode.ContractErrorCode;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -33,7 +35,7 @@ public class ContractRequestDTO {
 	@Schema(description = "계약 종료일", example = "2026-04-01")
 	private LocalDate contractEndDate;
 
-	@Schema(description = "계약 상태", example = "PENDING")
+	@Schema(description = "계약 상태", example = "IN_PROGRESS")
 	private String status;
 
 	@Schema(description = "임대/매도자 고객 UID", example = "1")
@@ -56,5 +58,14 @@ public class ContractRequestDTO {
 			.expectedContractEndDate(this.expectedContractEndDate)
 			.status(status)
 			.build();
+	}
+
+	public void validateDateOrder() {
+		if (contractDate != null && contractStartDate != null && contractDate.isAfter(contractStartDate)) {
+			throw new ContractException(ContractErrorCode.CONTRACT_DATE_AFTER_START_DATE);
+		}
+		if (contractStartDate != null && contractEndDate != null && !contractStartDate.isBefore(contractEndDate)) {
+			throw new ContractException(ContractErrorCode.CONTRACT_START_DATE_NOT_BEFORE_END_DATE);
+		}
 	}
 }
