@@ -17,4 +17,7 @@ public interface ContractService {
 		Long userUid);
 
 	ContractListResponseDTO getContractList(PageRequestDTO pageRequestDTO, Long userUid);
+
+	ContractResponseDTO modifyContract(ContractRequestDTO contractRequestDTO, Long contractUid,
+		List<MultipartFile> files, Long userUid);
 }

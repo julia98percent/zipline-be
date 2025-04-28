@@ -152,6 +152,39 @@ public class ContractServiceImpl implements ContractService {
 		return new ContractListResponseDTO(contractListDTO, contractPage);
 	}
 
+	@Transactional
+	public ContractResponseDTO modifyContract(ContractRequestDTO contractRequestDTO, Long contractUid,
+		List<MultipartFile> files, Long userUid) {
+		Contract contract = contractRepository.findByUidAndUserUidAndDeletedAtIsNull(contractUid, userUid)
+			.orElseThrow(() -> new ContractException(ContractErrorCode.CONTRACT_NOT_FOUND));
+
+		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
+		contract.modifyContract(
+			contractRequestDTO.getCategory(),
+			contractRequestDTO.getContractDate(),
+			contractRequestDTO.getContractStartDate(),
+			contractRequestDTO.getContractEndDate(),
+			contractRequestDTO.getExpectedContractEndDate(),
+			status
+		);
+
+		List<CustomerContract> customerContracts = customerContractRepository.findAllByContractUid(contractUid);
+		if (customerContracts.isEmpty()) {
+			throw new ContractException(ContractErrorCode.CONTRACT_CUSTOMER_NOT_FOUND);
+		}
+
+		updateCustomerContracts(contract, customerContracts, contractRequestDTO);
+
+		List<ContractResponseDTO.DocumentDTO> documentDTO = updateContractDocuments(contract, contractUid, files);
+
+		String lesseeOrBuyerName = contractRequestDTO.getLesseeOrBuyerUid() != null
+			? customerRepository.findById(contractRequestDTO.getLesseeOrBuyerUid()).get().getName()
+			: null;
+
+		return ContractResponseDTO.of(contract, customerContracts.get(0).getCustomer().getName(), lesseeOrBuyerName,
+			documentDTO);
+	}
+
 	private ContractStatus validateAndParseStatus(String status) {
 		try {
 			return ContractStatus.valueOf(status);
@@ -168,6 +201,49 @@ public class ContractServiceImpl implements ContractService {
 				.documentName(files.get(i).getOriginalFilename())
 				.documentUrl(urls.get(i))
 				.build())
+			.toList();
+	}
+
+	private void updateCustomerContracts(Contract contract, List<CustomerContract> customerContracts,
+		ContractRequestDTO dto) {
+		Customer lessorOrSeller = customerRepository.findById(dto.getLessorOrSellerUid())
+			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
+
+		customerContracts.get(0).updateCustomerContract(lessorOrSeller);
+
+		if (dto.getLesseeOrBuyerUid() != null) {
+			Customer lesseeOrBuyer = customerRepository.findById(dto.getLesseeOrBuyerUid())
+				.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
+
+			if (customerContracts.size() > 1) {
+				customerContracts.get(1).updateCustomerContract(lesseeOrBuyer);
+			} else {
+				customerContractRepository.save(CustomerContract.builder()
+					.customer(lesseeOrBuyer)
+					.contract(contract)
+					.build());
+			}
+		} else if (customerContracts.size() > 1) {
+			customerContractRepository.delete(customerContracts.get(1));
+		}
+	}
+
+	private List<ContractResponseDTO.DocumentDTO> updateContractDocuments(Contract contract, Long contractUid,
+		List<MultipartFile> files) {
+		List<ContractDocument> documents;
+
+		if (files != null && !files.isEmpty()) {
+			contractDocumentRepository.deleteAll(contractDocumentRepository.findAllByContractUid(contractUid));
+
+			List<String> uploadUrls = s3FileUploader.uploadContractFiles(files, S3Folder.CONTRACTS);
+			documents = createContractDocuments(contract, files, uploadUrls);
+			contractDocumentRepository.saveAll(documents);
+		} else {
+			documents = contractDocumentRepository.findAllByContractUid(contractUid);
+		}
+
+		return documents.stream()
+			.map(doc -> new ContractResponseDTO.DocumentDTO(doc.getDocumentName(), doc.getDocumentUrl()))
 			.toList();
 	}
 }
