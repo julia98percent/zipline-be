@@ -51,22 +51,6 @@ public class ContractListResponseDTO {
 			this.lesseeOrBuyerName = findLesseeOrBuyerName(customerContracts);
 		}
 
-		public ContractListDTO(CustomerContract customerContract) {
-			Contract contract = customerContract.getContract();
-			this.uid = contract.getUid();
-			this.category = contract.getCategory();
-			this.contractDate = contract.getContractDate();
-			this.contractStartDate = contract.getContractStartDate();
-			this.contractEndDate = contract.getContractEndDate();
-			this.status = contract.getStatus();
-
-			if (Boolean.TRUE.equals(customerContract.getCustomer().isBuyer())) {
-				this.lesseeOrBuyerName = customerContract.getCustomer().getName();
-			} else {
-				this.lessorOrSellerName = customerContract.getCustomer().getName();
-			}
-		}
-
 		private String findLesseeOrBuyerName(List<CustomerContract> customerContracts) {
 			if (customerContracts.size() > 1) {
 				return customerContracts.get(1).getCustomer().getName();
