@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,6 +63,13 @@ public class ContractController {
 
 		ApiResponse<ContractResponseDTO> response = ApiResponse.ok("계약 수정 성공", contractResponseDTO);
 		return ResponseEntity.ok(response);
+	}
+
+	@DeleteMapping("/{contractUid}")
+	public ResponseEntity<ApiResponse<Void>> deleteContract(@PathVariable Long contractUid, Principal principal) {
+		contractService.deleteContract(contractUid, Long.parseLong(principal.getName()));
+		ApiResponse<Void> response = ApiResponse.ok("계약 삭제 성공");
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	@GetMapping("")
