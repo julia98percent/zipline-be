@@ -47,6 +47,7 @@ public class ContractServiceImpl implements ContractService {
 	private final ContractDocumentRepository contractDocumentRepository;
 	private final CustomerContractRepository customerContractRepository;
 	private final S3FileUploader s3FileUploader;
+	private final ContractHistoryService contractHistoryService;
 
 	@Transactional(readOnly = true)
 	public ContractResponseDTO getContract(Long contractUid, Long userUid) {
@@ -159,16 +160,18 @@ public class ContractServiceImpl implements ContractService {
 			.orElseThrow(() -> new ContractException(ContractErrorCode.CONTRACT_NOT_FOUND));
 
 		contractRequestDTO.validateDateOrder();
-
-		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
+		ContractStatus prevStatus = contract.getStatus();
+		ContractStatus newStatus = validateAndParseStatus(contractRequestDTO.getStatus());
 		contract.modifyContract(
 			contractRequestDTO.getCategory(),
 			contractRequestDTO.getContractDate(),
 			contractRequestDTO.getContractStartDate(),
 			contractRequestDTO.getContractEndDate(),
 			contractRequestDTO.getExpectedContractEndDate(),
-			status
+			newStatus
 		);
+
+		contractHistoryService.addContractHistory(contract, prevStatus, newStatus);
 
 		List<CustomerContract> customerContracts = customerContractRepository.findAllByContractUid(contractUid);
 		if (customerContracts.isEmpty()) {
