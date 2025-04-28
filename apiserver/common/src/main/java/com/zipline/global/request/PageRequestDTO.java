@@ -41,12 +41,10 @@ public class PageRequestDTO {
 		if (sortFields == null || sortFields.isEmpty()) {
 			return Sort.unsorted();
 		}
-
 		List<Order> orders = new ArrayList<>();
 		for (Map.Entry<String, Direction> entry : sortFields.entrySet()) {
 			orders.add(new Order(entry.getValue(), entry.getKey()));
 		}
-
 		return Sort.by(orders);
 	}
 
