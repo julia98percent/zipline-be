@@ -171,7 +171,9 @@ public class ContractServiceImpl implements ContractService {
 			newStatus
 		);
 
-		contractHistoryService.addContractHistory(contract, prevStatus, newStatus);
+		if (!prevStatus.equals(newStatus)) {
+			contractHistoryService.addContractHistory(contract, prevStatus, newStatus);
+		}
 
 		List<CustomerContract> customerContracts = customerContractRepository.findAllByContractUid(contractUid);
 		if (customerContracts.isEmpty()) {
