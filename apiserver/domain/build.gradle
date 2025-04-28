@@ -23,8 +23,25 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    //Querydsl
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+
+    annotationProcessor 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+java {
+    sourceSets {
+        main {
+            java {
+                srcDirs += file("${project.buildDir}/generated/sources/annotationProcessor/java/main")
+            }
+        }
+    }
 }
 
 tasks.named('bootJar') {
