@@ -24,16 +24,17 @@ import com.zipline.global.exception.customer.CustomerException;
 import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
+import com.zipline.global.request.ContractFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.util.S3FileUploader;
 import com.zipline.repository.contract.ContractDocumentRepository;
+import com.zipline.repository.contract.ContractQueryRepository;
 import com.zipline.repository.contract.ContractRepository;
 import com.zipline.repository.contract.CustomerContractRepository;
 import com.zipline.repository.customer.CustomerRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.contract.dto.request.ContractRequestDTO;
 import com.zipline.service.contract.dto.response.ContractListResponseDTO;
-import com.zipline.service.contract.dto.response.ContractListResponseDTO.ContractListDTO;
 import com.zipline.service.contract.dto.response.ContractResponseDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class ContractServiceImpl implements ContractService {
 	private final ContractRepository contractRepository;
 	private final ContractDocumentRepository contractDocumentRepository;
 	private final CustomerContractRepository customerContractRepository;
+	private final ContractQueryRepository contractQueryRepository;
 	private final S3FileUploader s3FileUploader;
 
 	@Transactional(readOnly = true)
@@ -142,9 +144,13 @@ public class ContractServiceImpl implements ContractService {
 	}
 
 	@Transactional(readOnly = true)
-	public ContractListResponseDTO getContractList(PageRequestDTO pageRequestDTO, Long userUid) {
-		Page<Contract> contractPage = contractRepository.findByUserUidAndDeletedAtIsNull(userUid,
-			pageRequestDTO.toPageable());
+	public ContractListResponseDTO getContractList(PageRequestDTO pageRequestDTO, Long userUid,
+		ContractFilterRequestDTO filter) {
+
+		Page<Contract> contractPage = contractQueryRepository.findFilteredContracts(
+			userUid, filter, pageRequestDTO.toPageable()
+		);
+
 		List<Contract> contracts = contractPage.getContent();
 
 		List<Long> contractIds = contracts.stream()
@@ -156,11 +162,11 @@ public class ContractServiceImpl implements ContractService {
 		Map<Long, List<CustomerContract>> contractIdToCustomerContracts = customerContracts.stream()
 			.collect(Collectors.groupingBy(cc -> cc.getContract().getUid()));
 
-		List<ContractListDTO> contractListDTO = contracts.stream()
+		List<ContractListResponseDTO.ContractListDTO> contractListDTO = contracts.stream()
 			.map(contract -> {
 				List<CustomerContract> relatedCustomers = contractIdToCustomerContracts.getOrDefault(contract.getUid(),
 					List.of());
-				return new ContractListDTO(contract, relatedCustomers);
+				return new ContractListResponseDTO.ContractListDTO(contract, relatedCustomers);
 			})
 			.toList();
 

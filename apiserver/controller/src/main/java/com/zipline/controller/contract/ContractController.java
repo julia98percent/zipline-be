@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.zipline.global.request.ContractFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.contract.ContractService;
@@ -73,13 +75,17 @@ public class ContractController {
 	}
 
 	@GetMapping("")
-	public ResponseEntity<ApiResponse<ContractListResponseDTO>> getContractList(PageRequestDTO pageRequestDTO,
+	public ResponseEntity<ApiResponse<ContractListResponseDTO>> getContractList(
+		@ModelAttribute PageRequestDTO pageRequestDTO,
+		@ModelAttribute ContractFilterRequestDTO filter,
 		Principal principal) {
-		Long userUid = Long.parseLong(principal.getName());
 
-		ContractListResponseDTO responseDto = contractService.getContractList(pageRequestDTO, userUid);
-		ApiResponse<ContractListResponseDTO> response = ApiResponse.ok("계약 목록 조회 성공", responseDto);
+		ContractListResponseDTO response = contractService.getContractList(
+			pageRequestDTO,
+			Long.parseLong(principal.getName()),
+			filter
+		);
 
-		return ResponseEntity.status(HttpStatus.OK).body(response);
+		return ResponseEntity.ok(ApiResponse.ok("계약 목록 조회 성공", response));
 	}
 }
