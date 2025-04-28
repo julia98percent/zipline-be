@@ -88,8 +88,9 @@ public class ContractServiceImpl implements ContractService {
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
+		PropertyCategory category = validateAndParseCategory(contractRequestDTO.getCategory());
 		contractRequestDTO.validateDateOrder();
-		Contract contract = contractRequestDTO.toEntity(savedUser, status);
+		Contract contract = contractRequestDTO.toEntity(savedUser, status, category);
 		Contract savedContract = contractRepository.save(contract);
 
 		customerContractRepository.save(CustomerContract.builder()
@@ -162,8 +163,9 @@ public class ContractServiceImpl implements ContractService {
 		contractRequestDTO.validateDateOrder();
 
 		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
+		PropertyCategory category = validateAndParseCategory(contractRequestDTO.getCategory());
 		contract.modifyContract(
-			PropertyCategory.valueOf(contractRequestDTO.getCategory()),
+			category,
 			contractRequestDTO.getContractDate(),
 			contractRequestDTO.getContractStartDate(),
 			contractRequestDTO.getContractEndDate(),
@@ -193,6 +195,14 @@ public class ContractServiceImpl implements ContractService {
 			return ContractStatus.valueOf(status);
 		} catch (IllegalArgumentException e) {
 			throw new ContractException(ContractErrorCode.CONTRACT_STATUS_NOT_FOUND);
+		}
+	}
+
+	private PropertyCategory validateAndParseCategory(String category) {
+		try {
+			return PropertyCategory.valueOf(category);
+		} catch (IllegalArgumentException e) {
+			throw new ContractException(ContractErrorCode.CONTRACT_CATEGORY_NOT_FOUND);
 		}
 	}
 

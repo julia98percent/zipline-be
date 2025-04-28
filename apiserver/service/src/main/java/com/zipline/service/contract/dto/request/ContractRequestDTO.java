@@ -49,10 +49,10 @@ public class ContractRequestDTO {
 	@Schema(description = "계약 종료 예상일", example = "2026-05-01")
 	private LocalDate expectedContractEndDate;
 
-	public Contract toEntity(User user, ContractStatus status) {
+	public Contract toEntity(User user, ContractStatus status, PropertyCategory category) {
 		return Contract.builder()
 			.user(user)
-			.category(PropertyCategory.valueOf(this.category))
+			.category(category)
 			.contractDate(this.contractDate)
 			.contractStartDate(this.contractStartDate)
 			.contractEndDate(this.contractEndDate)
