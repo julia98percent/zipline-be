@@ -40,7 +40,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         User user = userRepository.findById(userUid)
             .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        Customer customer = findCustomerIsExist(request.getCustomerId());
+        Customer customer = findCustomerIsExist(request.getCustomerUid());
 
 
         Schedule schedule = Schedule.builder()
@@ -55,11 +55,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         scheduleRepository.save(schedule);
     }
 
-    private Customer findCustomerIsExist(Long customerId) {
-        if (customerId == null) {
+    private Customer findCustomerIsExist(Long customerUid) {
+        if (customerUid == null) {
             return null;
         }
-        return customerRepository.findById(customerId)
+        return customerRepository.findById(customerUid)
             .orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
     }
 
