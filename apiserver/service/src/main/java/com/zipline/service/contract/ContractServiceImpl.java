@@ -15,6 +15,7 @@ import com.zipline.entity.contract.ContractDocument;
 import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.enums.ContractStatus;
+import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.user.User;
 import com.zipline.global.config.S3Folder;
 import com.zipline.global.exception.contract.ContractException;
@@ -162,7 +163,7 @@ public class ContractServiceImpl implements ContractService {
 
 		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
 		contract.modifyContract(
-			contractRequestDTO.getCategory(),
+			PropertyCategory.valueOf(contractRequestDTO.getCategory()),
 			contractRequestDTO.getContractDate(),
 			contractRequestDTO.getContractStartDate(),
 			contractRequestDTO.getContractEndDate(),

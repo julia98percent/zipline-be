@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.enums.ContractStatus;
+import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.contract.ContractException;
 import com.zipline.global.exception.contract.errorcode.ContractErrorCode;
@@ -20,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Getter
 public class ContractRequestDTO {
 
-	@Schema(description = "계약 카테고리", example = "월세")
+	@Schema(description = "계약 카테고리", example = "APARTMENT")
 	private String category;
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -51,7 +52,7 @@ public class ContractRequestDTO {
 	public Contract toEntity(User user, ContractStatus status) {
 		return Contract.builder()
 			.user(user)
-			.category(this.category)
+			.category(PropertyCategory.valueOf(this.category))
 			.contractDate(this.contractDate)
 			.contractStartDate(this.contractStartDate)
 			.contractEndDate(this.contractEndDate)

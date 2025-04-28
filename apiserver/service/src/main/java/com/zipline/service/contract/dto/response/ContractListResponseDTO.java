@@ -39,16 +39,18 @@ public class ContractListResponseDTO {
 		private LocalDate contractStartDate;
 		private LocalDate contractEndDate;
 		private ContractStatus status;
+		private String address;
 
 		public ContractListDTO(Contract contract, List<CustomerContract> customerContracts) {
 			this.uid = contract.getUid();
-			this.category = contract.getCategory();
+			this.category = String.valueOf(contract.getCategory());
 			this.contractDate = contract.getContractDate();
 			this.contractStartDate = contract.getContractStartDate();
 			this.contractEndDate = contract.getContractEndDate();
 			this.status = contract.getStatus();
 			this.lessorOrSellerName = customerContracts.get(0).getCustomer().getName();
 			this.lesseeOrBuyerName = findLesseeOrBuyerName(customerContracts);
+			this.address = contract.getAgentProperty() != null ? contract.getAgentProperty().getAddress() : null;
 		}
 
 		private String findLesseeOrBuyerName(List<CustomerContract> customerContracts) {

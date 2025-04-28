@@ -20,6 +20,7 @@ public class ContractResponseDTO {
 	private String lessorOrSellerName;
 	private String lesseeOrBuyerName;
 	private List<DocumentDTO> documents;
+	private String propertyAddress;
 
 	@Getter
 	public static class DocumentDTO {
@@ -36,7 +37,7 @@ public class ContractResponseDTO {
 		List<DocumentDTO> documents) {
 		return ContractResponseDTO.builder()
 			.uid(contract.getUid())
-			.category(contract.getCategory())
+			.category(String.valueOf(contract.getCategory()))
 			.contractStartDate(contract.getContractStartDate())
 			.contractEndDate(contract.getContractEndDate())
 			.expectedContractEndDate(contract.getExpectedContractEndDate())
@@ -44,6 +45,9 @@ public class ContractResponseDTO {
 			.lessorOrSellerName(lessorOrSellerName)
 			.lesseeOrBuyerName(lesseeOrBuyerName)
 			.documents(documents)
+			.propertyAddress(
+				contract.getAgentProperty() != null ? contract.getAgentProperty().getAddress() : null
+			)
 			.build();
 	}
 }

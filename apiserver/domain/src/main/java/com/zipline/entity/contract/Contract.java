@@ -3,11 +3,15 @@ package com.zipline.entity.contract;
 import java.time.LocalDate;
 
 import com.zipline.entity.BaseTimeEntity;
+import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.enums.ContractStatus;
+import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.user.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -36,7 +40,8 @@ public class Contract extends BaseTimeEntity {
 	private User user;
 
 	@Column(name = "category", length = 20)
-	private String category;
+	@Enumerated(EnumType.STRING)
+	private PropertyCategory category;
 
 	@Column(name = "contract_start_date")
 	private LocalDate contractStartDate;
@@ -53,9 +58,14 @@ public class Contract extends BaseTimeEntity {
 	@Column(name = "expected_contract_end_date")
 	private LocalDate expectedContractEndDate;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "agent_property_uid")
+	private AgentProperty agentProperty;
+
 	@Builder
-	private Contract(User user, String category, LocalDate contractStartDate, LocalDate contractDate,
-		LocalDate contractEndDate, ContractStatus status, LocalDate expectedContractEndDate) {
+	private Contract(User user, PropertyCategory category, LocalDate contractStartDate, LocalDate contractDate,
+		LocalDate contractEndDate, ContractStatus status, LocalDate expectedContractEndDate,
+		AgentProperty agentProperty) {
 		this.user = user;
 		this.category = category;
 		this.contractStartDate = contractStartDate;
@@ -63,9 +73,10 @@ public class Contract extends BaseTimeEntity {
 		this.contractEndDate = contractEndDate;
 		this.status = status;
 		this.expectedContractEndDate = expectedContractEndDate;
+		this.agentProperty = agentProperty;
 	}
 
-	public void modifyContract(String category, LocalDate contractDate, LocalDate contractStartDate,
+	public void modifyContract(PropertyCategory category, LocalDate contractDate, LocalDate contractStartDate,
 		LocalDate contractEndDate, LocalDate expectedContractEndDate, ContractStatus status) {
 		this.category = category;
 		this.contractDate = contractDate;
