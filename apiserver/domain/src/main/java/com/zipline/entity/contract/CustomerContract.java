@@ -1,5 +1,6 @@
 package com.zipline.entity.contract;
 
+import com.zipline.entity.BaseTimeEntity;
 import com.zipline.entity.customer.Customer;
 
 import jakarta.persistence.Column;
@@ -20,12 +21,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "customer_contracts")
-public class CustomerContract {
+public class CustomerContract extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "uid", nullable = false)
 	private Long uid;
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "customer_uid", nullable = false)
 	private Customer customer;

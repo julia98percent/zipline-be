@@ -3,6 +3,7 @@ package com.zipline.service.customer;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,7 @@ import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
+import com.zipline.repository.contract.ContractRepository;
 import com.zipline.repository.contract.CustomerContractRepository;
 import com.zipline.repository.counsel.CounselRepository;
 import com.zipline.repository.customer.CustomerRepository;
@@ -54,6 +56,7 @@ public class CustomerServiceImpl implements CustomerService {
 	private final CustomerContractRepository customerContractRepository;
 	private final LabelRepository labelRepository;
 	private final LabelCustomerRepository labelCustomerRepository;
+	private final ContractRepository contractRepository;
 
 	@Transactional
 	public void registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUid) {
@@ -193,10 +196,24 @@ public class CustomerServiceImpl implements CustomerService {
 	@Transactional(readOnly = true)
 	public List<ContractListResponseDTO.ContractListDTO> getCustomerContracts(Long customerUid, Long userUid) {
 		validateCustomerExistence(customerUid, userUid);
-		List<CustomerContract> savedCustomerContract = customerContractRepository.findByCustomerUidAndUserUid(
-			customerUid, userUid);
-		return savedCustomerContract.stream()
-			.map(ContractListResponseDTO.ContractListDTO::new)
+
+		List<CustomerContract> customerContract = customerContractRepository.findByCustomerUidAndUserUid(customerUid,
+			userUid);
+
+		List<Long> contracts = customerContract.stream()
+			.map(cc -> cc.getContract().getUid())
+			.distinct()
+			.toList();
+
+		Map<Long, List<CustomerContract>> contractIdToCustomerContracts = customerContractRepository.findInContractUids(
+				contracts).stream()
+			.collect(Collectors.groupingBy(cc -> cc.getContract().getUid()));
+
+		return contractRepository.findAllById(contracts).stream()
+			.map(contract -> new ContractListResponseDTO.ContractListDTO(
+				contract,
+				contractIdToCustomerContracts.getOrDefault(contract.getUid(), List.of())
+			))
 			.toList();
 	}
 

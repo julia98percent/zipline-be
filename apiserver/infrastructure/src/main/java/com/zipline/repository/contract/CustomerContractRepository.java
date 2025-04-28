@@ -1,13 +1,11 @@
 package com.zipline.repository.contract;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.zipline.entity.contract.Contract;
 import com.zipline.entity.contract.CustomerContract;
 
 @Repository
@@ -15,8 +13,8 @@ public interface CustomerContractRepository extends JpaRepository<CustomerContra
 	@Query("SELECT cc FROM CustomerContract cc Where cc.contract.uid IN :contractIds ORDER BY cc.contract.uid DESC")
 	List<CustomerContract> findInContractUids(List<Long> contractIds);
 
-	Optional<CustomerContract> findByContract(Contract contract);
-
 	@Query("SELECT cc FROM CustomerContract cc WHERE cc.customer.uid = :customerUid AND cc.contract.user.uid =:userUid ORDER BY cc.contract.contractDate DESC")
 	List<CustomerContract> findByCustomerUidAndUserUid(Long customerUid, Long userUid);
+
+	List<CustomerContract> findAllByContractUid(Long contractUid);
 }
