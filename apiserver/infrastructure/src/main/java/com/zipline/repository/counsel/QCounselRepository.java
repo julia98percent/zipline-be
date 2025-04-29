@@ -10,4 +10,5 @@ public interface QCounselRepository {
 	Page<Counsel> findByUserUidAndDeletedAtIsNullWithFiltering(Long userUid, Pageable pageable,
 		CounselFilterRequestDTO filterRequestDTO);
 
+	Page<Counsel> findByUserUidAndDeletedAtIsNullWithSortType(Long userUid, Pageable pageable, String sortType);
 }

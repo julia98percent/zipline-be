@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.util.StringUtils;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -51,6 +52,58 @@ public class QCounselRepositoryImpl implements QCounselRepository {
 			);
 
 		return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
+	}
+
+	@Override
+	public Page<Counsel> findByUserUidAndDeletedAtIsNullWithSortType(Long userUid, Pageable pageable, String sortType) {
+		List<Counsel> results = queryFactory.select(counsel)
+			.from(counsel)
+			.where(isUserUidEqualTo(userUid),
+				isNotDeleted(),
+				filterByDueDateIfNeeded(sortType)
+			)
+			.orderBy(getSortOrder(sortType))
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
+			.fetch();
+
+		JPAQuery<Long> countQuery = queryFactory
+			.select(counsel.count())
+			.from(counsel)
+			.where(
+				isUserUidEqualTo(userUid),
+				isNotDeleted(),
+				filterByDueDateIfNeeded(sortType)
+			);
+
+		return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
+	}
+
+	private OrderSpecifier<?>[] getSortOrder(String sortType) {
+		if ("DUE_DATE".equalsIgnoreCase(sortType)) {
+			return new OrderSpecifier[] {
+				counsel.dueDate.asc().nullsLast(),
+				counsel.createdAt.desc()
+			};
+		}
+		return new OrderSpecifier[] {
+			counsel.counselDate.desc(),
+			counsel.createdAt.desc()
+		};
+	}
+
+	private LocalDate[] getDueDateRange() {
+		LocalDate today = LocalDate.now();
+		LocalDate limit = today.plusDays(14);
+		return new LocalDate[] {today, limit};
+	}
+
+	private BooleanExpression filterByDueDateIfNeeded(String sortType) {
+		if ("DUE_DATE".equalsIgnoreCase(sortType)) {
+			LocalDate[] range = getDueDateRange();
+			return counsel.dueDate.isNotNull().and(counsel.dueDate.between(range[0], range[1]));
+		}
+		return null;
 	}
 
 	private BooleanExpression isUserUidEqualTo(Long userUid) {
