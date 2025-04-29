@@ -20,6 +20,7 @@ public class ContractResponseDTO {
 	private LocalDate contractStartDate;
 	private LocalDate contractEndDate;
 	private LocalDate expectedContractEndDate;
+	private LocalDate contractDate;
 	private String status;
 	private String lessorOrSellerName;
 	private String lesseeOrBuyerName;
@@ -48,6 +49,7 @@ public class ContractResponseDTO {
 			.contractStartDate(contract.getContractStartDate())
 			.contractEndDate(contract.getContractEndDate())
 			.expectedContractEndDate(contract.getExpectedContractEndDate())
+			.contractDate(contract.getContractDate())
 			.status(contract.getStatus().name())
 			.lessorOrSellerName(lessorOrSellerName)
 			.lesseeOrBuyerName(lesseeOrBuyerName)
