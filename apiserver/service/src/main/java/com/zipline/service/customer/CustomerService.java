@@ -2,6 +2,7 @@ package com.zipline.service.customer;
 
 import java.util.List;
 
+import com.zipline.global.request.CustomerFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
 import com.zipline.service.contract.dto.response.ContractListResponseDTO;
@@ -20,7 +21,8 @@ public interface CustomerService {
 
 	void deleteCustomer(Long customerUID, Long userUid);
 
-	CustomerListResponseDTO getCustomers(PageRequestDTO pageRequestDTO, Long userUid);
+	CustomerListResponseDTO getCustomers(PageRequestDTO pageRequestDTO, CustomerFilterRequestDTO filterRequestDTO,
+		Long userUid);
 
 	CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid);
 

@@ -24,6 +24,7 @@ import com.zipline.global.exception.label.LabelException;
 import com.zipline.global.exception.label.errorcode.LabelErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
+import com.zipline.global.request.CustomerFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.contract.ContractRepository;
@@ -32,6 +33,7 @@ import com.zipline.repository.counsel.CounselRepository;
 import com.zipline.repository.customer.CustomerRepository;
 import com.zipline.repository.label.LabelCustomerRepository;
 import com.zipline.repository.label.LabelRepository;
+import com.zipline.repository.region.RegionRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
 import com.zipline.service.contract.dto.response.ContractListResponseDTO;
@@ -57,6 +59,7 @@ public class CustomerServiceImpl implements CustomerService {
 	private final LabelRepository labelRepository;
 	private final LabelCustomerRepository labelCustomerRepository;
 	private final ContractRepository contractRepository;
+	private final RegionRepository regionRepository;
 
 	@Transactional
 	public void registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUid) {
@@ -137,7 +140,10 @@ public class CustomerServiceImpl implements CustomerService {
 
 		List<LabelCustomer> updatedLabelMappings = labelCustomerRepository.findAllByCustomerUid(
 			savedCustomer.getUid());
-		return new CustomerDetailResponseDTO(savedCustomer, updatedLabelMappings);
+
+		String preferredRegion = regionRepository.findWithParentsByDistrictCode(
+			Long.valueOf(savedCustomer.getLegalDistrictCode()));
+		return new CustomerDetailResponseDTO(savedCustomer, preferredRegion, updatedLabelMappings);
 	}
 
 	@Transactional
@@ -149,8 +155,10 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Transactional(readOnly = true)
-	public CustomerListResponseDTO getCustomers(PageRequestDTO pageRequestDTO, Long userUid) {
-		Page<Customer> customerPage = customerRepository.findByUserUidWithLabels(userUid, pageRequestDTO.toPageable());
+	public CustomerListResponseDTO getCustomers(PageRequestDTO pageRequestDTO,
+		CustomerFilterRequestDTO filterRequestDTO, Long userUid) {
+		Page<Customer> customerPage = customerRepository.findByUserUidAndDeletedAtIsNullWithFilters(userUid,
+			filterRequestDTO, pageRequestDTO.toPageable());
 		List<Customer> customers = customerPage.getContent();
 
 		customers.forEach(customer -> customer.getLabelCustomers().size());
@@ -166,9 +174,10 @@ public class CustomerServiceImpl implements CustomerService {
 	public CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid) {
 		Customer savedCustomer = customerRepository.findByUidAndUserUidAndDeletedAtIsNull(customerUid, userUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
-
+		String preferredRegion = regionRepository.findWithParentsByDistrictCode(
+			Long.valueOf(savedCustomer.getLegalDistrictCode()));
 		List<LabelCustomer> labelCustomerList = labelCustomerRepository.findAllByCustomerUid(customerUid);
-		return new CustomerDetailResponseDTO(savedCustomer, labelCustomerList);
+		return new CustomerDetailResponseDTO(savedCustomer, preferredRegion, labelCustomerList);
 	}
 
 	@Transactional(readOnly = true)
