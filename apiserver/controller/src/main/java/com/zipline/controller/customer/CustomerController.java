@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zipline.global.request.CustomerFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
@@ -42,9 +44,10 @@ public class CustomerController {
 	private final CounselService counselService;
 
 	@GetMapping("/customers")
-	public ResponseEntity<ApiResponse<CustomerListResponseDTO>> getCustomers(PageRequestDTO pageRequestDTO,
-		Principal principal) {
-		CustomerListResponseDTO result = customerService.getCustomers(pageRequestDTO,
+	public ResponseEntity<ApiResponse<CustomerListResponseDTO>> getCustomers(
+		@ModelAttribute PageRequestDTO pageRequestDTO,
+		@ModelAttribute CustomerFilterRequestDTO filterRequestDTO, Principal principal) {
+		CustomerListResponseDTO result = customerService.getCustomers(pageRequestDTO, filterRequestDTO,
 			Long.parseLong(principal.getName()));
 		ApiResponse<CustomerListResponseDTO> response = ApiResponse.ok("고객 목록 조회에 성공하였습니다.", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
