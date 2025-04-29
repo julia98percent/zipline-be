@@ -69,14 +69,26 @@ public class PropertyArticleViewSpecification {
     }
 
     /**
-     * 면적 범위로 검색하는 명세
+     * 공급 면적 범위로 검색하는 명세
      */
-    public static Specification<PropertyArticle> exclusiveAreaBetween(Double minArea, Double maxArea) {
+    public static Specification<PropertyArticle> supplyAreaBetween(Double minSupplyArea, Double maxSupplyArea) {
         return (root, query, criteriaBuilder) -> {
-            if (minArea == null && maxArea == null) return null;
-            if (minArea == null) return criteriaBuilder.lessThanOrEqualTo(root.get("exclusiveArea"), maxArea);
-            if (maxArea == null) return criteriaBuilder.greaterThanOrEqualTo(root.get("exclusiveArea"), minArea);
-            return criteriaBuilder.between(root.get("exclusiveArea"), minArea, maxArea);
+            if (minSupplyArea == null && maxSupplyArea == null) return null;
+            if (minSupplyArea == null) return criteriaBuilder.lessThanOrEqualTo(root.get("exclusiveArea"), maxSupplyArea);
+            if (maxSupplyArea == null) return criteriaBuilder.greaterThanOrEqualTo(root.get("exclusiveArea"), minSupplyArea);
+            return criteriaBuilder.between(root.get("supplyArea"), minSupplyArea, maxSupplyArea);
+        };
+    }
+
+    /**
+     * 전용 면적 범위로 검색하는 명세
+     */
+    public static Specification<PropertyArticle> exclusiveAreaBetween(Double minExclusiveArea, Double maxExclusiveArea) {
+        return (root, query, criteriaBuilder) -> {
+            if (minExclusiveArea == null && maxExclusiveArea == null) return null;
+            if (minExclusiveArea== null) return criteriaBuilder.lessThanOrEqualTo(root.get("exclusiveArea"), maxExclusiveArea);
+            if (maxExclusiveArea == null) return criteriaBuilder.greaterThanOrEqualTo(root.get("exclusiveArea"), minExclusiveArea);
+            return criteriaBuilder.between(root.get("exclusiveArea"), minExclusiveArea, maxExclusiveArea);
         };
     }
 
