@@ -14,7 +14,7 @@ public class CustomerDetailResponseDTO {
 	private String name;
 	private String phoneNo;
 	private String telProvider;
-	private String legalDistrictCode;
+	private String preferredRegion;
 	private BigInteger minRent;
 	private BigInteger maxRent;
 	private String trafficSource;
@@ -29,12 +29,12 @@ public class CustomerDetailResponseDTO {
 	private String birthDay;
 	private List<LabelDTO> labels;
 
-	public CustomerDetailResponseDTO(Customer customer, List<LabelCustomer> labelCustomers) {
+	public CustomerDetailResponseDTO(Customer customer, String preferredRegion, List<LabelCustomer> labelCustomers) {
 		this.uid = customer.getUid();
 		this.name = customer.getName();
 		this.phoneNo = customer.getPhoneNo();
 		this.telProvider = customer.getTelProvider();
-		this.legalDistrictCode = customer.getLegalDistrictCode();
+		this.preferredRegion = preferredRegion;
 		this.minRent = customer.getMinRent();
 		this.maxRent = customer.getMaxRent();
 		this.trafficSource = customer.getTrafficSource();
