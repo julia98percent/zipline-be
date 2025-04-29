@@ -110,6 +110,10 @@ public class AgentPropertyRequestDTO {
 	@Schema(description = "기타 상세 사항", example = "풀옵션, 관리비 별도")
 	private String details;
 
+	@NotNull(message = "계약 생성 여부를 선택해주세요.")
+	@Schema(description = "계약 자동 생성 여부", example = "true", required = true)
+	private Boolean createContract;
+
 	public AgentProperty toEntity(User user, Customer customer) {
 		return AgentProperty.builder()
 			.user(user)

@@ -11,13 +11,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.contract.ContractDocument;
 import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.enums.ContractStatus;
+import com.zipline.entity.enums.PropertyType;
 import com.zipline.entity.user.User;
 import com.zipline.global.config.S3Folder;
+import com.zipline.global.exception.agentProperty.PropertyException;
+import com.zipline.global.exception.agentProperty.errorcode.PropertyErrorCode;
 import com.zipline.global.exception.contract.ContractException;
 import com.zipline.global.exception.contract.errorcode.ContractErrorCode;
 import com.zipline.global.exception.customer.CustomerException;
@@ -26,6 +30,7 @@ import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.util.S3FileUploader;
+import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.contract.ContractDocumentRepository;
 import com.zipline.repository.contract.ContractRepository;
 import com.zipline.repository.contract.CustomerContractRepository;
@@ -47,6 +52,7 @@ public class ContractServiceImpl implements ContractService {
 	private final ContractRepository contractRepository;
 	private final ContractDocumentRepository contractDocumentRepository;
 	private final CustomerContractRepository customerContractRepository;
+	private final AgentPropertyRepository agentPropertyRepository;
 	private final S3FileUploader s3FileUploader;
 	private final ContractHistoryService contractHistoryService;
 
@@ -89,8 +95,14 @@ public class ContractServiceImpl implements ContractService {
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
+		PropertyType category = validateAndParseCategory(contractRequestDTO.getCategory());
 		contractRequestDTO.validateDateOrder();
-		Contract contract = contractRequestDTO.toEntity(savedUser, status);
+		contractRequestDTO.validateProperty();
+		AgentProperty agentProperty = agentPropertyRepository.findByUidAndUserUidAndDeletedAtIsNull(
+				contractRequestDTO.getPropertyUid(), userUid)
+			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
+
+		Contract contract = contractRequestDTO.toEntity(savedUser, agentProperty, status, category);
 		Contract savedContract = contractRepository.save(contract);
 
 		customerContractRepository.save(CustomerContract.builder()
@@ -175,10 +187,20 @@ public class ContractServiceImpl implements ContractService {
 			.orElseThrow(() -> new ContractException(ContractErrorCode.CONTRACT_NOT_FOUND));
 
 		contractRequestDTO.validateDateOrder();
+		contractRequestDTO.validateProperty();
+		AgentProperty agentProperty = agentPropertyRepository.findByUidAndUserUidAndDeletedAtIsNull(
+				contractRequestDTO.getPropertyUid(), userUid)
+			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
+
+		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
+		PropertyType category = validateAndParseCategory(String.valueOf(contractRequestDTO.getCategory()));
 		ContractStatus prevStatus = contract.getStatus();
 		ContractStatus newStatus = validateAndParseStatus(contractRequestDTO.getStatus());
 		contract.modifyContract(
-			contractRequestDTO.getCategory(),
+			category,
+			contractRequestDTO.getDeposit(),
+			contractRequestDTO.getMonthlyRent(),
+			contractRequestDTO.getPrice(),
 			contractRequestDTO.getContractDate(),
 			contractRequestDTO.getContractStartDate(),
 			contractRequestDTO.getContractEndDate(),
@@ -212,6 +234,14 @@ public class ContractServiceImpl implements ContractService {
 			return ContractStatus.valueOf(status);
 		} catch (IllegalArgumentException e) {
 			throw new ContractException(ContractErrorCode.CONTRACT_STATUS_NOT_FOUND);
+		}
+	}
+
+	private PropertyType validateAndParseCategory(String category) {
+		try {
+			return PropertyType.valueOf(category);
+		} catch (IllegalArgumentException e) {
+			throw new ContractException(ContractErrorCode.CONTRACT_CATEGORY_NOT_FOUND);
 		}
 	}
 
