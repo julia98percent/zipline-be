@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,8 @@ import com.zipline.global.exception.customer.CustomerException;
 import com.zipline.global.exception.customer.errorcode.CustomerErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
+import com.zipline.global.request.CounselFilterRequestDTO;
+import com.zipline.global.request.PageRequestDTO;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.counsel.CounselDetailRepository;
 import com.zipline.repository.counsel.CounselRepository;
@@ -30,6 +33,8 @@ import com.zipline.repository.customer.CustomerRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.counsel.dto.request.CounselCreateRequestDTO;
 import com.zipline.service.counsel.dto.request.CounselModifyRequestDTO;
+import com.zipline.service.counsel.dto.response.CounselListResponseDTO;
+import com.zipline.service.counsel.dto.response.CounselPageResponseDTO;
 import com.zipline.service.counsel.dto.response.CounselResponseDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -61,7 +66,7 @@ public class CounselServiceImpl implements CounselService {
 
 		Counsel counsel = new Counsel(requestDTO.getTitle(), requestDTO.getCounselDate(),
 			CounselType.from(requestDTO.getType()),
-			requestDTO.getDueDate(), savedUser, savedCustomer, savedProperty);
+			requestDTO.getDueDate(), savedUser, savedCustomer, savedProperty, false);
 
 		for (CounselCreateRequestDTO.CounselDetailDTO counselDetailDTO : requestDTO.getCounselDetails()) {
 			counsel.addDetail(new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), counsel));
@@ -92,7 +97,7 @@ public class CounselServiceImpl implements CounselService {
 
 		LocalDateTime deletedAt = LocalDateTime.now();
 		savedCounsel.update(requestDTO.getTitle(), requestDTO.getCounselDate(), CounselType.from(requestDTO.getType()),
-			requestDTO.getDueDate());
+			requestDTO.getDueDate(), requestDTO.isCompleted());
 		savedCounselDetails.forEach(detail -> detail.delete(deletedAt));
 
 		List<CounselDetail> counselDetails = new ArrayList<>();
@@ -115,5 +120,17 @@ public class CounselServiceImpl implements CounselService {
 		LocalDateTime deletedAt = LocalDateTime.now();
 		savedCounsel.delete(deletedAt);
 		savedCounselDetails.forEach(counselDetail -> counselDetail.delete(deletedAt));
+	}
+
+	@Transactional(readOnly = true)
+	public CounselPageResponseDTO getCounsels(PageRequestDTO pageRequestDTO,
+		CounselFilterRequestDTO filterRequestDTO, Long userUid) {
+		Page<Counsel> savedCounsels = counselRepository.findByUserUidAndDeletedAtIsNullWithFiltering(
+			userUid,
+			pageRequestDTO.toPageable(), filterRequestDTO);
+		List<CounselListResponseDTO> data = savedCounsels.getContent().stream().map(
+			CounselListResponseDTO::createWithCustomerName).toList();
+		CounselPageResponseDTO result = new CounselPageResponseDTO(savedCounsels, data);
+		return result;
 	}
 }
