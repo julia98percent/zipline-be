@@ -22,9 +22,10 @@ public class CounselListResponseDTO {
 	private LocalDateTime counselDate;
 	private LocalDate dueDate;
 	private Long propertyUid;
+	private boolean completed;
 
 	private CounselListResponseDTO(Long counselUid, String title, String type, String customerName,
-		LocalDateTime counselDate, LocalDate dueDate, AgentProperty agentProperty) {
+		LocalDateTime counselDate, LocalDate dueDate, AgentProperty agentProperty, boolean completed) {
 		this.counselUid = counselUid;
 		this.title = title;
 		this.type = type;
@@ -32,16 +33,17 @@ public class CounselListResponseDTO {
 		this.counselDate = counselDate;
 		this.dueDate = dueDate;
 		this.propertyUid = agentProperty != null ? agentProperty.getUid() : null;
+		this.completed = completed;
 	}
 
 	public static CounselListResponseDTO createWithoutCustomerName(Counsel counsel) {
 		return new CounselListResponseDTO(counsel.getUid(), counsel.getTitle(), counsel.getType().getDescription(),
-			null, counsel.getCounselDate(), counsel.getDueDate(), counsel.getAgentProperty());
+			null, counsel.getCounselDate(), counsel.getDueDate(), counsel.getAgentProperty(), counsel.isCompleted());
 	}
 
 	public static CounselListResponseDTO createWithCustomerName(Counsel counsel) {
 		return new CounselListResponseDTO(counsel.getUid(), counsel.getTitle(), counsel.getType().getDescription(),
 			counsel.getCustomer().getName(), counsel.getCounselDate(), counsel.getDueDate(),
-			counsel.getAgentProperty());
+			counsel.getAgentProperty(), counsel.isCompleted());
 	}
 }

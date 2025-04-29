@@ -12,8 +12,10 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Tag(name = "상담 생성 요청", description = "상담을 생성하기 위한 요청 DTO")
+@NoArgsConstructor
 @Getter
 public class CounselCreateRequestDTO {
 

@@ -12,7 +12,9 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 @Tag(name = "상담 수정 요청", description = "상담을 생성하기 위한 요청 DTO")
 @Getter
 public class CounselModifyRequestDTO {
@@ -37,6 +39,9 @@ public class CounselModifyRequestDTO {
 
 	@Schema(description = "의뢰 기한", example = "2025-02-01")
 	private LocalDate dueDate;
+
+	@Schema(description = "의뢰 완료 여부", example = "true")
+	private boolean completed;
 
 	@Schema(description = "상담 문항 정보")
 	@Getter

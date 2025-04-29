@@ -18,6 +18,7 @@ public class CounselResponseDTO {
 	private LocalDateTime counselDate;
 	private LocalDate dueDate;
 	private Long propertyUid;
+	private boolean completed;
 	private List<CounselDetailResponseDTO> counselDetails;
 
 	public CounselResponseDTO(Counsel counsel, List<CounselDetail> counselDetails) {
@@ -27,6 +28,7 @@ public class CounselResponseDTO {
 		this.counselDate = counsel.getCounselDate();
 		this.dueDate = counsel.getDueDate();
 		this.propertyUid = (counsel.getAgentProperty() != null) ? counsel.getAgentProperty().getUid() : null;
+		this.completed = counsel.isCompleted();
 		this.counselDetails = counselDetails
 			.stream()
 			.map(CounselDetailResponseDTO::new)

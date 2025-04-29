@@ -2,8 +2,11 @@ package com.zipline.service.counsel;
 
 import java.util.Map;
 
+import com.zipline.global.request.CounselFilterRequestDTO;
+import com.zipline.global.request.PageRequestDTO;
 import com.zipline.service.counsel.dto.request.CounselCreateRequestDTO;
 import com.zipline.service.counsel.dto.request.CounselModifyRequestDTO;
+import com.zipline.service.counsel.dto.response.CounselPageResponseDTO;
 import com.zipline.service.counsel.dto.response.CounselResponseDTO;
 
 public interface CounselService {
@@ -15,4 +18,7 @@ public interface CounselService {
 	Map<String, Long> modifyCounsel(Long counselUid, CounselModifyRequestDTO requestDTO, Long userUid);
 
 	void deleteCounsel(Long counselUid, Long userUid);
+
+	CounselPageResponseDTO getCounsels(PageRequestDTO pageRequestDTO, CounselFilterRequestDTO filterRequestDTO,
+		Long userUid);
 }
