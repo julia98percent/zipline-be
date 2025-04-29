@@ -1,6 +1,5 @@
 package com.zipline.service.agentProperty;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -71,7 +70,6 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 		if (Boolean.TRUE.equals(agentPropertyRequestDTO.getCreateContract())) {
 			Contract contract = Contract.builder()
 				.user(loggedInUser)
-				.contractDate(LocalDate.now())
 				.status(ContractStatus.LISTED)
 				.agentProperty(agentProperty)
 				.build();
