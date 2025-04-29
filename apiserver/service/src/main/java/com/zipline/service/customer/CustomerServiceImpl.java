@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.contract.CustomerContract;
@@ -174,8 +175,12 @@ public class CustomerServiceImpl implements CustomerService {
 	public CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid) {
 		Customer savedCustomer = customerRepository.findByUidAndUserUidAndDeletedAtIsNull(customerUid, userUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
-		String preferredRegion = regionRepository.findWithParentsByDistrictCode(
-			Long.valueOf(savedCustomer.getLegalDistrictCode()));
+		String preferredRegion = null;
+		if (StringUtils.hasText(savedCustomer.getLegalDistrictCode())) {
+			preferredRegion = regionRepository.findWithParentsByDistrictCode(
+				Long.valueOf(savedCustomer.getLegalDistrictCode()));
+		}
+
 		List<LabelCustomer> labelCustomerList = labelCustomerRepository.findAllByCustomerUid(customerUid);
 		return new CustomerDetailResponseDTO(savedCustomer, preferredRegion, labelCustomerList);
 	}
