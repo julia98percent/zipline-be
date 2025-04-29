@@ -53,7 +53,7 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<MessageTemplateResponseDTO> getMessageTemplateList(Long userUid) {
-		List<MessageTemplate> messageTemplateList = messageTemplateRepository.findByUserUid(userUid);
+		List<MessageTemplate> messageTemplateList = messageTemplateRepository.findByUserUidAndDeletedAtIsNull(userUid);
 		return messageTemplateList.stream()
 				.map(MessageTemplateResponseDTO::new)
 				.toList();
