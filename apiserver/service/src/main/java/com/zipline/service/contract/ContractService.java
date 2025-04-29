@@ -18,6 +18,8 @@ public interface ContractService {
 
 	ContractListResponseDTO getContractList(PageRequestDTO pageRequestDTO, Long userUid);
 
+	void deleteContract(Long contractUid, Long userUid);
+
 	ContractResponseDTO modifyContract(ContractRequestDTO contractRequestDTO, Long contractUid,
 		List<MultipartFile> files, Long userUid);
 }

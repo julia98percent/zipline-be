@@ -1,5 +1,6 @@
 package com.zipline.service.contract;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,6 +54,7 @@ public class ContractServiceImpl implements ContractService {
 	private final CustomerContractRepository customerContractRepository;
 	private final AgentPropertyRepository agentPropertyRepository;
 	private final S3FileUploader s3FileUploader;
+	private final ContractHistoryService contractHistoryService;
 
 	@Transactional(readOnly = true)
 	public ContractResponseDTO getContract(Long contractUid, Long userUid) {
@@ -138,6 +140,20 @@ public class ContractServiceImpl implements ContractService {
 		return ContractResponseDTO.of(savedContract, lessorOrSeller.getName(), lesseeOrBuyerName, documentDTO);
 	}
 
+	@Transactional
+	public void deleteContract(Long contractUid, Long userUid) {
+		Contract contract = contractRepository.findByUidAndUserUidAndDeletedAtIsNull(contractUid, userUid)
+			.orElseThrow(() -> new ContractException(ContractErrorCode.CONTRACT_NOT_FOUND));
+
+		contract.delete(LocalDateTime.now());
+
+		List<CustomerContract> customerContracts = customerContractRepository.findAllByContractUid(contractUid);
+		customerContracts.forEach(cc -> cc.delete(LocalDateTime.now()));
+
+		List<ContractDocument> documents = contractDocumentRepository.findAllByContractUid(contractUid);
+		documents.forEach(doc -> doc.delete(LocalDateTime.now()));
+	}
+
 	@Transactional(readOnly = true)
 	public ContractListResponseDTO getContractList(PageRequestDTO pageRequestDTO, Long userUid) {
 		Page<Contract> contractPage = contractRepository.findByUserUidAndDeletedAtIsNull(userUid,
@@ -178,6 +194,8 @@ public class ContractServiceImpl implements ContractService {
 
 		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
 		PropertyType category = validateAndParseCategory(String.valueOf(contractRequestDTO.getCategory()));
+		ContractStatus prevStatus = contract.getStatus();
+		ContractStatus newStatus = validateAndParseStatus(contractRequestDTO.getStatus());
 		contract.modifyContract(
 			category,
 			contractRequestDTO.getDeposit(),
@@ -187,8 +205,12 @@ public class ContractServiceImpl implements ContractService {
 			contractRequestDTO.getContractStartDate(),
 			contractRequestDTO.getContractEndDate(),
 			contractRequestDTO.getExpectedContractEndDate(),
-			status
+			newStatus
 		);
+
+		if (!prevStatus.equals(newStatus)) {
+			contractHistoryService.addContractHistory(contract, prevStatus, newStatus);
+		}
 
 		List<CustomerContract> customerContracts = customerContractRepository.findAllByContractUid(contractUid);
 		if (customerContracts.isEmpty()) {
