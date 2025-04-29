@@ -25,37 +25,37 @@ public class StaticsController {
 
   @GetMapping("/recent-contracts")
   @Operation(summary = "최근 계약 건수 조회", description = "최근 30일 이내 생성된 계약 건수를 조회합니다.")
-  public ResponseEntity<ApiResponse<Long>> getRecentContractCount(Principal principal) {
+  public ResponseEntity<ApiResponse<Integer>> getRecentContractCount(Principal principal) {
     long userId = Long.parseLong(principal.getName());
-    long count = staticsService.getRecentContractCount(userId);
-    ApiResponse<Long> response = ApiResponse.ok("Successfully retrieved recent contract count.", count);
+    int count = staticsService.getRecentContractCount(userId);
+    ApiResponse<Integer> response = ApiResponse.ok("Successfully retrieved recent contract count.", count);
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 
   @GetMapping("/ongoing-contracts")
   @Operation(summary = "진행 중인 계약 건수 조회", description = "진행 중인 계약 건수를 조회합니다.")
-  public ResponseEntity<ApiResponse<Long>> getOngoingContractCount(Principal principal) {
+  public ResponseEntity<ApiResponse<Integer>> getOngoingContractCount(Principal principal) {
     long userId = Long.parseLong(principal.getName());
-    long count = staticsService.getOngoingContractCount(userId);
-    ApiResponse<Long> response = ApiResponse.ok("Successfully retrieved ongoing contract count.", count);
+    int count = staticsService.getOngoingContractCount(userId);
+    ApiResponse<Integer> response = ApiResponse.ok("Successfully retrieved ongoing contract count.", count);
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 
   @GetMapping("/completed-contracts")
   @Operation(summary = "완료된 계약 건수 조회", description = "완료된 계약 건수를 조회합니다.")
-  public ResponseEntity<ApiResponse<Long>> getCompletedContractCount(Principal principal) {
+  public ResponseEntity<ApiResponse<Integer>> getCompletedContractCount(Principal principal) {
     long userId = Long.parseLong(principal.getName());
-    long count = staticsService.getCompletedContractCount(userId);
-    ApiResponse<Long> response = ApiResponse.ok("Successfully retrieved completed contract count.", count);
+    int count = staticsService.getCompletedContractCount(userId);
+    ApiResponse<Integer> response = ApiResponse.ok("Successfully retrieved completed contract count.", count);
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 
   @GetMapping("/recent-customers")
   @Operation(summary = "최근 고객 수 조회", description = "최근 30일 이내 확보한 고객 수를 조회합니다.")
-  public ResponseEntity<ApiResponse<Long>> getRecentCustomerCount(Principal principal) {
+  public ResponseEntity<ApiResponse<Integer>> getRecentCustomerCount(Principal principal) {
     long userId = Long.parseLong(principal.getName());
-    long count = staticsService.getRecentCustomerCount(userId);
-    ApiResponse<Long> response = ApiResponse.ok("Successfully retrieved recent customer count.", count);
+    int count = staticsService.getRecentCustomerCount(userId);
+    ApiResponse<Integer> response = ApiResponse.ok("Successfully retrieved recent customer count.", count);
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 }
