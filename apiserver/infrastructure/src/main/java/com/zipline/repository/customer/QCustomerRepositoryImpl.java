@@ -29,6 +29,7 @@ public class QCustomerRepositoryImpl implements QCustomerRepository {
 		List<Customer> result = queryFactory
 			.selectFrom(customer)
 			.where(
+				userUidEq(userUid),
 				notDeleted(),
 				searchNameOrPhoneNo(customerFilterRequestDTO.getSearch()),
 				regionCode(customerFilterRequestDTO.getRegionCode()),
@@ -53,6 +54,7 @@ public class QCustomerRepositoryImpl implements QCustomerRepository {
 			.select(customer.count())
 			.from(customer)
 			.where(
+				userUidEq(userUid),
 				notDeleted(),
 				searchNameOrPhoneNo(customerFilterRequestDTO.getSearch()),
 				regionCode(customerFilterRequestDTO.getRegionCode()),
@@ -70,6 +72,12 @@ public class QCustomerRepositoryImpl implements QCustomerRepository {
 			);
 
 		return PageableExecutionUtils.getPage(result, pageable, totalCount::fetchOne);
+	}
+
+	private BooleanExpression userUidEq(Long userUid) {
+		if (userUid != null)
+			return customer.user.uid.eq(userUid);
+		return null;
 	}
 
 	private BooleanExpression notDeleted() {
