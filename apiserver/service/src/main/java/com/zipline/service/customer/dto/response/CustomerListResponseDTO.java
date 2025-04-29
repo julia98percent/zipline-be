@@ -37,6 +37,8 @@ public class CustomerListResponseDTO {
 		private boolean isBuyer;
 		private boolean isSeller;
 		private List<LabelDTO> labels;
+		private String legalDistrictCode;
+		private String birthday;
 
 		public CustomerResponseDTO(Customer customer) {
 			this.uid = customer.getUid();
@@ -51,6 +53,8 @@ public class CustomerListResponseDTO {
 				.stream()
 				.map(lc -> new LabelDTO(lc.getLabel().getUid(), lc.getLabel().getName()))
 				.toList() : List.of();
+			this.legalDistrictCode = customer.getLegalDistrictCode();
+			this.birthday = customer.getBirthday();
 		}
 
 		@Getter
