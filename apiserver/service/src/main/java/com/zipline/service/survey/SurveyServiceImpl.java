@@ -104,17 +104,17 @@ public class SurveyServiceImpl implements SurveyService {
 	}
 
 	@Transactional(readOnly = true)
-	public SurveyResponseDTO getSurvey(Long surveyUid) {
-		Survey savedSurvey = surveyRepository.findByUidAndDeletedAtIsNull(surveyUid)
+	public SurveyResponseDTO getSurvey(String surveyUlid) {
+		Survey savedSurvey = surveyRepository.findByUlidAndDeleteAtIsNull(surveyUlid)
 			.orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
 		List<Question> questions = questionRepository.findAllBySurveyUidWithChoices(savedSurvey.getUid());
 		return SurveyResponseDTO.from(savedSurvey, questions);
 	}
 
 	@Transactional
-	public void submitSurvey(Long surveyUid, List<SurveySubmitRequestDTO> requestDTOList,
+	public void submitSurvey(String surveyUlid, List<SurveySubmitRequestDTO> requestDTOList,
 		List<MultipartFile> files) {
-		Survey savedSurvey = surveyRepository.findByUidAndDeletedAtIsNull(surveyUid)
+		Survey savedSurvey = surveyRepository.findByUlidAndDeleteAtIsNull(surveyUlid)
 			.orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
 
 		SurveyResponse surveyResponse = new SurveyResponse(savedSurvey, null, LocalDateTime.now());

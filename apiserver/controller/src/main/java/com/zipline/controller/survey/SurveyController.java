@@ -52,9 +52,9 @@ public class SurveyController {
 	}
 
 	@Operation(summary = "설문 조회", description = "공인중개사가 생성한 설문을 조회합니다.")
-	@GetMapping("/surveys/{surveyUid}")
-	public ResponseEntity<ApiResponse<SurveyResponseDTO>> getSurvey(@PathVariable Long surveyUid) {
-		SurveyResponseDTO result = surveyService.getSurvey(surveyUid);
+	@GetMapping("/surveys/{surveyUlid}")
+	public ResponseEntity<ApiResponse<SurveyResponseDTO>> getSurvey(@PathVariable String surveyUlid) {
+		SurveyResponseDTO result = surveyService.getSurvey(surveyUlid);
 		ApiResponse<SurveyResponseDTO> response = ApiResponse.ok("설문 조회 성공", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
@@ -80,12 +80,12 @@ public class SurveyController {
 	}
 
 	@Operation(summary = "설문 제출", description = "고객이 설문을 제출합니다.")
-	@PostMapping(value = "/surveys/{surveyUid}/submit", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,
+	@PostMapping(value = "/surveys/{surveyUlid}/submit", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE,
 		MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<ApiResponse<Void>> submitSurvey(@PathVariable Long surveyUid,
+	public ResponseEntity<ApiResponse<Void>> submitSurvey(@PathVariable String surveyUlid,
 		@RequestPart(name = "requestDTO") List<SurveySubmitRequestDTO> requestDTO,
 		@RequestPart(name = "files", required = false) List<MultipartFile> files) {
-		surveyService.submitSurvey(surveyUid, requestDTO, files);
+		surveyService.submitSurvey(surveyUlid, requestDTO, files);
 		ApiResponse<Void> response = ApiResponse.create("설문 제출에 성공하였습니다.");
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}

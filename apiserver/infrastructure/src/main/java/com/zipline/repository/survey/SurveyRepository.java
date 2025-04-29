@@ -12,13 +12,13 @@ import com.zipline.entity.user.User;
 
 @Repository
 public interface SurveyRepository extends JpaRepository<Survey, Long> {
-	@Query("SELECT s FROM Survey s WHERE s.uid = :surveyUid AND s.deletedAt IS NULL")
-	Optional<Survey> findByUidAndDeletedAtIsNull(Long surveyUid);
+	@Query("SELECT s FROM Survey s WHERE s.ulid = :surveyUlid AND s.deletedAt IS NULL")
+	Optional<Survey> findByUlidAndDeleteAtIsNull(String surveyUlid);
 
 	@Query("SELECT s FROM Survey s WHERE s.user.uid = :userUid AND s.deletedAt IS NULL")
 	Optional<Survey> findByUserUidAndDeletedAtIsNull(Long userUid);
 
 	Optional<Survey> findFirstByUserOrderByCreatedAtDesc(User user);
 
-    int countByUserUidAndCreatedAtAfter(Long userId, LocalDateTime oneMonthAgo);
+	int countByUserUidAndCreatedAtAfter(Long userId, LocalDateTime oneMonthAgo);
 }
