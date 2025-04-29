@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zipline.global.request.CounselFilterRequestDTO;
@@ -46,6 +47,16 @@ public class CounselController {
 		@ModelAttribute PageRequestDTO pageRequestDTO,
 		@ModelAttribute CounselFilterRequestDTO filterRequestDTO, Principal principal) {
 		CounselPageResponseDTO result = counselService.getCounsels(pageRequestDTO, filterRequestDTO,
+			Long.parseLong(principal.getName()));
+		ApiResponse<CounselPageResponseDTO> response = ApiResponse.ok("상담 목록 조회 성공", result);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@GetMapping("/dashboard/counsels")
+	public ResponseEntity<ApiResponse<CounselPageResponseDTO>> getDashboardCounsels(
+		@ModelAttribute PageRequestDTO pageRequestDTO,
+		@RequestParam(defaultValue = "DUE_DATE") String sortType, Principal principal) {
+		CounselPageResponseDTO result = counselService.getDashBoardCounsels(pageRequestDTO, sortType,
 			Long.parseLong(principal.getName()));
 		ApiResponse<CounselPageResponseDTO> response = ApiResponse.ok("상담 목록 조회 성공", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
