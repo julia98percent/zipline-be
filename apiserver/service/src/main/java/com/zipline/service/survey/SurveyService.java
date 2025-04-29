@@ -19,9 +19,9 @@ public interface SurveyService {
 
 	void createDefaultSurveyForUser(User user);
 
-	SurveyResponseDTO getSurvey(Long surveyUid);
+	SurveyResponseDTO getSurvey(String surveyUid);
 
-	void submitSurvey(Long surveyUid, List<SurveySubmitRequestDTO> requestDTOList, List<MultipartFile> files);
+	void submitSurvey(String surveyUid, List<SurveySubmitRequestDTO> requestDTOList, List<MultipartFile> files);
 
 	SurveyResponseListDTO getSurveyResponses(PageRequestDTO pageRequestDTO, Long userUid);
 

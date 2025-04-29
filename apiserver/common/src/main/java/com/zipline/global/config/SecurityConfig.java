@@ -63,8 +63,8 @@ public class SecurityConfig {
 					"/api/v1/users/reissue", "/api/v1/users/find-id", "/api/v1/users/find-password",
 					"/api/v1/users/reset-password")
 				.permitAll()
-				.requestMatchers(new RegexRequestMatcher("/api/surveys/\\d+$", "GET"),
-					new RegexRequestMatcher("/api/surveys/\\d+/submit$", "POST"))
+				.requestMatchers(new RegexRequestMatcher("/api/v1/surveys/[A-Za-z0-9]+$", "GET"),
+					new RegexRequestMatcher("/api/v1/surveys/[A-Za-z0-9]{26}/submit$$", "POST"))
 				.permitAll()
 				.requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs",
 					"/api-docs/**",
