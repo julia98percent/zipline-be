@@ -20,8 +20,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.zipline.global.request.ContractFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.response.ApiResponse;
+import com.zipline.service.contract.ContractHistoryService;
 import com.zipline.service.contract.ContractService;
 import com.zipline.service.contract.dto.request.ContractRequestDTO;
+import com.zipline.service.contract.dto.response.ContractHistoryResponseDTO;
 import com.zipline.service.contract.dto.response.ContractListResponseDTO;
 import com.zipline.service.contract.dto.response.ContractResponseDTO;
 
@@ -35,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 public class ContractController {
 
 	private final ContractService contractService;
+	private final ContractHistoryService contractHistoryService;
 
 	@GetMapping("/{contractUid}")
 	public ResponseEntity<ApiResponse<ContractResponseDTO>> getContract(@PathVariable Long contractUid,
@@ -88,4 +91,13 @@ public class ContractController {
 
 		return ResponseEntity.ok(ApiResponse.ok("계약 목록 조회 성공", response));
 	}
+
+	@GetMapping("/{contractUid}/histories")
+	public ResponseEntity<ApiResponse<List<ContractHistoryResponseDTO>>> getContractHistories(
+		@PathVariable Long contractUid) {
+		List<ContractHistoryResponseDTO> histories = contractHistoryService.getHistoriesByContractUid(contractUid);
+		ApiResponse<List<ContractHistoryResponseDTO>> response = ApiResponse.ok("계약 히스토리 조회 성공", histories);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
 }

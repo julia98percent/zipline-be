@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.zipline.entity.agentProperty.AgentProperty;
+import com.zipline.entity.contract.Contract;
+import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.customer.Customer;
+import com.zipline.entity.enums.ContractStatus;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.agentProperty.PropertyException;
 import com.zipline.global.exception.agentProperty.errorcode.PropertyErrorCode;
@@ -20,6 +23,8 @@ import com.zipline.global.request.AgentPropertyFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.repository.agentProperty.AgentPropertyQueryRepository;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
+import com.zipline.repository.contract.ContractRepository;
+import com.zipline.repository.contract.CustomerContractRepository;
 import com.zipline.repository.customer.CustomerRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.agentProperty.dto.request.AgentPropertyRequestDTO;
@@ -36,6 +41,8 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 	private final AgentPropertyRepository agentPropertyRepository;
 	private final UserRepository userRepository;
 	private final CustomerRepository customerRepository;
+	private final ContractRepository contractRepository;
+	private final CustomerContractRepository customerContractRepository;
 	private final AgentPropertyQueryRepository agentPropertyQueryRepository;
 
 	@Transactional(readOnly = true)
@@ -59,6 +66,20 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 		AgentProperty agentProperty = agentPropertyRequestDTO.toEntity(loggedInUser, customer);
 
 		AgentProperty save = agentPropertyRepository.save(agentProperty);
+
+		if (Boolean.TRUE.equals(agentPropertyRequestDTO.getCreateContract())) {
+			Contract contract = Contract.builder()
+				.user(loggedInUser)
+				.status(ContractStatus.LISTED)
+				.agentProperty(agentProperty)
+				.build();
+			CustomerContract customerContract = CustomerContract.builder()
+				.customer(save.getCustomer())
+				.contract(contract)
+				.build();
+			contractRepository.save(contract);
+			customerContractRepository.save(customerContract);
+		}
 		return AgentPropertyResponseDTO.of(save);
 	}
 
