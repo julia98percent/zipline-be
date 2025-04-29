@@ -21,4 +21,6 @@ public interface CounselService {
 
 	CounselPageResponseDTO getCounsels(PageRequestDTO pageRequestDTO, CounselFilterRequestDTO filterRequestDTO,
 		Long userUid);
+
+	CounselPageResponseDTO getDashBoardCounsels(PageRequestDTO pageRequestDTO, String sortType, Long userUid);
 }

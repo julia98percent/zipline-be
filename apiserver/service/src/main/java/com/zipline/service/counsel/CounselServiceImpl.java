@@ -133,4 +133,17 @@ public class CounselServiceImpl implements CounselService {
 		CounselPageResponseDTO result = new CounselPageResponseDTO(savedCounsels, data);
 		return result;
 	}
+
+	@Override
+	public CounselPageResponseDTO getDashBoardCounsels(PageRequestDTO pageRequestDTO, String sortType, Long userUid) {
+		Page<Counsel> savedCounsels = counselRepository.findByUserUidAndDeletedAtIsNullWithSortType(
+			userUid, pageRequestDTO.toPageable(), sortType);
+
+		List<CounselListResponseDTO> data = savedCounsels.getContent()
+			.stream()
+			.map(CounselListResponseDTO::createWithCustomerName)
+			.toList();
+		CounselPageResponseDTO result = new CounselPageResponseDTO(savedCounsels, data);
+		return result;
+	}
 }
