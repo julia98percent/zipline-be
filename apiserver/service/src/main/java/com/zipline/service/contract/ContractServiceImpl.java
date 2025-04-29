@@ -90,7 +90,12 @@ public class ContractServiceImpl implements ContractService {
 		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
 		PropertyCategory category = validateAndParseCategory(contractRequestDTO.getCategory());
 		contractRequestDTO.validateDateOrder();
-		Contract contract = contractRequestDTO.toEntity(savedUser, status, category);
+		contractRequestDTO.validateProperty();
+		AgentProperty agentProperty = agentPropertyRepository.findByUidAndUserUidAndDeletedAtIsNull(
+				contractRequestDTO.getPropertyUid(), userUid)
+			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
+
+		Contract contract = contractRequestDTO.toEntity(savedUser, agentProperty, status, category);
 		Contract savedContract = contractRepository.save(contract);
 
 		customerContractRepository.save(CustomerContract.builder()
@@ -161,6 +166,10 @@ public class ContractServiceImpl implements ContractService {
 			.orElseThrow(() -> new ContractException(ContractErrorCode.CONTRACT_NOT_FOUND));
 
 		contractRequestDTO.validateDateOrder();
+		contractRequestDTO.validateProperty();
+		AgentProperty agentProperty = agentPropertyRepository.findByUidAndUserUidAndDeletedAtIsNull(
+				contractRequestDTO.getPropertyUid(), userUid)
+			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
 
 		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
 		PropertyCategory category = validateAndParseCategory(contractRequestDTO.getCategory());

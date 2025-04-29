@@ -69,4 +69,10 @@ public class ContractRequestDTO {
 			throw new ContractException(ContractErrorCode.CONTRACT_START_DATE_NOT_BEFORE_END_DATE);
 		}
 	}
+
+	public void validateProperty() {
+		if (propertyUid == null) {
+			throw new ContractException(ContractErrorCode.PROPERTY_REQUIRED);
+		}
+	}
 }
