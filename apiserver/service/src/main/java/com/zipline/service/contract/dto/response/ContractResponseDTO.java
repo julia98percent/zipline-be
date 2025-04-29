@@ -1,5 +1,6 @@
 package com.zipline.service.contract.dto.response;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -13,6 +14,9 @@ import lombok.Getter;
 public class ContractResponseDTO {
 	private Long uid;
 	private String category;
+	private BigInteger deposit;
+	private BigInteger monthlyRent;
+	private BigInteger price;
 	private LocalDate contractStartDate;
 	private LocalDate contractEndDate;
 	private LocalDate expectedContractEndDate;
@@ -38,6 +42,9 @@ public class ContractResponseDTO {
 		return ContractResponseDTO.builder()
 			.uid(contract.getUid())
 			.category(String.valueOf(contract.getCategory()))
+			.price(contract.getPrice())
+			.deposit(contract.getDeposit())
+			.monthlyRent(contract.getMonthlyRent())
 			.contractStartDate(contract.getContractStartDate())
 			.contractEndDate(contract.getContractEndDate())
 			.expectedContractEndDate(contract.getExpectedContractEndDate())
@@ -45,9 +52,7 @@ public class ContractResponseDTO {
 			.lessorOrSellerName(lessorOrSellerName)
 			.lesseeOrBuyerName(lesseeOrBuyerName)
 			.documents(documents)
-			.propertyAddress(
-				contract.getAgentProperty() != null ? contract.getAgentProperty().getAddress() : null
-			)
+			.propertyAddress(contract.getAgentProperty().getAddress())
 			.build();
 	}
 }

@@ -71,7 +71,6 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 		if (Boolean.TRUE.equals(agentPropertyRequestDTO.getCreateContract())) {
 			Contract contract = Contract.builder()
 				.user(loggedInUser)
-				.category(agentPropertyRequestDTO.getRealCategory())
 				.contractDate(LocalDate.now())
 				.status(ContractStatus.LISTED)
 				.agentProperty(agentProperty)

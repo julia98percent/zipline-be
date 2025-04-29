@@ -1,16 +1,19 @@
 package com.zipline.service.contract.dto.request;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.enums.ContractStatus;
-import com.zipline.entity.enums.PropertyCategory;
+import com.zipline.entity.enums.PropertyType;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.contract.ContractException;
 import com.zipline.global.exception.contract.errorcode.ContractErrorCode;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,19 +42,38 @@ public class ContractRequestDTO {
 	@Schema(description = "계약 상태", example = "IN_PROGRESS")
 	private String status;
 
+	@PositiveOrZero(message = "보증금은 0 이상의 값이어야 합니다.")
+	@Schema(description = "보증금", example = "50000000")
+	private BigInteger deposit;
+
+	@PositiveOrZero(message = "월세는 0 이상의 값이어야 합니다.")
+	@Schema(description = "월세", example = "1000000")
+	private BigInteger monthlyRent;
+
+	@PositiveOrZero(message = "매매 가격은 0 이상의 값이어야 합니다.")
+	@Schema(description = "매매 가격", example = "800000000")
+	private BigInteger price;
+
 	@Schema(description = "임대/매도자 고객 UID", example = "1")
 	private Long lessorOrSellerUid;
 
 	@Schema(description = "임차/매수자 고객 UID", example = "2")
 	private Long lesseeOrBuyerUid;
 
+	@Schema(description = "매물 UID", example = "1")
+	private Long propertyUid;
+
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	@Schema(description = "계약 종료 예상일", example = "2026-05-01")
 	private LocalDate expectedContractEndDate;
 
-	public Contract toEntity(User user, ContractStatus status, PropertyCategory category) {
+	public Contract toEntity(User user, AgentProperty agentProperty, ContractStatus status, PropertyType category) {
 		return Contract.builder()
 			.user(user)
+			.agentProperty(agentProperty)
+			.deposit(this.deposit)
+			.monthlyRent(this.monthlyRent)
+			.price(this.price)
 			.category(category)
 			.contractDate(this.contractDate)
 			.contractStartDate(this.contractStartDate)

@@ -1,11 +1,12 @@
 package com.zipline.entity.contract;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 
 import com.zipline.entity.BaseTimeEntity;
 import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.enums.ContractStatus;
-import com.zipline.entity.enums.PropertyCategory;
+import com.zipline.entity.enums.PropertyType;
 import com.zipline.entity.user.User;
 
 import jakarta.persistence.Column;
@@ -41,7 +42,7 @@ public class Contract extends BaseTimeEntity {
 
 	@Column(name = "category", length = 20)
 	@Enumerated(EnumType.STRING)
-	private PropertyCategory category;
+	private PropertyType category;
 
 	@Column(name = "contract_start_date")
 	private LocalDate contractStartDate;
@@ -58,16 +59,29 @@ public class Contract extends BaseTimeEntity {
 	@Column(name = "expected_contract_end_date")
 	private LocalDate expectedContractEndDate;
 
+	@Column(name = "deposit")
+	private BigInteger deposit;
+
+	@Column(name = "monthly_rent")
+	private BigInteger monthlyRent;
+
+	@Column(name = "price")
+	private BigInteger price;
+
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "agent_property_uid")
+	@JoinColumn(name = "agent_property_uid", nullable = false)
 	private AgentProperty agentProperty;
 
 	@Builder
-	private Contract(User user, PropertyCategory category, LocalDate contractStartDate, LocalDate contractDate,
+	private Contract(User user, PropertyType category, BigInteger deposit, BigInteger monthlyRent, BigInteger price,
+		LocalDate contractStartDate, LocalDate contractDate,
 		LocalDate contractEndDate, ContractStatus status, LocalDate expectedContractEndDate,
 		AgentProperty agentProperty) {
 		this.user = user;
 		this.category = category;
+		this.deposit = deposit;
+		this.monthlyRent = monthlyRent;
+		this.price = price;
 		this.contractStartDate = contractStartDate;
 		this.contractDate = contractDate;
 		this.contractEndDate = contractEndDate;
@@ -76,9 +90,13 @@ public class Contract extends BaseTimeEntity {
 		this.agentProperty = agentProperty;
 	}
 
-	public void modifyContract(PropertyCategory category, LocalDate contractDate, LocalDate contractStartDate,
+	public void modifyContract(PropertyType category, BigInteger deposit, BigInteger monthlyRent, BigInteger price,
+		LocalDate contractDate, LocalDate contractStartDate,
 		LocalDate contractEndDate, LocalDate expectedContractEndDate, ContractStatus status) {
 		this.category = category;
+		this.deposit = deposit;
+		this.monthlyRent = monthlyRent;
+		this.price = price;
 		this.contractDate = contractDate;
 		this.contractStartDate = contractStartDate;
 		this.contractEndDate = contractEndDate;
