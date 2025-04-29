@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Getter
 public class ContractRequestDTO {
 
-	@Schema(description = "계약 카테고리", example = "APARTMENT")
+	@Schema(description = "계약 카테고리", example = "SALE")
 	private String category;
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
