@@ -9,7 +9,8 @@ public enum PublicItemErrorCode implements ErrorCode {
     INVALID_PRICE_RANGE("PUBLIC-ITEM-003", "최소 가격은 최대 가격보다 클 수 없습니다.", HttpStatus.BAD_REQUEST),
     INVALID_DEPOSIT_RANGE("PUBLIC-ITEM-004", "최소 보증금은 최대 보증금보다 클 수 없습니다.", HttpStatus.BAD_REQUEST),
     INVALID_MONTHLY_RENT_RANGE("PUBLIC-ITEM-005", "최소 월세는 최대 월세보다 클 수 없습니다.", HttpStatus.BAD_REQUEST),
-    INVALID_AREA_RANGE("PUBLIC-ITEM-006", "최소 면적은 최대 면적보다 클 수 없습니다.", HttpStatus.BAD_REQUEST);
+    INVALID_EXCLUSIVE_AREA_RANGE("PUBLIC-ITEM-006", "최소 전용 면적은 최대 전용 면적보다 클 수 없습니다.", HttpStatus.BAD_REQUEST),
+    INVALID_SUPPLY_AREA_RANGE("PUBLIC-ITEM-007", "최소 공급 면적은 최대 공급 면적보다 클 수 없습니다.", HttpStatus.BAD_REQUEST);
 
 
     private final String code;

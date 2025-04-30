@@ -98,11 +98,15 @@ public class PropertyArticleSpecificationBuilder {
     private Specification<PropertyArticle> addAreaSpecifications(
             Specification<PropertyArticle> spec, PropertyArticleSearchDTO searchDTO) {
 
-        if (searchDTO.getMinArea() != null || searchDTO.getMaxArea() != null) {
-            spec = spec.and(PropertyArticleViewSpecification.exclusiveAreaBetween(
-                    searchDTO.getMinArea(), searchDTO.getMaxArea()));
+        if (searchDTO.getMinSupplyArea() != null || searchDTO.getMaxSupplyArea() != null) {
+            spec = spec.and(PropertyArticleViewSpecification.supplyAreaBetween(
+                    searchDTO.getMinSupplyArea(), searchDTO.getMaxSupplyArea()));
         }
 
+        if (searchDTO.getMinExclusiveArea() != null || searchDTO.getMaxExclusiveArea() != null) {
+            spec = spec.and(PropertyArticleViewSpecification.exclusiveAreaBetween(
+                    searchDTO.getMinExclusiveArea(), searchDTO.getMaxExclusiveArea()));
+        }
         return spec;
     }
 }

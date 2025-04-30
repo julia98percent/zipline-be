@@ -68,8 +68,11 @@ public class PropertyArticleViewServiceImpl implements PropertyArticleViewServic
 		validateRange(searchDTO.getMinMonthlyRent(), searchDTO.getMaxMonthlyRent(),
 				PublicItemErrorCode.INVALID_MONTHLY_RENT_RANGE);
 
-		validateRange(searchDTO.getMinArea(), searchDTO.getMaxArea(),
-				PublicItemErrorCode.INVALID_AREA_RANGE);
+		validateRange(searchDTO.getMinExclusiveArea(), searchDTO.getMaxExclusiveArea(),
+				PublicItemErrorCode.INVALID_EXCLUSIVE_AREA_RANGE);
+
+    	validateRange(searchDTO.getMinSupplyArea(), searchDTO.getMaxSupplyArea(),
+       			PublicItemErrorCode.INVALID_SUPPLY_AREA_RANGE);
 	}
 
 	private void validateRange(Number min, Number max, PublicItemErrorCode errorCode) {
