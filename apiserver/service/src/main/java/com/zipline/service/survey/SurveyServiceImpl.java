@@ -72,12 +72,12 @@ public class SurveyServiceImpl implements SurveyService {
 			survey.getQuestions().add(question);
 		});
 		surveyRepository.save(survey);
-		user.setUrl(String.valueOf(survey.getUid()));
+		user.setUrl(String.valueOf(survey.getUlid()));
 		return Collections.singletonMap("surveyURL", survey.getUlid());
 	}
 
 	@Transactional
-	public void createDefaultSurveyForUser(User user) {     //default questions
+	public void createDefaultSurveyForUser(User user) {
 		Survey survey = new Survey("기본 설문지", user);
 
 		Question nameQuestion = new Question(
