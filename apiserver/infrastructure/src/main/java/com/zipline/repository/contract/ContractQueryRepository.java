@@ -1,6 +1,8 @@
 package com.zipline.repository.contract;
 
 import static com.zipline.entity.contract.QContract.*;
+import static com.zipline.entity.contract.QCustomerContract.*;
+import static com.zipline.entity.customer.QCustomer.*;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -54,6 +56,30 @@ public class ContractQueryRepository {
 			}
 		}
 
+		if (filter.getCategory() != null && !filter.getCategory().isBlank()) {
+			try {
+				builder.and(contract.category.stringValue().eq(filter.getCategory()));
+			} catch (IllegalArgumentException e) {
+				throw new ContractException(ContractErrorCode.CONTRACT_CATEGORY_NOT_FOUND);
+			}
+		}
+
+		List<Long> matchingContractUids = null;
+		if (filter.getCustomerName() != null && !filter.getCustomerName().isBlank()) {
+			matchingContractUids = queryFactory
+				.select(customerContract.contract.uid)
+				.from(customerContract)
+				.join(customerContract.customer, customer)
+				.where(customer.name.containsIgnoreCase(filter.getCustomerName()))
+				.fetch();
+
+			builder.and(contract.uid.in(matchingContractUids));
+		}
+
+		if (filter.getAddress() != null && !filter.getAddress().isBlank()) {
+			builder.and(contract.agentProperty.address.containsIgnoreCase(filter.getAddress()));
+		}
+
 		List<Contract> result = queryFactory
 			.selectFrom(contract)
 			.where(builder)
@@ -62,10 +88,12 @@ public class ContractQueryRepository {
 			.orderBy(contract.uid.desc())
 			.fetch();
 
-		return PageableExecutionUtils.getPage(result, pageable, () -> queryFactory
-			.select(contract.count())
-			.from(contract)
-			.where(builder)
-			.fetchOne());
+		return PageableExecutionUtils.getPage(result, pageable, () ->
+			queryFactory
+				.select(contract.count())
+				.from(contract)
+				.where(builder)
+				.fetchOne());
+
 	}
 }
