@@ -3,6 +3,8 @@ package com.zipline.global.request;
 import java.math.BigInteger;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import lombok.Getter;
@@ -37,7 +39,9 @@ public class AgentPropertyFilterRequestDTO {
 	@DecimalMin(value = "0", message = "매매가는 0 이상이어야 합니다.")
 	private BigInteger maxPrice;
 
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDate minMoveInDate;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDate maxMoveInDate;
 
 	private Boolean petsAllowed;
