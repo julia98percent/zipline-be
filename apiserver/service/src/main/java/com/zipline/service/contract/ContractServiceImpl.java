@@ -100,6 +100,7 @@ public class ContractServiceImpl implements ContractService {
 		PropertyType category = validateAndParseCategory(contractRequestDTO.getCategory());
 		contractRequestDTO.validateDateOrder();
 		contractRequestDTO.validateProperty();
+		contractRequestDTO.validateDistinctParties();
 		AgentProperty agentProperty = agentPropertyRepository.findByUidAndUserUidAndDeletedAtIsNull(
 				contractRequestDTO.getPropertyUid(), userUid)
 			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
@@ -194,6 +195,7 @@ public class ContractServiceImpl implements ContractService {
 
 		contractRequestDTO.validateDateOrder();
 		contractRequestDTO.validateProperty();
+		contractRequestDTO.validateDistinctParties();
 		AgentProperty agentProperty = agentPropertyRepository.findByUidAndUserUidAndDeletedAtIsNull(
 				contractRequestDTO.getPropertyUid(), userUid)
 			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
