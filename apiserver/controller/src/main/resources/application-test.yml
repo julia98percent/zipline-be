@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mariadb://${DB_URL_DEV}:${DB_PORT}/${DB_NAME}
+    url: jdbc:mariadb://${DB_URL}:${DB_PORT}/${DB_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
@@ -49,7 +49,7 @@ aws:
   s3:
     bucket: ${AWS_S3_BUCKET}
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS_DEV}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
 sms:
   api-key: ${SMS_API_KEY}
   secret-key: ${SMS_SEC_KEY}

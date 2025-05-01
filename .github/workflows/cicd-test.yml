@@ -2,9 +2,9 @@ name: Java CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ test ]
   pull_request:
-    branches: [ main ]
+    branches: [ test ]
 
 jobs:
   test:
@@ -24,7 +24,6 @@ jobs:
 
   deploy:
     needs: test
-    # if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -111,7 +110,7 @@ jobs:
             SMS_SEC_KEY=${{ secrets.SMS_SEC_KEY }}
             SURVEY_DELIMITER=${{ secrets.SURVEY_DELIMITER }}
             MAX_HTTP_TOMCAT_FORM_POST_SIZE=${{ secrets.MAX_HTTP_TOMCAT_FORM_POST_SIZE }}
-            SPRING_PROFILES_ACTIVE=dev
+            SPRING_PROFILES_ACTIVE=test
             EOF
             
             cat << 'EOF' > /tmp/crawlerserver-env-vars
@@ -137,7 +136,7 @@ jobs:
             PROXY_UPLOAD_MAX_FILE_SIZE=${{ secrets.PROXY_UPLOAD_MAX_FILE_SIZE }}
             PROXY_UPLOAD_MAX_LINES=${{ secrets.PROXY_UPLOAD_MAX_LINES }}
             MAX_HTTP_TOMCAT_FORM_POST_SIZE=${{ secrets.MAX_HTTP_TOMCAT_FORM_POST_SIZE }}
-            SPRING_PROFILES_ACTIVE=dev
+            SPRING_PROFILES_ACTIVE=test
             EOF
             
             echo "Starting API Server..."

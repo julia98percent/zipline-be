@@ -2,9 +2,9 @@ name: Java CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ dev ]
   pull_request:
-    branches: [ main ]
+    branches: [ dev ]
 
 jobs:
   test:
@@ -24,7 +24,6 @@ jobs:
 
   deploy:
     needs: test
-    # if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -74,7 +73,7 @@ jobs:
       - name: SSH Remote Commands
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ secrets.EC2_DEV_HOST}}
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           script: |
@@ -91,10 +90,10 @@ jobs:
             PORT_API=${{ secrets.PORT_API }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_NAME=${{ secrets.DB_NAME }}
-            DB_URL=${{ secrets.DB_URL }}
+            DB_URL=${{ secrets.DB_URL_DEV}}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             AWS_REGION=${{ secrets.AWS_REGION }}
-            CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
+            CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS_DEV }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             AWS_ACC_KEY=${{ secrets.AWS_ACC_KEY }}
