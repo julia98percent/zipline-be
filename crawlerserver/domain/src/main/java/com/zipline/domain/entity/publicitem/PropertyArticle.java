@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.zipline.domain.entity.enums.Category;
 import com.zipline.domain.entity.enums.Platform;
 
+import com.zipline.domain.entity.region.Region;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
