@@ -99,7 +99,7 @@ public class ContractRequestDTO {
 	}
 
 	public void validateDistinctParties() {
-		if (lessorOrSellerUid != null && lesseeOrBuyerUid != null && lessorOrSellerUid.equals(lesseeOrBuyerUid)) {
+		if (lessorOrSellerUid != null && lessorOrSellerUid.equals(lesseeOrBuyerUid)) {
 			throw new ContractException(ContractErrorCode.SAME_CUSTOMER_FOR_BOTH_PARTIES);
 		}
 	}
