@@ -8,10 +8,11 @@ public enum ContractErrorCode implements ErrorCode {
 	CONTRACT_NOT_FOUND("CONTRACT-001", "해당하는 계약을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	CONTRACT_CUSTOMER_NOT_FOUND("CONTRACT-002", "계약에 연결된 고객을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	CONTRACT_STATUS_NOT_FOUND("CONTRACT-003", "존재하지 않는 계약 상태입니다.", HttpStatus.NOT_FOUND),
-	CONTRACT_CATEGORY_NOT_FOUND("CONTRACT-006", "존재하지 않는 계약 카테고리입니다.", HttpStatus.NOT_FOUND),
 	CONTRACT_DATE_AFTER_START_DATE("CONTRACT-004", "계약일은 계약 시작일보다 이후일 수 없습니다.", HttpStatus.BAD_REQUEST),
 	CONTRACT_START_DATE_NOT_BEFORE_END_DATE("CONTRACT-005", "계약 시작일은 계약 종료일보다 이전이어야 합니다.", HttpStatus.BAD_REQUEST),
-	PROPERTY_REQUIRED("CONTRACT-007", "매물을 선택해 주세요.", HttpStatus.BAD_REQUEST);
+	CONTRACT_CATEGORY_NOT_FOUND("CONTRACT-006", "존재하지 않는 계약 카테고리입니다.", HttpStatus.NOT_FOUND),
+	PROPERTY_REQUIRED("CONTRACT-007", "매물을 선택해 주세요.", HttpStatus.BAD_REQUEST),
+	SAME_CUSTOMER_FOR_BOTH_PARTIES("CONTRACT-008", "계약의 임대/매도자와 임차/매수자가 동일할 수 없습니다.", HttpStatus.BAD_REQUEST);
 	private final String code;
 	private final String message;
 	private final HttpStatus status;
