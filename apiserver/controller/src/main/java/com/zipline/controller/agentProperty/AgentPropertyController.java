@@ -74,7 +74,7 @@ public class AgentPropertyController {
 	@GetMapping("")
 	public ResponseEntity<ApiResponse<AgentPropertyListResponseDTO>> getPropertyList(
 		@ModelAttribute PageRequestDTO pageRequestDTO,
-		@ModelAttribute AgentPropertyFilterRequestDTO agentPropertyFilterRequestDTO,
+		@Valid @ModelAttribute AgentPropertyFilterRequestDTO agentPropertyFilterRequestDTO,
 		Principal principal) {
 		AgentPropertyListResponseDTO propertyListResponseDTO = agentPropertyService.getAgentPropertyList(pageRequestDTO,
 			Long.parseLong(principal.getName()), agentPropertyFilterRequestDTO);
