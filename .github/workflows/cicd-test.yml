@@ -143,13 +143,13 @@ jobs:
             sudo docker run -d -p ${{ secrets.PORT_API }}:${{ secrets.PORT_API }} \
             --name apiserver \
             --env-file /tmp/apiserver-env-vars \
-            ${{ secrets.DOCKERHUB_USERNAME }}/apiserver
+            ${{ secrets.DOCKERHUB_USERNAME }}/apiserver:test
             
             echo "Starting Crawler Server..."
             sudo docker run -d -p ${{ secrets.PORT_CRAWLER }}:${{ secrets.PORT_CRAWLER }} \
             --name crawlerserver \
             --env-file /tmp/crawlerserver-env-vars \
-            ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver
+            ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver:test
             
             echo "Checking container status..."
             sudo docker ps -a
