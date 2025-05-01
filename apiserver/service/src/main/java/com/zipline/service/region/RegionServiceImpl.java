@@ -1,7 +1,7 @@
 package com.zipline.service.region;
 
-import com.zipline.global.exception.custom.region.RegionException;
-import com.zipline.global.exception.custom.region.errorcode.RegionErrorCode;
+import com.zipline.global.exception.region.RegionException;
+import com.zipline.global.exception.region.errorcode.RegionErrorCode;
 import com.zipline.global.response.ApiResponse;
 import com.zipline.repository.region.RegionRepository;
 import com.zipline.service.region.dto.FlatRegionDTO;

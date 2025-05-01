@@ -1,4 +1,4 @@
-package com.zipline.global.exception.custom.region.errorcode;
+package com.zipline.global.exception.region.errorcode;
 
 import com.zipline.global.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
