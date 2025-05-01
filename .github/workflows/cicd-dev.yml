@@ -89,7 +89,7 @@ jobs:
             cat << 'EOF' > /tmp/apiserver-env-vars
             PORT_API=${{ secrets.PORT_API }}
             DB_PORT=${{ secrets.DB_PORT }}
-            DB_NAME=${{ secrets.DB_NAME }}
+            DB_NAME=${{ secrets.DB_NAME_DEV }}
             DB_URL=${{ secrets.DB_URL_DEV}}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             AWS_REGION=${{ secrets.AWS_REGION }}
