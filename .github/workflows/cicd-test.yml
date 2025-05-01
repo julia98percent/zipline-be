@@ -61,14 +61,14 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Docker Image Build - API Server
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/apiserver -f apiserver/Dockerfile .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/apiserver:test -f apiserver/Dockerfile .
       - name: DockerHub Push - API Server
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/apiserver
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/apiserver:test
 
       - name: Docker Image Build - Crawler Server
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver -f crawlerserver/Dockerfile .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver:test -f crawlerserver/Dockerfile .
       - name: DockerHub Push - Crawler Server
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver:test
 
       - name: SSH Remote Commands
         uses: appleboy/ssh-action@master
@@ -81,10 +81,10 @@ jobs:
             
             sudo docker kill apiserver crawlerserver || true
             sudo docker rm -f apiserver crawlerserver || true
-            sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/apiserver ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver || true
+            sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/apiserver:test ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver:test || true
             
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/apiserver
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/apiserver:test
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/crawlerserver:test
             
             cat << 'EOF' > /tmp/apiserver-env-vars
             PORT_API=${{ secrets.PORT_API }}
