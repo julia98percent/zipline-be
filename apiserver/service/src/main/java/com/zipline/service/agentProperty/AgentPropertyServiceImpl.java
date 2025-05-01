@@ -126,6 +126,7 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 		Page<AgentProperty> agentPropertyPage = agentPropertyQueryRepository.findFilteredProperties(
 			userUid, detailFilter, pageRequestDTO.toPageable()
 		);
+		detailFilter.validate();
 		List<PropertyResponseDTO> agentPropertyResponseDTOList = agentPropertyPage.getContent().stream()
 			.map(PropertyResponseDTO::new)
 			.toList();
