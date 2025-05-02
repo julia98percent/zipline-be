@@ -1,9 +1,10 @@
-package com.zipline.service.migaration;
+package com.zipline.service.migration;
 
-import com.zipline.service.migaration.dto.MigrationStatisticsDTO;
 import com.zipline.domain.entity.naver.NaverRawArticle;
+import com.zipline.global.task.dto.TaskResponseDto;
+import com.zipline.service.migration.dto.MigrationStatisticsDTO;
 
-public interface NaverRawArticleMigrationService {
+public interface MigrationService {
 
 	void NaverMigration();
 
@@ -13,10 +14,6 @@ public interface NaverRawArticleMigrationService {
 
 	void migrateRawArticle(NaverRawArticle rawArticle);
 
-	void retryFailedMigrations();
-
-	void retryFailedMigrationsForRegion(Long cortarNo);
-
 	int resetMigrationStatusForRegion(Long cortarNo);
 
 	int resetAndMigrateRegion(Long cortarNo);
@@ -24,4 +21,12 @@ public interface NaverRawArticleMigrationService {
 	MigrationStatisticsDTO getMigrationStatistics();
 
 	MigrationStatisticsDTO getMigrationStatisticsForRegion(Long cortarNo);
+
+	TaskResponseDto startNaverMigration();
+
+	TaskResponseDto migrateRegion(Long regionId);
+
+	TaskResponseDto retryFailedMigrations();
+
+	TaskResponseDto getTaskStatus(String taskId);
 }

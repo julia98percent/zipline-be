@@ -23,7 +23,7 @@ public class ProxyListUploadController {
 	public ResponseEntity<ApiResponse<String>> uploadProxyList(@RequestParam("file") MultipartFile file) {
 		String result = proxyListUploadService.saveFile(file);
 		ApiResponse<String> response = ApiResponse.ok("파일 업로드 성공", result);
-		return ResponseEntity.status(HttpStatus.OK).body(response);
+		return ResponseEntity.ok(response);
 	}
 }
 

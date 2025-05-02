@@ -1,4 +1,4 @@
-package com.zipline.service.migaration.dto;
+package com.zipline.service.migration.dto;
 
 import java.time.LocalDateTime;
 
@@ -26,7 +26,7 @@ public class MigrationStatisticsDTO {
      * 전체 마이그레이션 통계 정보를 생성합니다.
      */
     public static MigrationStatisticsDTO of(
-            long totalArticles, 
+            long totalArticles,
             long pendingArticles, 
             long completedArticles, 
             long failedArticles) {

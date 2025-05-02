@@ -1,6 +1,9 @@
 
 package com.zipline.global.exception;
 
+import com.zipline.global.exception.task.TaskException;
+import com.zipline.global.exception.task.errorcode.TaskErrorCode;
+import com.zipline.global.response.ApiResponse;
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -70,4 +73,20 @@ public class GlobalExceptionHandler {
 		ExceptionResponseDTO response = ExceptionResponseDTO.of(errorCode.getCode(), e.getMessage());
 		return ResponseEntity.status(errorCode.getStatus()).body(response);
 	}
+	
+	@ExceptionHandler(TaskException.class)
+    public ResponseEntity<ExceptionResponseDTO> handleTaskAlreadyRunningException(Exception e) {
+		log.error(e.getMessage(), e);
+		ErrorCode errorCode = TaskErrorCode.TASK_ALREADY_RUNNING;
+		ExceptionResponseDTO response = ExceptionResponseDTO.of(errorCode.getCode(), e.getMessage());
+		return ResponseEntity.status(errorCode.getStatus()).body(response);
+    }
+    
+    @ExceptionHandler(TaskException.class)
+    public ResponseEntity<ExceptionResponseDTO> handleTaskNotFoundException(Exception e) {
+		log.error(e.getMessage(), e);
+		ErrorCode errorCode = TaskErrorCode.TASK_NOT_FOUND;
+		ExceptionResponseDTO response = ExceptionResponseDTO.of(errorCode.getCode(), e.getMessage());
+		return ResponseEntity.status(errorCode.getStatus()).body(response);
+    }
 }
