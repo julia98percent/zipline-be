@@ -56,28 +56,36 @@ public class ContractQueryRepository {
 			}
 		}
 
-		if (filter.getCategory() != null && !filter.getCategory().isBlank()) {
-			try {
-				builder.and(contract.category.stringValue().eq(filter.getCategory()));
-			} catch (IllegalArgumentException e) {
-				throw new ContractException(ContractErrorCode.CONTRACT_CATEGORY_NOT_FOUND);
+		if (
+			filter.getCategory() != null && !filter.getCategory().isBlank() ||
+				filter.getCustomerName() != null && !filter.getCustomerName().isBlank() ||
+				filter.getAddress() != null && !filter.getAddress().isBlank()
+		) {
+			String keyword = null;
+
+			if (filter.getCategory() != null && !filter.getCategory().isBlank()) {
+				keyword = filter.getCategory();
+			} else if (filter.getCustomerName() != null && !filter.getCustomerName().isBlank()) {
+				keyword = filter.getCustomerName();
+			} else if (filter.getAddress() != null && !filter.getAddress().isBlank()) {
+				keyword = filter.getAddress();
 			}
-		}
 
-		List<Long> matchingContractUids = null;
-		if (filter.getCustomerName() != null && !filter.getCustomerName().isBlank()) {
-			matchingContractUids = queryFactory
-				.select(customerContract.contract.uid)
-				.from(customerContract)
-				.join(customerContract.customer, customer)
-				.where(customer.name.containsIgnoreCase(filter.getCustomerName()))
-				.fetch();
+			if (keyword != null) {
+				List<Long> matchingContractUids = queryFactory
+					.select(customerContract.contract.uid)
+					.from(customerContract)
+					.join(customerContract.customer, customer)
+					.where(customer.name.containsIgnoreCase(keyword))
+					.fetch();
 
-			builder.and(contract.uid.in(matchingContractUids));
-		}
+				BooleanBuilder keywordBuilder = new BooleanBuilder();
+				keywordBuilder.or(contract.agentProperty.address.containsIgnoreCase(keyword));
+				keywordBuilder.or(contract.category.stringValue().containsIgnoreCase(keyword));
+				keywordBuilder.or(contract.uid.in(matchingContractUids));
 
-		if (filter.getAddress() != null && !filter.getAddress().isBlank()) {
-			builder.and(contract.agentProperty.address.containsIgnoreCase(filter.getAddress()));
+				builder.and(keywordBuilder);
+			}
 		}
 
 		List<Contract> result = queryFactory
