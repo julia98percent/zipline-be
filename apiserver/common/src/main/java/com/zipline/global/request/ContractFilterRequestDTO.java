@@ -10,4 +10,7 @@ import lombok.Setter;
 public class ContractFilterRequestDTO {
 	private String period;
 	private String status;
+	private String category;
+	private String customerName;
+	private String address;
 }
