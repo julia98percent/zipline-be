@@ -8,6 +8,8 @@ import com.zipline.entity.contract.Contract;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Builder
@@ -28,6 +30,8 @@ public class ContractResponseDTO {
 	private String propertyAddress;
 
 	@Getter
+	@NoArgsConstructor
+	@Setter
 	public static class DocumentDTO {
 		private String fileName;
 		private String fileUrl;
