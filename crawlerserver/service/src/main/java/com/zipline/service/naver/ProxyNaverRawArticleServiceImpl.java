@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import com.zipline.domain.entity.crawl.Crawl;
+import com.zipline.infrastructure.crawl.CrawlRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +49,7 @@ public class ProxyNaverRawArticleServiceImpl implements ProxyNaverRawArticleServ
 	private final ObjectMapper objectMapper;
 	private final RegionRepository regionRepository;
 	private final NaverRawArticleRepository naverRawArticleRepository;
+	private final CrawlRepository crawlRepository;
 
 	@Getter
 	private final ProxyPool proxyPool;
@@ -59,7 +62,7 @@ public class ProxyNaverRawArticleServiceImpl implements ProxyNaverRawArticleServ
 	private static final int ZOOM_LEVEL = 12; // 줌 레벨
 
 	private final ExecutorService executorService = Executors.newFixedThreadPool(MAX_CONCURRENT_REQUESTS);
-	private final ConcurrentHashMap<String, CrawlingStatusDTO> regionStatuses = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<Long, CrawlingStatusDTO> regionStatuses = new ConcurrentHashMap<>();
 
 	@Value("${crawler.max-retry-count:10}")
 	private int maxRetryCount;
@@ -77,21 +80,19 @@ public class ProxyNaverRawArticleServiceImpl implements ProxyNaverRawArticleServ
 		try {
 			LocalDateTime cutoffDate = LocalDateTime.now().minusDays(14); // 이주일 전
 			log.info("[Thread-{}] 수집 기준일: {}", Thread.currentThread().getId(), cutoffDate);
-
-			List<Region> regionsToUpdate = regionRepository.findRegionsNeedingUpdateForNaver(level, cutoffDate);
+			List<Crawl> regionsToUpdate = crawlRepository.findRegionsNeedingCrawlingUpdateForNaver(level, cutoffDate);
 			log.info("[Thread-{}] 처리할 총 지역 수: {}", Thread.currentThread().getId(), regionsToUpdate.size());
 
 			// 지역 간 병렬 처리를 위한 CompletableFuture 리스트
 			List<CompletableFuture<Void>> regionFutures = new ArrayList<>();
 
 			// 지역별 병렬 처리 시작
-			for (Region region : regionsToUpdate) {
+			for (Crawl crawlRegion : regionsToUpdate) {
 				CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 					try {
-						crawlAndSaveRawArticlesForRegion(region);
+						crawlAndSaveRawArticlesForRegion(crawlRegion);
 					} catch (Exception e) {
-						log.error("[Thread-{}] [{}] 지역 처리 중 오류 발생: {}", Thread.currentThread().getId(),
-							region.getCortarName(), e.getMessage(), e);
+						log.error("[Thread-{}] [{}] 지역 처리 중 오류 발생: {}", Thread.currentThread().getId(), crawlRegion.getCortarNo(), e.getMessage(), e);
 					}
 				}, executorService);
 
@@ -125,27 +126,26 @@ public class ProxyNaverRawArticleServiceImpl implements ProxyNaverRawArticleServ
 	 * @param cortarNo 지역 코드
 	 */
 	public void crawlAndSaveRawArticlesForRegion(Long cortarNo) {
-		Region region = regionRepository.findByCortarNo(cortarNo)
-			.orElseThrow(() -> new RuntimeException("지역을 찾을 수 없습니다: " + cortarNo));
-		crawlAndSaveRawArticlesForRegion(region);
+		Crawl crawlRegion = crawlRepository.findByCortarNo(cortarNo);
+		crawlAndSaveRawArticlesForRegion(crawlRegion);
 	}
 
 	/**
 	 * 특정 지역의 원본 매물 정보를 수집하고 저장합니다.
 	 *
-	 * @param region 지역 정보
+	 * @param crawlRegion 지역 정보
 	 */
-	public void crawlAndSaveRawArticlesForRegion(Region region) {
-		String regionName = region.getCortarName();
-		log.info("[Thread-{}] \n[{}] 네이버 원본 매물 정보 수집 시작", Thread.currentThread().getId(), regionName);
+	public void crawlAndSaveRawArticlesForRegion(Crawl crawlRegion) {
+		Long cortarNo = crawlRegion.getCortarNo();
+		log.info("[Thread-{}] \n[{}] 네이버 원본 매물 정보 수집 시작", Thread.currentThread().getId(), cortarNo);
 
 		// 크롤링 상태 초기화
-		CrawlingStatusDTO status = CrawlingStatusDTO.initialize(regionName);
-		regionStatuses.put(regionName, status);
+		CrawlingStatusDTO status = CrawlingStatusDTO.initialize(cortarNo);
+		regionStatuses.put(cortarNo, status);
 
 		// 네이버 크롤링 상태 업데이트 - 직접 리포지토리 메서드 사용
-		regionRepository.updateNaverStatus(region.getCortarNo(), CrawlStatus.PROCESSING);
-		log.info("[Thread-{}] [{}] 상태 업데이트: {}", Thread.currentThread().getId(), regionName, CrawlStatus.PROCESSING);
+		crawlRepository.updateNaverCrawlStatus(crawlRegion.getCortarNo(), CrawlStatus.PROCESSING);
+		log.info("[Thread-{}] [{}] 상태 업데이트: {}", Thread.currentThread().getId(), cortarNo, CrawlStatus.PROCESSING);
 
 		try {
 			int currentPage = 1;
@@ -153,67 +153,67 @@ public class ProxyNaverRawArticleServiceImpl implements ProxyNaverRawArticleServ
 			AtomicInteger totalArticles = new AtomicInteger(0);
 
 			// 해당 지역의 기존 마이그레이션 상태를 초기화
-			naverRawArticleRepository.resetMigrationStatusForRegion(region.getCortarNo(), MigrationStatus.PENDING);
-			log.info("[Thread-{}] [{}] 마이그레이션 상태 초기화 완료", Thread.currentThread().getId(), regionName);
+			naverRawArticleRepository.resetMigrationStatusForRegion(crawlRegion.getCortarNo(), MigrationStatus.PENDING);
+			log.info("[Thread-{}] [{}] 마이그레이션 상태 초기화 완료", Thread.currentThread().getId(), cortarNo);
 
 			// 첫 페이지 처리
-			PageResultDTO firstPage = crawlPage(region.getCortarNo(), 1);
+			PageResultDTO firstPage = crawlPage(crawlRegion.getCortarNo(), 1);
 			if (!firstPage.isSuccess()) {
 				throw new RuntimeException("첫 페이지 수집 실패: " + firstPage.getError());
 			}
 
-			totalArticles.addAndGet(saveRawArticles(firstPage.getArticles(), region.getCortarNo()));
-			processPage(region, 1, firstPage.isHasMore());
+			totalArticles.addAndGet(saveRawArticles(firstPage.getArticles(), crawlRegion.getCortarNo()));
+			processPage(crawlRegion, 1, firstPage.isHasMore());
 
 			// 첫 페이지에 더 이상 데이터가 없으면 바로 종료
 			if (!firstPage.isHasMore()) {
 				isRegionCompleted = true;
-				log.info("[Thread-{}] [{}] 첫 페이지에 더 이상 데이터가 없어 수집 완료", Thread.currentThread().getId(), regionName);
+				log.info("[Thread-{}] [{}] 첫 페이지에 더 이상 데이터가 없어 수집 완료", Thread.currentThread().getId(), cortarNo);
 			}
 
 			// 페이지 순차 처리
 			while (!isRegionCompleted) {
 				currentPage++;
-				PageResultDTO result = crawlPage(region.getCortarNo(), currentPage);
+				PageResultDTO result = crawlPage(crawlRegion.getCortarNo(), currentPage);
 
 				if (result.isSuccess()) {
-					totalArticles.addAndGet(saveRawArticles(result.getArticles(), region.getCortarNo()));
+					totalArticles.addAndGet(saveRawArticles(result.getArticles(), crawlRegion.getCortarNo()));
 					log.info("[Thread-{}] [{}] 페이지 {} 처리 완료 (현재 {}개 매물) {}",
-						Thread.currentThread().getId(), regionName, currentPage, totalArticles.get(),
+						Thread.currentThread().getId(), cortarNo, currentPage, totalArticles.get(),
 						result.isHasMore() ? "▶" : "■");
 
-					processPage(region, currentPage, result.isHasMore());
+					processPage(crawlRegion, currentPage, result.isHasMore());
 
 					if (!result.isHasMore()) {
 						isRegionCompleted = true;
 						log.info("[Thread-{}] [{}] 페이지 {}에서 더 이상 데이터가 없어 수집 완료",
-							Thread.currentThread().getId(), regionName, currentPage);
+							Thread.currentThread().getId(), cortarNo, currentPage);
 					}
 				} else {
 					if (result.isProxyError()) {
 						log.warn("[Thread-{}] [{}] 페이지 {} 프록시 오류: {}",
-							Thread.currentThread().getId(), regionName, currentPage, result.getError());
+							Thread.currentThread().getId(), cortarNo, currentPage, result.getError());
 						// 프록시 오류 시 짧은 대기 후 재시도
 						RandomSleepUtil.sleepShort();
 					} else {
 						log.warn("[Thread-{}] [{}] 페이지 {} 처리 실패 (스킵): {}",
-							Thread.currentThread().getId(), regionName, currentPage, result.getError());
+							Thread.currentThread().getId(), cortarNo, currentPage, result.getError());
 						isRegionCompleted = true;
 					}
 				}
 			}
 
 			// 최종 상태 업데이트 - 직접 리포지토리 메서드 사용
-			regionRepository.updateNaverStatus(region.getCortarNo(), CrawlStatus.COMPLETED);
-			log.info("[Thread-{}] [{}] 상태 업데이트: {}", Thread.currentThread().getId(), regionName, CrawlStatus.COMPLETED);
+			crawlRepository.updateNaverCrawlStatus(crawlRegion.getCortarNo(), CrawlStatus.COMPLETED);
+			log.info("[Thread-{}] [{}] 상태 업데이트: {}", Thread.currentThread().getId(), cortarNo, CrawlStatus.COMPLETED);
 			log.info("[Thread-{}] [{}] 네이버 원본 매물 정보 수집 완료 - 총 {}개 매물",
-				Thread.currentThread().getId(), regionName, totalArticles.get());
+				Thread.currentThread().getId(), cortarNo, totalArticles.get());
 		} catch (Exception e) {
 			log.error("[Thread-{}] [{}] 네이버 원본 매물 정보 수집 중 오류 발생: {}",
-				Thread.currentThread().getId(), regionName, e.getMessage(), e);
+				Thread.currentThread().getId(), cortarNo, e.getMessage(), e);
 			// 실패 상태 업데이트 - 직접 리포지토리 메서드 사용
-			regionRepository.updateNaverStatus(region.getCortarNo(), CrawlStatus.FAILED);
-			log.info("[Thread-{}] [{}] 상태 업데이트: {}", Thread.currentThread().getId(), regionName, CrawlStatus.FAILED);
+			crawlRepository.updateNaverCrawlStatus(crawlRegion.getCortarNo(), CrawlStatus.FAILED);
+			log.info("[Thread-{}] [{}] 상태 업데이트: {}", Thread.currentThread().getId(), cortarNo, CrawlStatus.FAILED);
 		}
 	}
 
@@ -477,7 +477,7 @@ public class ProxyNaverRawArticleServiceImpl implements ProxyNaverRawArticleServ
 		}
 	}
 
-	private void processPage(Region region, int page, boolean hasMore) {
+	private void processPage(Crawl crawl, int page, boolean hasMore) {
 		// 대기 시간을 페이지 처리 결과에 따라 동적으로 조정
 		if (!hasMore) {
 			RandomSleepUtil.sleepShort();

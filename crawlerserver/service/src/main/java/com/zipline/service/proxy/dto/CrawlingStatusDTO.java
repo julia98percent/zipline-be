@@ -22,7 +22,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CrawlingStatusDTO {
-    private String regionName;
+    private Long cortarNo;
     private int currentPage;
     private int totalArticles;
     private boolean isCompleted;
@@ -35,12 +35,12 @@ public class CrawlingStatusDTO {
     /**
      * 새로운 크롤링 상태를 초기화합니다.
      *
-     * @param regionName 지역 이름
+     * @param cortarNo 지역 코드
      * @return 초기화된 CrawlingStatus 객체
      */
-    public static CrawlingStatusDTO initialize(String regionName) {
+    public static CrawlingStatusDTO initialize(Long cortarNo){
         return CrawlingStatusDTO.builder()
-            .regionName(regionName)
+            .cortarNo(cortarNo)
             .currentPage(1)
             .totalArticles(0)
             .isCompleted(false)
@@ -59,16 +59,16 @@ public class CrawlingStatusDTO {
      */
     public CrawlingStatusDTO updateLastUpdateTime() {
         return CrawlingStatusDTO.builder()
-            .regionName(this.regionName)
-            .currentPage(this.currentPage)
-            .totalArticles(this.totalArticles)
-            .isCompleted(this.isCompleted)
-            .pendingPages(this.pendingPages)
-            .failedPages(this.failedPages)
-            .retryCount(this.retryCount)
-            .startTime(this.startTime)
-            .lastUpdateTime(LocalDateTime.now())
-            .build();
+                .cortarNo(this.cortarNo)
+                .currentPage(this.currentPage)
+                .totalArticles(this.totalArticles)
+                .isCompleted(this.isCompleted)
+                .pendingPages(this.pendingPages)
+                .failedPages(this.failedPages)
+                .retryCount(this.retryCount)
+                .startTime(this.startTime)
+                .lastUpdateTime(LocalDateTime.now())
+                .build();
     }
 
     /**
@@ -88,16 +88,16 @@ public class CrawlingStatusDTO {
      */
     public CrawlingStatusDTO updateCurrentPage(int page) {
         return CrawlingStatusDTO.builder()
-            .regionName(this.regionName)
-            .currentPage(page)
-            .totalArticles(this.totalArticles)
-            .isCompleted(this.isCompleted)
-            .pendingPages(this.pendingPages)
-            .failedPages(this.failedPages)
-            .retryCount(this.retryCount)
-            .startTime(this.startTime)
-            .lastUpdateTime(LocalDateTime.now())
-            .build();
+                .cortarNo(this.cortarNo)
+                .currentPage(page)
+                .totalArticles(this.totalArticles)
+                .isCompleted(this.isCompleted)
+                .pendingPages(this.pendingPages)
+                .failedPages(this.failedPages)
+                .retryCount(this.retryCount)
+                .startTime(this.startTime)
+                .lastUpdateTime(LocalDateTime.now())
+                .build();
     }
     
     /**
@@ -108,16 +108,16 @@ public class CrawlingStatusDTO {
      */
     public CrawlingStatusDTO incrementTotalArticles(int count) {
         return CrawlingStatusDTO.builder()
-            .regionName(this.regionName)
-            .currentPage(this.currentPage)
-            .totalArticles(this.totalArticles + count)
-            .isCompleted(this.isCompleted)
-            .pendingPages(this.pendingPages)
-            .failedPages(this.failedPages)
-            .retryCount(this.retryCount)
-            .startTime(this.startTime)
-            .lastUpdateTime(LocalDateTime.now())
-            .build();
+                .cortarNo(this.cortarNo)
+                .currentPage(this.currentPage)
+                .totalArticles(this.totalArticles + count)
+                .isCompleted(this.isCompleted)
+                .pendingPages(this.pendingPages)
+                .failedPages(this.failedPages)
+                .retryCount(this.retryCount)
+                .startTime(this.startTime)
+                .lastUpdateTime(LocalDateTime.now())
+                .build();
     }
     
     /**
@@ -131,16 +131,16 @@ public class CrawlingStatusDTO {
         updatedPendingPages.add(page);
         
         return CrawlingStatusDTO.builder()
-            .regionName(this.regionName)
-            .currentPage(this.currentPage)
-            .totalArticles(this.totalArticles)
-            .isCompleted(this.isCompleted)
-            .pendingPages(updatedPendingPages)
-            .failedPages(this.failedPages)
-            .retryCount(this.retryCount)
-            .startTime(this.startTime)
-            .lastUpdateTime(LocalDateTime.now())
-            .build();
+                    .cortarNo(this.cortarNo)
+                    .currentPage(this.currentPage)
+                    .totalArticles(this.totalArticles)
+                    .isCompleted(this.isCompleted)
+                    .pendingPages(updatedPendingPages)
+                    .failedPages(this.failedPages)
+                    .retryCount(this.retryCount)
+                    .startTime(this.startTime)
+                    .lastUpdateTime(LocalDateTime.now())
+                    .build();
     }
     
     /**
@@ -154,16 +154,16 @@ public class CrawlingStatusDTO {
         updatedPendingPages.remove(page);
         
         return CrawlingStatusDTO.builder()
-            .regionName(this.regionName)
-            .currentPage(this.currentPage)
-            .totalArticles(this.totalArticles)
-            .isCompleted(this.isCompleted)
-            .pendingPages(updatedPendingPages)
-            .failedPages(this.failedPages)
-            .retryCount(this.retryCount)
-            .startTime(this.startTime)
-            .lastUpdateTime(LocalDateTime.now())
-            .build();
+                    .cortarNo(this.cortarNo)
+                    .currentPage(this.currentPage)
+                    .totalArticles(this.totalArticles)
+                    .isCompleted(this.isCompleted)
+                    .pendingPages(updatedPendingPages)
+                    .failedPages(this.failedPages)
+                    .retryCount(this.retryCount)
+                    .startTime(this.startTime)
+                    .lastUpdateTime(LocalDateTime.now())
+                    .build();
     }
     
     /**
@@ -177,16 +177,16 @@ public class CrawlingStatusDTO {
         updatedFailedPages.add(page);
         
         return CrawlingStatusDTO.builder()
-            .regionName(this.regionName)
-            .currentPage(this.currentPage)
-            .totalArticles(this.totalArticles)
-            .isCompleted(this.isCompleted)
-            .pendingPages(this.pendingPages)
-            .failedPages(updatedFailedPages)
-            .retryCount(this.retryCount)
-            .startTime(this.startTime)
-            .lastUpdateTime(LocalDateTime.now())
-            .build();
+                    .cortarNo(this.cortarNo)
+                    .currentPage(this.currentPage)
+                    .totalArticles(this.totalArticles)
+                    .isCompleted(this.isCompleted)
+                    .pendingPages(this.pendingPages)
+                    .failedPages(updatedFailedPages)
+                    .retryCount(this.retryCount)
+                    .startTime(this.startTime)
+                    .lastUpdateTime(LocalDateTime.now())
+                    .build();
     }
     
     /**
@@ -200,16 +200,16 @@ public class CrawlingStatusDTO {
         updatedRetryCount.put(page, updatedRetryCount.getOrDefault(page, 0) + 1);
         
         return CrawlingStatusDTO.builder()
-            .regionName(this.regionName)
-            .currentPage(this.currentPage)
-            .totalArticles(this.totalArticles)
-            .isCompleted(this.isCompleted)
-            .pendingPages(this.pendingPages)
-            .failedPages(this.failedPages)
-            .retryCount(updatedRetryCount)
-            .startTime(this.startTime)
-            .lastUpdateTime(LocalDateTime.now())
-            .build();
+                    .cortarNo(this.cortarNo)
+                    .currentPage(this.currentPage)
+                    .totalArticles(this.totalArticles)
+                    .isCompleted(this.isCompleted)
+                    .pendingPages(this.pendingPages)
+                    .failedPages(this.failedPages)
+                    .retryCount(updatedRetryCount)
+                    .startTime(this.startTime)
+                    .lastUpdateTime(LocalDateTime.now())
+                    .build();
     }
     
     /**
@@ -219,16 +219,16 @@ public class CrawlingStatusDTO {
      */
     public CrawlingStatusDTO markAsCompleted() {
         return CrawlingStatusDTO.builder()
-            .regionName(this.regionName)
-            .currentPage(this.currentPage)
-            .totalArticles(this.totalArticles)
-            .isCompleted(true)
-            .pendingPages(this.pendingPages)
-            .failedPages(this.failedPages)
-            .retryCount(this.retryCount)
-            .startTime(this.startTime)
-            .lastUpdateTime(LocalDateTime.now())
-            .build();
+                .cortarNo(this.cortarNo)
+                .currentPage(this.currentPage)
+                .totalArticles(this.totalArticles)
+                .isCompleted(true)
+                .pendingPages(this.pendingPages)
+                .failedPages(this.failedPages)
+                .retryCount(this.retryCount)
+                .startTime(this.startTime)
+                .lastUpdateTime(LocalDateTime.now())
+                .build();
     }
     
     /**

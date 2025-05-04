@@ -38,8 +38,7 @@ public class Migration {
     }
 
     public Migration(Long id, Long cortarNo, CrawlStatus naverStatus, LocalDateTime naverLastCrawledAt,
-                     CrawlStatus zigbangStatus, LocalDateTime zigbangLastCrawledAt,
-                     CrawlStatus dabangStatus, LocalDateTime dabangLastCrawledAt) {
+                     CrawlStatus zigbangStatus, LocalDateTime zigbangLastCrawledAt) {
         this.id = id;
         this.cortarNo = cortarNo;
         this.naverStatus = naverStatus;

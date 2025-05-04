@@ -13,10 +13,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CrawlRepository extends JpaRepository<Crawl, Long> {
-    List<Crawl> findByRegionCode(String regionCode);
-    Optional<Crawl> findByArticleId(String articleId);
     List<Crawl> findByStatus(CrawlStatus status);
-    List<Crawl> findByStatusAndRegionCode(CrawlStatus status, String regionCode);
+
+    Crawl findByCortarNo(Long cortarNo);
 
     @Query("UPDATE Crawl r SET r.naverStatus = :status WHERE r.cortarNo = :cortarNo")
     void updateNaverCrawlStatus(@Param("cortarNo") Long cortarNo,

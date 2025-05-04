@@ -2,7 +2,11 @@ package com.zipline.domain.entity.crawl;
 
 import com.zipline.domain.entity.enums.CrawlStatus;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import jakarta.persistence.EnumType;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.annotation.Id;

@@ -43,6 +43,7 @@ public class RegionDTO {
             .collect(Collectors.toList());
     }
 
+    //todo: 상태관리 이전대애서 구현필요
     public static Region createKoreaRegion() {
         return Region.builder()
                 .cortarNo(0000000000L)
@@ -51,9 +52,8 @@ public class RegionDTO {
                 .centerLat(36.5)
                 .centerLon(127.5)
                 .parent(null)
-                .naverStatus(CrawlStatus.NEW)
-                .zigbangStatus(CrawlStatus.NEW)
-                .dabangStatus(CrawlStatus.NEW)
+                //.naverStatus(CrawlStatus.NEW)
+                //.zigbangStatus(CrawlStatus.NEW)
                 .build();
     }
 
@@ -74,9 +74,8 @@ public class RegionDTO {
                 .centerLat(this.getCenterLat())
                 .centerLon(this.getCenterLon())
                 .parent(parent)
-                .naverStatus(CrawlStatus.NEW)
-                .zigbangStatus(CrawlStatus.NEW)
-                .dabangStatus(CrawlStatus.NEW)
+                //.naverStatus(CrawlStatus.NEW)
+                //.zigbangStatus(CrawlStatus.NEW)
                 .build();
     }
 }

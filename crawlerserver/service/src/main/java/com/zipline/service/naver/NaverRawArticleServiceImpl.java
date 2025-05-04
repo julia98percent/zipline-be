@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.zipline.infrastructure.crawl.CrawlRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 	private final ObjectMapper objectMapper;
 	private final RegionRepository regionRepository;
 	private final NaverRawArticleRepository naverRawArticleRepository;
+	private final CrawlRepository crawlRepository;
 
 	private static final String BASE_URL = "https://m.land.naver.com/cluster/ajax/articleList";
 	private static final int RECENT_DAYS = 14; // 최근 2일
@@ -57,8 +59,7 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 				PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
 				log.info("페이지 요청: {}", pageRequest);
 
-				Page<Long> regionPage = regionRepository.findRegionsNeedingUpdateForNaverWithPage(level, cutoffDate,
-					pageRequest);
+				Page<Long> regionPage = crawlRepository.findRegionsNeedingCrawlingUpdateForNaverWithPage(level, cutoffDate, pageRequest);
 				log.info("조회된 지역 수: {}", regionPage.getContent().size());
 
 				if (regionPage.isEmpty()) {
@@ -77,7 +78,7 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 						crawlAndSaveRawArticlesForRegion(cortarNo);
 
 						// 수집 완료 후 최종 수집 시간 업데이트
-						regionRepository.updateNaverLastCrawledAt(cortarNo, LocalDateTime.now());
+						crawlRepository.updateNaverLastCrawledAt(cortarNo, LocalDateTime.now());
 						log.info("지역 코드 {} 최종 수집 시간 업데이트 완료", cortarNo);
 					} catch (Exception e) {
 						log.error("지역 코드 {} 처리 중 오류 발생: {}", cortarNo, e.getMessage(), e);
@@ -108,7 +109,7 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 		log.info("네이버 원본 매물 정보 수집 시작 - 지역 코드: {}", cortarNo);
 
 		// 상태 업데이트 - 직접 리포지토리 메서드 사용
-		regionRepository.updateNaverStatus(cortarNo, CrawlStatus.PROCESSING);
+		crawlRepository.updateNaverCrawlStatus(cortarNo, CrawlStatus.PROCESSING);
 		log.info("지역 코드 {} 상태 업데이트: {}", cortarNo, CrawlStatus.PROCESSING);
 
 		try {
@@ -150,7 +151,7 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 			}
 
 			// 성공 상태 업데이트 - 직접 리포지토리 메서드 사용
-			regionRepository.updateNaverStatus(cortarNo, CrawlStatus.COMPLETED);
+			crawlRepository.updateNaverCrawlStatus(cortarNo, CrawlStatus.COMPLETED);
 			log.info("지역 코드 {} 상태 업데이트: {}", cortarNo, CrawlStatus.COMPLETED);
 
 			Region region = regionRepository.findByCortarNo(cortarNo)
@@ -161,7 +162,7 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 			log.error("네이버 원본 매물 정보 수집 중 오류 발생: {}", e.getMessage(), e);
 
 			// 실패 상태 업데이트 - 직접 리포지토리 메서드 사용
-			regionRepository.updateNaverStatus(cortarNo, CrawlStatus.FAILED);
+			crawlRepository.updateNaverCrawlStatus(cortarNo, CrawlStatus.FAILED);
 			log.info("지역 코드 {} 상태 업데이트: {}", cortarNo, CrawlStatus.FAILED);
 		}
 	}
