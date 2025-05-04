@@ -41,6 +41,7 @@ public interface NaverRawArticleRepository extends JpaRepository<NaverRawArticle
      */
     Page<NaverRawArticle> findByCortarNoAndMigrationStatus(Long cortarNo, MigrationStatus status, Pageable pageable);
 
+
     /**
      * 마이그레이션 상태 일괄 업데이트
      */

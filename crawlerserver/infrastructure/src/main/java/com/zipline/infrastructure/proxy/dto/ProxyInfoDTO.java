@@ -1,8 +1,11 @@
 package com.zipline.infrastructure.proxy.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import java.time.LocalDateTime;
-
-import lombok.*;
 
 @Getter
 @Builder
@@ -132,4 +135,4 @@ public class ProxyInfoDTO {
     public boolean isUsable(double minResponseTime, int minUptime) {
         return responseTime <= minResponseTime && uptime >= minUptime;
     }
-} 
+}

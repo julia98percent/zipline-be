@@ -8,5 +8,4 @@ public class TaskException extends BaseException {
     public TaskException(TaskErrorCode errorCode) {
         super(errorCode);
     }
-
 }

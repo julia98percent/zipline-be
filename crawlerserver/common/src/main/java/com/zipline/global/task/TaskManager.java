@@ -1,13 +1,19 @@
 package com.zipline.global.task;
 
+import com.zipline.global.task.dto.ProgressDto;
+import com.zipline.global.task.enums.TaskStatus;
+import com.zipline.global.task.enums.TaskType;
+
 // 작업 관리 인터페이스
 public interface TaskManager {
-    boolean isTaskRunning(String taskType);
-    Task createTask(String taskType);
+    boolean isTaskRunning(TaskType taskType);
+    Task createTask(TaskType taskType);
 
-    void updateTaskStatus(Task task);
+    void updateTaskStatus(TaskType taskType, TaskStatus status);
 
-    Task createRegionalTask(String taskType, Long targetRegion);
+    Task createRegionalTask(TaskType taskType, Long targetRegion);
 
-    Task getTaskById(String taskId);
+    Task getTaskByType(TaskType taskType);
+
+    void removeTask(TaskType taskType);
 }

@@ -1,198 +1,180 @@
 package com.zipline.service.migration;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zipline.domain.entity.enums.MigrationStatus;
+import com.zipline.domain.entity.naver.NaverRawArticle;
+import com.zipline.domain.entity.publicitem.PropertyArticle;
+import com.zipline.global.exception.migration.MigrationException;
+import com.zipline.global.exception.migration.errorcode.MigrationErrorCode;
+import com.zipline.global.exception.task.TaskException;
+import com.zipline.global.exception.task.errorcode.TaskErrorCode;
 import com.zipline.global.task.Task;
 import com.zipline.global.task.TaskManager;
 import com.zipline.global.task.dto.TaskResponseDto;
+import com.zipline.global.task.enums.TaskStatus;
+import com.zipline.global.task.enums.TaskType;
+import com.zipline.infrastructure.migration.MigrationRepository;
+import com.zipline.infrastructure.naver.NaverRawArticleRepository;
+import com.zipline.infrastructure.publicItem.PropertyArticleRepository;
 import com.zipline.infrastructure.region.RegionRepository;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.zipline.domain.entity.enums.MigrationStatus;
-import com.zipline.service.migration.dto.MigrationStatisticsDTO;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class NaverMigrationServiceImpl implements NaverMigrationService {
-	private final NaverMigrationService migrationService;
 	private final TaskManager taskManager;
 	private final TaskExecutor taskExecutor;
 	private final RegionRepository regionRepository;
+	private final NaverRawArticleRepository naverRawArticleRepository;
+	private final PropertyArticleRepository propertyArticleRepository;
+	private final ObjectMapper objectMapper;
 
-	private static final String FULL_MIGRATION_TASK = "NAVER_FULL_MIGRATION";
-	private static final String REGION_MIGRATION_TASK = "NAVER_REGION_MIGRATION";
-	private static final String RETRY_FAILED_TASK = "NAVER_RETRY_FAILED";
+	private static final int BATCH_SIZE = 100;
+	private static final int MAX_RETRY_COUNT = 3;
 
 	@Override
 	public TaskResponseDto startFullMigration() {
-		// 작업 생성
-		Task task = taskManager.createTask(FULL_MIGRATION_TASK);
-
-		// 비동기 작업 실행
-		CompletableFuture.runAsync(() -> {
-			try {
-				task.markAsRunning();
-				taskManager.updateTaskStatus(task);
-
-				log.info("=== 네이버 원본 매물 데이터 마이그레이션 작업 시작 ===");
-
-				// 1. 모든 지역 코드 조회
-				List<Long> allRegionCodes = regionRepository.findAllCortarNos();
-				log.info("총 {} 개 지역에 대한 마이그레이션 시작", allRegionCodes.size());
-
-				task.updateProgress(allRegionCodes.size(), 0, 0, 0);
-				taskManager.updateTaskStatus(task);
-
-				int totalRegions = allRegionCodes.size();
-				int processedRegions = 0;
-				int successRegions = 0;
-				int failedRegions = 0;
-
-				// 2. 각 지역별로 마이그레이션 수행
-				for (Long cortarNo : allRegionCodes) {
-					try {
-						log.info("지역 {} 마이그레이션 시작 ({}/{})",
-								cortarNo, ++processedRegions, totalRegions);
-
-						// 지역별 마이그레이션 수행
-						migrationService.migrateRegion(cortarNo);
-						log.info("지역 {} 마이그레이션 완료", cortarNo);
-						successRegions++;
-					} catch (Exception e) {
-						log.error("지역 {} 마이그레이션 중 오류 발생: {}", cortarNo, e.getMessage());
-						failedRegions++;
-					}
-
-					// 진행 상황 업데이트
-					task.updateProgress(totalRegions, processedRegions, successRegions, failedRegions);
-					taskManager.updateTaskStatus(task);
-				}
-
-				// 3. 실패한 마이그레이션 재시도
-				migrationService.retryFailedMigrations();
-
-				task.markAsCompleted();
-				taskManager.updateTaskStatus(task);
-				log.info("=== 네이버 원본 매물 데이터 마이그레이션 작업 완료 ===");
-			} catch (Exception e) {
-				log.error("마이그레이션 작업 중 오류 발생: {}", e.getMessage(), e);
-				task.markAsFailed(e.getMessage());
-				taskManager.updateTaskStatus(task);
-			}
-		}, taskExecutor);
-
+		if (taskManager.isTaskRunning(TaskType.MIGRATION)){
+			throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);}
+		Task task = taskManager.createTask(TaskType.MIGRATION);
+		try {
+			CompletableFuture.runAsync(() -> {
+				executeFullMigrationAsync(task);
+			}, taskExecutor);
+		} catch (Exception e) {
+			log.error("마이그레이션 작업 실행중 오류 발생: {}", e.getMessage(), e);
+			task.markAsFailed(e.getMessage());
+			taskManager.updateTaskStatus(TaskType.MIGRATION, TaskStatus.FAILED);
+		}
 		return TaskResponseDto.fromTask(task);
+	}
+
+	private void executeFullMigrationAsync(Task task) {
+		task.markAsRunning();
+		taskManager.updateTaskStatus(TaskType.MIGRATION, TaskStatus.RUNNING);
+		log.info("=== 네이버 원본 매물 데이터 마이그레이션 작업 시작 ===");
+		List<Long> allRegionCodes = regionRepository.findAllCortarNos();
+		log.info("총 {} 개 지역에 대한 마이그레이션 시작", allRegionCodes.size());
+		task.markAsRunning();
+		for (Long cortarNo : allRegionCodes) {
+			try {
+				executeRegionMigrationAsync(task, cortarNo);
+				log.info("지역 {} 마이그레이션 완료", cortarNo);
+				task.markAsCompleted();
+			} catch (Exception e) {
+				log.error("지역 {} 마이그레이션 중 오류 발생: {}", cortarNo, e.getMessage());
+				task.markAsFailed(e.getMessage());
+			}
+		}
+		log.info("=== 네이버 원본 매물 데이터 마이그레이션 작업 완료 ===");
 	}
 
 	@Override
 	public TaskResponseDto migrateRegion(Long regionId) {
-		String taskType = REGION_MIGRATION_TASK + "_" + regionId;
+		if (taskManager.isTaskRunning(TaskType.MIGRATION)){
+			log.error("마이그레이션 작업이 이미 실행 중입니다.");
+			throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);
+		}
+		Task task = taskManager.createRegionalTask(TaskType.MIGRATION, regionId);
+		try {
+			CompletableFuture.runAsync(() -> {
+				executeRegionMigrationAsync(task, regionId);
+			}, taskExecutor);
+		} catch (Exception e) {
+			log.error("지역 {} 마이그레이션 작업 중 오류 발생: {}", regionId, e.getMessage(), e);
+			task.markAsFailed(e.getMessage());
+			// 추후 실패작업 재실행 구현시 삭제
+			taskManager.updateTaskStatus(TaskType.MIGRATION, TaskStatus.FAILED);
+		}
+		taskManager.removeTask(TaskType.MIGRATION);
+		return TaskResponseDto.fromTask(task);
+	}
 
-		// 작업 생성
-		Task task = taskManager.createRegionalTask(taskType, regionId);
+	private void executeRegionMigrationAsync(Task task, Long regionId) {
+		log.info("지역 코드 {} 원본 매물 데이터 마이그레이션 시작", regionId);
+		boolean hasMoreData = true;
+		int pageNumber = 0;
+		int failedCount = 0;
 
-		// 비동기 작업 실행
-		CompletableFuture.runAsync(() -> {
-			try {
-				task.markAsRunning();
-				taskManager.updateTaskStatus(task);
+		while (hasMoreData) {
+			PageRequest pageRequest = PageRequest.of(0, BATCH_SIZE);
+			Page<NaverRawArticle> pendingArticle = naverRawArticleRepository.findByCortarNoAndMigrationStatus(regionId, MigrationStatus.PENDING, pageRequest);
+			int batchSize = pendingArticle.getSize();
 
-				log.info("지역 코드 {} 원본 매물 데이터 마이그레이션 시작", regionId);
-
-				// 마이그레이션 수행
-				migrationService.migrateRegion(regionId);
-
-				// 마이그레이션 통계 조회
-				MigrationStatisticsDTO stats = migrationService.getMigrationStatisticsForRegion(regionId);
-
-				// 진행 상황 업데이트
-				task.updateProgress(
-						stats.getTotalArticles(),
-						stats.getCompletedArticles() + stats.getFailedArticles(),
-						stats.getCompletedArticles(),
-						stats.getFailedArticles()
-				);
-
-				task.markAsCompleted();
-				taskManager.updateTaskStatus(task);
-				log.info("지역 코드 {} 원본 매물 데이터 마이그레이션 완료", regionId);
-			} catch (Exception e) {
-				log.error("지역 {} 마이그레이션 작업 중 오류 발생: {}", regionId, e.getMessage(), e);
-				task.markAsFailed(e.getMessage());
-				taskManager.updateTaskStatus(task);
+			for (NaverRawArticle rawArticle : pendingArticle) {
+				try {
+					migrateRawArticle(rawArticle);
+				} catch (Exception e) {
+					log.error("지역 코드 {} 마이그레이션 중 오류 발생: {}", regionId, e.getMessage(), e);
+					task.markAsFailed(e.getMessage());
+					failedCount++;
+					throw new MigrationException(MigrationErrorCode.MIGRATION_FAILED);
+				}
 			}
-		}, taskExecutor);
-
-		return TaskResponseDto.fromTask(task);
-	}
-
-	@Override
-	public TaskResponseDto retryFailedMigrations() {
-		// 작업 생성
-		Task task = taskManager.createTask(RETRY_FAILED_TASK);
-
-		// 비동기 작업 실행
-		CompletableFuture.runAsync(() -> {
-			try {
-				task.markAsRunning();
-				taskManager.updateTaskStatus(task);
-
-				log.info("=== 실패한 마이그레이션 재시도 시작 ===");
-
-				// 실패한 마이그레이션 수 확인
-				long failedCount = migrationService.getMigrationStatistics().getFailedArticles();
-
-				// 작업 시작
-				task.updateProgress(failedCount, 0, 0, 0);
-				taskManager.updateTaskStatus(task);
-
-				// 실패한 마이그레이션 재시도
-				migrationService.retryFailedMigrations();
-
-				// 마이그레이션 통계 조회
-				MigrationStatisticsDTO stats = migrationService.getMigrationStatistics();
-
-				// 진행 상황 업데이트
-				task.updateProgress(
-						failedCount,
-						failedCount,
-						failedCount - stats.getFailedArticles(),
-						stats.getFailedArticles()
-				);
-
-				task.markAsCompleted();
-				taskManager.updateTaskStatus(task);
-				log.info("=== 실패한 마이그레이션 재시도 완료 ===");
-			} catch (Exception e) {
-				log.error("실패한 마이그레이션 재시도 중 오류 발생: {}", e.getMessage(), e);
-				task.markAsFailed(e.getMessage());
-				taskManager.updateTaskStatus(task);
+			pageNumber++;
+			hasMoreData = pendingArticle.hasNext();
+			// 메모리 관리를 위해 주기적으로 GC 힌트
+			if (pageNumber % 10 == 0) {
+				System.gc();
 			}
-		}, taskExecutor);
+		}
+		if (failedCount > 0) {
+			log.error("{}개 지역 마이그레이션 중 오류 발생",  failedCount);
+		}
+		log.info("지역 코드 {} 원본 매물 데이터 마이그레이션 완료", regionId);
+	}
 
+	@Transactional
+	private void migrateRawArticle(NaverRawArticle rawArticle){
+		log.info("네이버 원본 매물 데이터 마이그레이션 시작", rawArticle.getArticleId());
+		try{
+			JsonNode articleNode = objectMapper.readTree(rawArticle.getRawData());
+
+			String ArticleId = articleNode.get("atclNo").asText();
+			Optional<PropertyArticle> existingArticle = propertyArticleRepository.findByArticleId(ArticleId);
+
+			PropertyArticle article = PropertyArticle.createOrUpdateFromNaverRawArticle(
+					articleNode,
+					String.valueOf(rawArticle.getCortarNo()),
+					existingArticle.orElse(null)
+			);
+			propertyArticleRepository.save(article);
+			rawArticle.updateMigrationStatus(MigrationStatus.COMPLETED);
+			naverRawArticleRepository.save(rawArticle);
+			log.info("네이버 원본 매물 데이터 마이그레이션 완료", rawArticle.getArticleId());
+		} catch (Exception e) {
+			log.error("네이버 원본 매물 데이터 마이그레이션 중 오류 발생: {}", e.getMessage(), e);
+			throw new MigrationException(MigrationErrorCode.MIGRATION_FAILED);
+		}
+	}
+
+	@Override
+	public TaskResponseDto getTaskStatus(TaskType taskName) {
+		Task task = taskManager.getTaskByType(taskName);
 		return TaskResponseDto.fromTask(task);
 	}
 
-	@Override
-	public TaskResponseDto getTaskStatus(String taskId) {
-		Task task = taskManager.getTaskById(taskId);
-		return TaskResponseDto.fromTask(task);
-	}
-
-	@Override
-	public MigrationStatisticsDTO getMigrationStatistics() {
-		return migrationService.getMigrationStatistics();
-	}
-
-	@Override
-	public MigrationStatisticsDTO getMigrationStatisticsForRegion(Long cortarNo) {
-		return migrationService.getMigrationStatisticsForRegion(cortarNo);
-	}
+//	@Override
+//	public MigrationStatisticsDTO getMigrationStatistics() {
+//		MigrationStatisticsDTO statistics = migrationRepository.getMigrationStatistics();
+//		return statics;
+//	}
+//
+//	@Override
+//	public MigrationStatisticsDTO getMigrationStatisticsForRegion(Long cortarNo) {
+//		MigrationStatisticsDTO statistics = migrationRepository.getMigrationStatisticsForRegion(cortarNo);
+//		return statics;
+//	}
 }

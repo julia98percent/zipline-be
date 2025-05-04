@@ -75,9 +75,6 @@ public class PropertyArticle {
     @Enumerated(EnumType.STRING)
     private Platform platform;
 
-    @Column(name = "platform_url")
-    private String platformUrl;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -92,13 +89,10 @@ public class PropertyArticle {
      * @return 생성된 PropertyArticle 객체
      */
     public static PropertyArticle createFromNaverArticle(JsonNode articleNode, Region region) {
-        String articleId = articleNode.path("atclNo").asText();
-        
         // 거래 유형에 따른 가격 정보와 카테고리 설정
         PriceInfo priceInfo = extractPriceInfo(articleNode);
-        
         return PropertyArticle.builder()
-            .articleId(articleId)
+            .articleId(articleNode.path("atclNo").asText())
             .regionCode(region.getCortarNo().toString())
             .category(priceInfo.category)
             .buildingName(articleNode.path("atclNm").asText())
@@ -112,7 +106,6 @@ public class PropertyArticle {
             .supplyArea(parseDoubleOrNull(articleNode.path("spc1").asText()))
             .exclusiveArea(parseDoubleOrNull(articleNode.path("spc2").asText()))
             .platform(Platform.NAVER)
-            .platformUrl("https://m.land.naver.com/article/" + articleId)
             .createdAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
             .build();
@@ -145,7 +138,6 @@ public class PropertyArticle {
             .supplyArea(parseDoubleOrNull(articleNode.path("spc1").asText()))
             .exclusiveArea(parseDoubleOrNull(articleNode.path("spc2").asText()))
             .platform(article.getPlatform())
-            .platformUrl(article.getPlatformUrl())
             .createdAt(article.getCreatedAt())
             .updatedAt(LocalDateTime.now())
             .build();
@@ -154,7 +146,6 @@ public class PropertyArticle {
     /**
      * 네이버 매물 JSON 데이터로부터 PropertyArticle 객체를 생성하거나 업데이트합니다.
      * 
-     * @param naverRawArticle 네이버 원본 매물 데이터
      * @param existingArticle 기존 매물 정보 (없으면 null)
      * @return 생성 또는 업데이트된 PropertyArticle 객체
      */
@@ -178,9 +169,8 @@ public class PropertyArticle {
             .latitude(parseDoubleOrNull(articleNode.path("lat").asText()))
             .supplyArea(parseDoubleOrNull(articleNode.path("spc1").asText()))
             .exclusiveArea(parseDoubleOrNull(articleNode.path("spc2").asText()))
-            .platform(Platform.NAVER)
-            .platformUrl("https://m.land.naver.com/article/" + articleId);
-            
+            .platform(Platform.NAVER);
+
         if (existingArticle != null) {
             // 기존 매물이 있는 경우 ID와 생성 시간 유지
             builder.id(existingArticle.getId())
@@ -253,7 +243,7 @@ public class PropertyArticle {
             return 0L;
         }
     }
-    
+
     /**
      * 가격 정보를 담는 내부 클래스
      */
@@ -279,7 +269,6 @@ public class PropertyArticle {
                 .articleId(articleId)
                 .regionCode(regionCode)
                 .platform(platform)
-                .platformUrl(platformUrl)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -305,7 +294,6 @@ public class PropertyArticle {
                 .supplyArea(this.supplyArea)
                 .exclusiveArea(this.exclusiveArea)
                 .platform(this.platform)
-                .platformUrl(this.platformUrl)
                 .createdAt(this.createdAt)
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -331,7 +319,6 @@ public class PropertyArticle {
                 .supplyArea(this.supplyArea)
                 .exclusiveArea(this.exclusiveArea)
                 .platform(this.platform)
-                .platformUrl(this.platformUrl)
                 .createdAt(this.createdAt)
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -357,7 +344,6 @@ public class PropertyArticle {
                 .supplyArea(this.supplyArea)
                 .exclusiveArea(this.exclusiveArea)
                 .platform(this.platform)
-                .platformUrl(this.platformUrl)
                 .createdAt(this.createdAt)
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -383,7 +369,6 @@ public class PropertyArticle {
                 .supplyArea(this.supplyArea)
                 .exclusiveArea(this.exclusiveArea)
                 .platform(this.platform)
-                .platformUrl(this.platformUrl)
                 .createdAt(this.createdAt)
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -409,7 +394,6 @@ public class PropertyArticle {
                 .supplyArea(this.supplyArea)
                 .exclusiveArea(this.exclusiveArea)
                 .platform(this.platform)
-                .platformUrl(this.platformUrl)
                 .createdAt(this.createdAt)
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -435,7 +419,6 @@ public class PropertyArticle {
                 .supplyArea(supplyArea)
                 .exclusiveArea(exclusiveArea)
                 .platform(this.platform)
-                .platformUrl(this.platformUrl)
                 .createdAt(this.createdAt)
                 .updatedAt(LocalDateTime.now())
                 .build();

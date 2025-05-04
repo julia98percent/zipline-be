@@ -1,6 +1,7 @@
 package com.zipline.global.task.dto;
 
 import com.zipline.global.task.Task;
+import com.zipline.global.task.enums.TaskType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,8 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class TaskResponseDto {
-    private String taskId;
-    private String taskType;
+    private TaskType taskType;
     private String taskStatus;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -20,14 +20,12 @@ public class TaskResponseDto {
 
     public static TaskResponseDto fromTask(Task task) {
         return TaskResponseDto.builder()
-                .taskId(task.getId())
                 .taskType(task.getType())
                 .taskStatus(task.getStatus().name())
                 .startTime(task.getStartTime())
                 .endTime(task.getEndTime())
                 .message(getStatusMessage(task))
                 .targetRegion(task.getTargetRegion())
-                .progress(task.getProgress())
                 .build();
     }
 
