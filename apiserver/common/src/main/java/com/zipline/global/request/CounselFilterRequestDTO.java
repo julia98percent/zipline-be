@@ -20,4 +20,10 @@ public class CounselFilterRequestDTO {
 
 	@Schema(description = "조회 종료일 (포함)", example = "2025-04-30")
 	private LocalDate endDate;
+
+	@Schema(description = "상담 종류", example = "PURCHASE")
+	private String type;
+
+	@Schema(description = "의뢰 마감 여부", example = "true")
+	private Boolean completed;
 }
