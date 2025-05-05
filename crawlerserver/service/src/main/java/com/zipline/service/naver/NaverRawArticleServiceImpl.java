@@ -41,11 +41,9 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 
 	/**
 	 * 특정 레벨의 모든 지역에 대한 원본 매물 정보를 수집합니다.
-	 *
-	 * @param level 지역 레벨
 	 */
-	public void crawlAndSaveRawArticlesByLevel(int level) {
-		log.info("=== 레벨 {} 네이버 원본 매물 정보 수집 시작 ===", level);
+	public void crawlAndSaveRawArticles() {
+		log.info("=== 레벨 {} 네이버 원본 매물 정보 수집 시작 ===");
 		try {
 			LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
 			log.info("수집 기준일: {}", cutoffDate);
@@ -59,7 +57,7 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 				PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
 				log.info("페이지 요청: {}", pageRequest);
 
-				Page<Long> regionPage = crawlRepository.findRegionsNeedingCrawlingUpdateForNaverWithPage(level, cutoffDate, pageRequest);
+				Page<Long> regionPage = crawlRepository.findRegionsNeedingCrawlingUpdateForNaverWithPage(cutoffDate, pageRequest);
 				log.info("조회된 지역 수: {}", regionPage.getContent().size());
 
 				if (regionPage.isEmpty()) {
@@ -93,7 +91,7 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 				hasMoreData = pageNumber < regionPage.getTotalPages();
 			}
 
-			log.info("=== 레벨 {} 네이버 원본 매물 정보 수집 완료 ===", level);
+			log.info("=== 레벨 {} 네이버 원본 매물 정보 수집 완료 ===");
 		} catch (Exception e) {
 			log.error("네이버 원본 매물 정보 수집 중 오류 발생: {}", e.getMessage(), e);
 			throw e;

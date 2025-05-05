@@ -32,18 +32,14 @@ public interface MigrationRepository {
     /**
      * 네이버 크롤링이 필요한 지역 목록 조회
      */
-    @Query("SELECT r FROM Crawl r WHERE r.level = :level " +
-            "AND (r.naverLastCrawledAt < :cutoffDate " +
-            "OR r.naverStatus != 'COMPLETED')")
+    @Query("SELECT r FROM Crawl r WHERE r.level = :(r.naverLastCrawledAt < :cutoffDate " + "OR r.naverStatus != 'COMPLETED')")
     List<Region> findMigrationsNeedingUpdateForNaver(@Param("level") int level,
                                                   @Param("cutoffDate") LocalDateTime cutoffDate);
 
     /**
      * 네이버 크롤링이 필요한 지역 코드 페이징 조회
      */
-    @Query("SELECT r.cortarNo FROM Crawl r WHERE r.level = :level " +
-            "AND (r.naverLastCrawledAt < :cutoffDate " +
-            "OR r.naverStatus != 'COMPLETED')")
+    @Query("SELECT r.cortarNo FROM Crawl r WHERE(r.naverLastCrawledAt < :cutoffDate " + "OR r.naverStatus != 'COMPLETED')")
     Page<Long> findMigrationsNeedingUpdateForNaverWithPage(@Param("level") int level,
                                                         @Param("cutoffDate") LocalDateTime cutoffDate,
                                                         Pageable pageable);

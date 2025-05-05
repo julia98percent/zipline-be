@@ -25,7 +25,7 @@ public class NaverRawArticleController {
 	@GetMapping("/all")
 	public ResponseEntity<ApiResponse<Void>> crawlAllRawArticleFromNaver() {
 		return checkAndExecute(crawlingStatusManager, 
-			() -> naverRawArticleService.crawlAndSaveRawArticlesByLevel(3), 
+			() -> naverRawArticleService.crawlAndSaveRawArticles(), 
 			"레벨 " + 3 + " 원본 매물 정보 수집이 시작되었습니다.");
 	}
 

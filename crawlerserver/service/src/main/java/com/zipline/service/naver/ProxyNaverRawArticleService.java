@@ -3,11 +3,9 @@ package com.zipline.service.naver;
 public interface ProxyNaverRawArticleService {
 
 	/**
-	 * 특정 레벨의 모든 지역에 대한 원본 매물 정보를 수집합니다.
-	 *
-	 * @param level 지역 레벨
+	 * 모든 지역에 대한 원본 매물 정보를 수집합니다.
 	 */
-	void crawlAndSaveRawArticlesByLevel(int level);
+	void crawlAndSaveRawArticles();
 
 	/**
 	 * 특정 지역의 원본 매물 정보를 수집하고 저장합니다. (지역 코드 기준)

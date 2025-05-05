@@ -71,16 +71,14 @@ public class ProxyNaverRawArticleServiceImpl implements ProxyNaverRawArticleServ
 	private long retryDelayMs;
 
 	/**
-	 * 특정 레벨의 모든 지역에 대한 원본 매물 정보를 수집합니다.
-	 *
-	 * @param level 지역 레벨
+	 * 모든 지역에 대한 원본 매물 정보를 수집합니다.
 	 */
-	public void crawlAndSaveRawArticlesByLevel(int level) {
-		log.info("[Thread-{}] === 프록시를 통한 레벨 {} 네이버 원본 매물 정보 수집 시작 ===", Thread.currentThread().getId(), level);
+	public void crawlAndSaveRawArticles() {
+		log.info("[Thread-{}] === 프록시를 통한 네이버 원본 매물 정보 수집 시작 ===", Thread.currentThread().getId());
 		try {
 			LocalDateTime cutoffDate = LocalDateTime.now().minusDays(14); // 이주일 전
 			log.info("[Thread-{}] 수집 기준일: {}", Thread.currentThread().getId(), cutoffDate);
-			List<Crawl> regionsToUpdate = crawlRepository.findRegionsNeedingCrawlingUpdateForNaver(level, cutoffDate);
+			List<Crawl> regionsToUpdate = crawlRepository.findRegionsNeedingCrawlingUpdateForNaver(cutoffDate);
 			log.info("[Thread-{}] 처리할 총 지역 수: {}", Thread.currentThread().getId(), regionsToUpdate.size());
 
 			// 지역 간 병렬 처리를 위한 CompletableFuture 리스트
@@ -113,7 +111,7 @@ public class ProxyNaverRawArticleServiceImpl implements ProxyNaverRawArticleServ
 			// 모든 지역 처리가 완료될 때까지 대기
 			CompletableFuture.allOf(regionFutures.toArray(new CompletableFuture[0])).join();
 
-			log.info("[Thread-{}] === 프록시를 통한 레벨 {} 네이버 원본 매물 정보 수집 완료 ===", Thread.currentThread().getId(), level);
+			log.info("[Thread-{}] === 프록시를 통한 네이버 원본 매물 정보 수집 완료 ===", Thread.currentThread().getId());
 		} catch (Exception e) {
 			log.error("[Thread-{}] 네이버 원본 매물 정보 수집 중 오류 발생: {}", Thread.currentThread().getId(), e.getMessage(), e);
 			throw e;

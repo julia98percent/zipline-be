@@ -27,7 +27,7 @@ public class NaverProxyRawArticleController {
 	@GetMapping("/all")
 	public ResponseEntity<ApiResponse<Void>> crawlAllRawArticleFromNaverWithProxy() {
 		return checkAndExecute(crawlingStatusManager,
-			() -> proxyNaverRawArticleService.crawlAndSaveRawArticlesByLevel(3),
+			() -> proxyNaverRawArticleService.crawlAndSaveRawArticles(),
 			"프록시를 통한 레벨 원본 매물 정보 수집이 시작되었습니다.");
 	}
 

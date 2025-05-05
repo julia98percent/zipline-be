@@ -1,15 +1,12 @@
 package com.zipline.domain.entity.migration;
-
 import com.zipline.domain.entity.enums.CrawlStatus;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.data.annotation.Id;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "crawl")
+@Table(name = "migrations")
 @Getter
 @Builder
 public class Migration {
@@ -24,14 +21,14 @@ public class Migration {
     @Enumerated(EnumType.STRING)
     private CrawlStatus naverStatus;
 
-    @Column(name = "naver_last_crawled_at")
+    @Column(name = "naver_last_migrated_at")
     private LocalDateTime naverLastMigratedAt;
 
     @Column(name = "zigbang_status")
     @Enumerated(EnumType.STRING)
     private CrawlStatus zigbangStatus;
 
-    @Column(name = "zigbang_last_crawled_at")
+    @Column(name = "zigbang_last_migrated_at")
     private LocalDateTime zigbangLastMigratedAt;
 
     protected Migration() {
@@ -47,7 +44,7 @@ public class Migration {
         this.zigbangLastMigratedAt = zigbangLastCrawledAt;
     }
 
-    public Migration CreateCrawl(Long cortarNo) {
+    public Migration CreateMigration(Long cortarNo) {
         this.cortarNo = cortarNo;
         this.naverStatus = CrawlStatus.NEW;
         this.zigbangStatus = CrawlStatus.NEW;
@@ -56,7 +53,7 @@ public class Migration {
         return this;
     }
 
-    public Migration UpdateCrawl(Long cortarNo) {
+    public Migration UpdateMigration(Long cortarNo) {
         this.cortarNo = cortarNo;
         this.naverStatus = CrawlStatus.NEW;
         this.zigbangStatus = CrawlStatus.NEW;
@@ -68,7 +65,7 @@ public class Migration {
     /**
      * 네이버 크롤링 상태를 업데이트합니다.
      */
-    public Migration updateNaverStatus(CrawlStatus status) {
+    public Migration updateNaverMigrationStatus(CrawlStatus status) {
         this.naverStatus = status;
         this.naverLastMigratedAt = LocalDateTime.now();
         return this;
@@ -77,7 +74,7 @@ public class Migration {
     /**
      * 직방 크롤링 상태를 업데이트합니다.
      */
-    public Migration updateZigbangStatus(CrawlStatus status) {
+    public Migration updateZigbangMigrationStatus(CrawlStatus status) {
         this.zigbangStatus = status;
         this.zigbangLastMigratedAt = LocalDateTime.now();
         return this;

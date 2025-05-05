@@ -6,15 +6,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import jakarta.persistence.Id;
 import jakarta.persistence.EnumType;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "crawl")
+@Table(name = "crawls")
 @Getter
 @Builder
 public class Crawl {
