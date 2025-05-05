@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.counsel.Counsel;
@@ -30,6 +31,7 @@ import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.counsel.CounselDetailRepository;
 import com.zipline.repository.counsel.CounselRepository;
 import com.zipline.repository.customer.CustomerRepository;
+import com.zipline.repository.region.RegionRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.counsel.dto.request.CounselCreateRequestDTO;
 import com.zipline.service.counsel.dto.request.CounselModifyRequestDTO;
@@ -48,6 +50,7 @@ public class CounselServiceImpl implements CounselService {
 	private final UserRepository userRepository;
 	private final CounselDetailRepository counselDetailRepository;
 	private final AgentPropertyRepository agentPropertyRepository;
+	private final RegionRepository regionRepository;
 
 	@Transactional
 	public Map<String, Long> createCounsel(Long customerUid, CounselCreateRequestDTO requestDTO,
@@ -85,7 +88,12 @@ public class CounselServiceImpl implements CounselService {
 
 		List<CounselDetail> savedCounselDetails = counselDetailRepository.findByCounselUidAndDeletedAtIsNull(
 			counselUid);
-		return new CounselResponseDTO(savedCounsel, savedCounselDetails);
+		String preferredRegion = null;
+		if (StringUtils.hasText(savedCounsel.getCustomer().getLegalDistrictCode())) {
+			preferredRegion = regionRepository.findWithParentsByDistrictCode(
+				Long.valueOf(savedCounsel.getCustomer().getLegalDistrictCode()));
+		}
+		return new CounselResponseDTO(savedCounsel, savedCounselDetails, preferredRegion);
 	}
 
 	@Transactional
@@ -98,7 +106,8 @@ public class CounselServiceImpl implements CounselService {
 			counselUid);
 
 		LocalDateTime deletedAt = LocalDateTime.now();
-		savedCounsel.update(requestDTO.getTitle(), requestDTO.getCounselDate(), CounselType.from(requestDTO.getType()),
+		savedCounsel.update(requestDTO.getTitle(), requestDTO.getCounselDate(),
+			CounselType.getCounselType(requestDTO.getType()),
 			requestDTO.getDueDate(), requestDTO.isCompleted());
 		savedCounselDetails.forEach(detail -> detail.delete(deletedAt));
 
