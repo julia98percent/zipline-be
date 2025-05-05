@@ -7,7 +7,16 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
+import com.zipline.global.exception.task.TaskException;
+import com.zipline.global.exception.task.errorcode.TaskErrorCode;
+import com.zipline.global.task.Task;
+import com.zipline.global.task.TaskManager;
+import com.zipline.global.task.dto.TaskResponseDto;
+import com.zipline.global.task.enums.TaskStatus;
+import com.zipline.global.task.enums.TaskType;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,11 +33,29 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class RegionCodeServiceImpl implements RegionCodeService {
+    private final TaskManager taskManager;
+    private final TaskExecutor taskExecutor;
     private final RegionRepository regionRepository;
     private static final String API_BASE_URL = "https://new.land.naver.com/api/regions/list?cortarNo=";
     private static final Long KOREA_CORTAR_NO = 0L;
 
-    public void crawlAndSaveRegions() {
+    public TaskResponseDto crawlAndSaveRegions() {
+        if(taskManager.isTaskRunning(TaskType.NAVERCRAWLING)){
+            throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);}
+        Task task = taskManager.createTask(TaskType.NAVERCRAWLING);
+        try {
+            CompletableFuture.runAsync(() -> {
+                executeCrawlAndSaveRegions();
+            }, taskExecutor);
+        } catch (Exception e) {
+            log.error("테스크 실행중 오류 발생 {}", e.getMessage());
+            task.markAsFailed(e.getMessage());
+            taskManager.updateTaskStatus(TaskType.NAVERCRAWLING, TaskStatus.FAILED);
+        }
+        return TaskResponseDto.fromTask(task);
+    }
+
+    private void executeCrawlAndSaveRegions() {
         log.info("지역 정보 수집 시작");
         initializeKoreaIfNotExists();
         collectRegionsForLevel(1);
