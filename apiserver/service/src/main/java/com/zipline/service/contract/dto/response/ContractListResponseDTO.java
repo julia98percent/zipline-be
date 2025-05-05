@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.contract.CustomerContract;
+import com.zipline.entity.enums.ContractCustomerRole;
 import com.zipline.entity.enums.ContractStatus;
 
 import lombok.Getter;
@@ -48,16 +49,18 @@ public class ContractListResponseDTO {
 			this.contractStartDate = contract.getContractStartDate();
 			this.contractEndDate = contract.getContractEndDate();
 			this.status = contract.getStatus();
-			this.lessorOrSellerName = customerContracts.get(0).getCustomer().getName();
-			this.lesseeOrBuyerName = findLesseeOrBuyerName(customerContracts);
+			this.lessorOrSellerName = extractCustomerNameByRole(customerContracts,
+				ContractCustomerRole.LESSOR_OR_SELLER);
+			this.lesseeOrBuyerName = extractCustomerNameByRole(customerContracts, ContractCustomerRole.LESSEE_OR_BUYER);
 			this.address = contract.getAgentProperty() != null ? contract.getAgentProperty().getAddress() : null;
 		}
 
-		private String findLesseeOrBuyerName(List<CustomerContract> customerContracts) {
-			if (customerContracts.size() > 1) {
-				return customerContracts.get(1).getCustomer().getName();
-			}
-			return null;
+		private String extractCustomerNameByRole(List<CustomerContract> customerContracts, ContractCustomerRole role) {
+			return customerContracts.stream()
+				.filter(cc -> cc.getRole() == role)
+				.map(cc -> cc.getCustomer().getName())
+				.findFirst()
+				.orElse(null);
 		}
 	}
 }
