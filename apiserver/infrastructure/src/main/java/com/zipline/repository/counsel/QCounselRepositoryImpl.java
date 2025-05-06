@@ -15,6 +15,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zipline.entity.counsel.Counsel;
+import com.zipline.entity.enums.CounselType;
 import com.zipline.global.request.CounselFilterRequestDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,9 @@ public class QCounselRepositoryImpl implements QCounselRepository {
 			.where(isNotDeleted(),
 				isUserUidEqualTo(userUid),
 				searchNameOrPhone(filterRequestDTO.getSearch()),
-				betweenCounselDate(filterRequestDTO.getStartDate(), filterRequestDTO.getEndDate())
+				betweenCounselDate(filterRequestDTO.getStartDate(), filterRequestDTO.getEndDate()),
+				filterByType(filterRequestDTO.getType()),
+				filterByCompleted(filterRequestDTO.getCompleted())
 			)
 			.orderBy(counsel.counselDate.desc())
 			.offset(pageable.getOffset())
@@ -48,7 +51,9 @@ public class QCounselRepositoryImpl implements QCounselRepository {
 			.where(isNotDeleted(),
 				isUserUidEqualTo(userUid),
 				searchNameOrPhone(filterRequestDTO.getSearch()),
-				betweenCounselDate(filterRequestDTO.getStartDate(), filterRequestDTO.getEndDate())
+				betweenCounselDate(filterRequestDTO.getStartDate(), filterRequestDTO.getEndDate()),
+				filterByType(filterRequestDTO.getType()),
+				filterByCompleted(filterRequestDTO.getCompleted())
 			);
 
 		return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
@@ -60,7 +65,7 @@ public class QCounselRepositoryImpl implements QCounselRepository {
 			.from(counsel)
 			.where(isUserUidEqualTo(userUid),
 				isNotDeleted(),
-				filterByDueDateIfNeeded(sortType)
+				filterByDueDate(sortType)
 			)
 			.orderBy(getSortOrder(sortType))
 			.offset(pageable.getOffset())
@@ -73,7 +78,7 @@ public class QCounselRepositoryImpl implements QCounselRepository {
 			.where(
 				isUserUidEqualTo(userUid),
 				isNotDeleted(),
-				filterByDueDateIfNeeded(sortType)
+				filterByDueDate(sortType)
 			);
 
 		return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
@@ -98,10 +103,12 @@ public class QCounselRepositoryImpl implements QCounselRepository {
 		return new LocalDate[] {today, limit};
 	}
 
-	private BooleanExpression filterByDueDateIfNeeded(String sortType) {
+	private BooleanExpression filterByDueDate(String sortType) {
 		if ("DUE_DATE".equalsIgnoreCase(sortType)) {
 			LocalDate[] range = getDueDateRange();
-			return counsel.dueDate.isNotNull().and(counsel.dueDate.between(range[0], range[1]));
+			return counsel.dueDate.isNotNull()
+				.and(filterByCompleted(false))
+				.and(counsel.dueDate.between(range[0], range[1]));
 		}
 		return null;
 	}
@@ -135,5 +142,20 @@ public class QCounselRepositoryImpl implements QCounselRepository {
 			return counsel.counselDate.goe(startDate.atStartOfDay());
 		}
 		return counsel.counselDate.lt(endDate.plusDays(1).atStartOfDay());
+	}
+
+	private BooleanExpression filterByType(String type) {
+		CounselType counselType = CounselType.getCounselType(type);
+		if (counselType == null) {
+			return null;
+		}
+		return counsel.type.eq(CounselType.getCounselType(type));
+	}
+
+	private BooleanExpression filterByCompleted(Boolean completed) {
+		if (completed == null) {
+			return null;
+		}
+		return counsel.completed.eq(completed);
 	}
 }

@@ -2,9 +2,12 @@ package com.zipline.entity.contract;
 
 import com.zipline.entity.BaseTimeEntity;
 import com.zipline.entity.customer.Customer;
+import com.zipline.entity.enums.ContractCustomerRole;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,10 +37,15 @@ public class CustomerContract extends BaseTimeEntity {
 	@JoinColumn(name = "contract_uid", nullable = false)
 	private Contract contract;
 
+	@Column(name = "role", nullable = false)
+	@Enumerated(EnumType.STRING)
+	private ContractCustomerRole role;
+
 	@Builder
-	private CustomerContract(Customer customer, Contract contract) {
+	private CustomerContract(Customer customer, Contract contract, ContractCustomerRole role) {
 		this.customer = customer;
 		this.contract = contract;
+		this.role = role;
 	}
 
 	public void updateCustomerContract(Customer customer) {

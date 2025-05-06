@@ -88,14 +88,25 @@ public class ContractQueryRepository {
 			}
 		}
 
-		List<Contract> result = queryFactory
+		var query = queryFactory
 			.selectFrom(contract)
 			.where(builder)
 			.offset(pageable.getOffset())
-			.limit(pageable.getPageSize())
-			.orderBy(contract.uid.desc())
-			.fetch();
+			.limit(pageable.getPageSize());
 
+		if (filter.getSort() != null && !filter.getSort().isBlank()) {
+			switch (filter.getSort()) {
+				case "LATEST" -> query.orderBy(contract.uid.desc());
+				case "OLDEST" -> query.orderBy(contract.uid.asc());
+				case "EXPIRING" -> query.orderBy(contract.contractEndDate.asc());
+				default -> query.orderBy(contract.uid.desc());
+			}
+		} else {
+			query.orderBy(contract.uid.desc());
+		}
+
+		List<Contract> result = query.fetch();
+		
 		return PageableExecutionUtils.getPage(result, pageable, () ->
 			queryFactory
 				.select(contract.count())
