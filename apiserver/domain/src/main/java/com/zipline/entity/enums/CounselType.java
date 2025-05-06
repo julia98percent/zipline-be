@@ -2,6 +2,8 @@ package com.zipline.entity.enums;
 
 import java.util.Arrays;
 
+import org.springframework.util.StringUtils;
+
 import com.zipline.global.exception.counsel.CounselException;
 import com.zipline.global.exception.counsel.errorcode.CounselErrorCode;
 
@@ -26,5 +28,16 @@ public enum CounselType {
 			.filter(e -> e.description.equals(type))
 			.findFirst()
 			.orElseThrow(() -> new CounselException(CounselErrorCode.INVALID_COUNSEL_TYPE));
+	}
+
+	public static CounselType getCounselType(String type) {
+		if (!StringUtils.hasText(type)) {
+			return null;
+		}
+		try {
+			return CounselType.valueOf(type.toUpperCase());
+		} catch (RuntimeException e) {
+			throw new CounselException(CounselErrorCode.INVALID_COUNSEL_TYPE);
+		}
 	}
 }

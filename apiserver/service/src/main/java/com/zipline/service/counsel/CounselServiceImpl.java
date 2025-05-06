@@ -64,9 +64,11 @@ public class CounselServiceImpl implements CounselService {
 				.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
 		}
 
+		boolean completed = requestDTO.getDueDate() == null;
+
 		Counsel counsel = new Counsel(requestDTO.getTitle(), requestDTO.getCounselDate(),
 			CounselType.from(requestDTO.getType()),
-			requestDTO.getDueDate(), savedUser, savedCustomer, savedProperty, false);
+			requestDTO.getDueDate(), savedUser, savedCustomer, savedProperty, completed);
 
 		for (CounselCreateRequestDTO.CounselDetailDTO counselDetailDTO : requestDTO.getCounselDetails()) {
 			counsel.addDetail(new CounselDetail(counselDetailDTO.getQuestion(), counselDetailDTO.getAnswer(), counsel));
