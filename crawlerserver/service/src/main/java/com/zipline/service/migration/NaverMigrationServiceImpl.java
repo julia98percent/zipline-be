@@ -18,7 +18,6 @@ import com.zipline.global.task.TaskManager;
 import com.zipline.global.task.dto.TaskResponseDto;
 import com.zipline.global.task.enums.TaskStatus;
 import com.zipline.global.task.enums.TaskType;
-import com.zipline.infrastructure.migration.MigrationRepository;
 import com.zipline.infrastructure.naver.NaverRawArticleRepository;
 import com.zipline.infrastructure.publicItem.PropertyArticleRepository;
 import com.zipline.infrastructure.region.RegionRepository;
@@ -42,7 +41,6 @@ public class NaverMigrationServiceImpl implements NaverMigrationService {
 	private final ObjectMapper objectMapper;
 
 	private static final int BATCH_SIZE = 100;
-	private static final int MAX_RETRY_COUNT = 3;
 
 	@Override
 	public TaskResponseDto startFullMigration() {
@@ -55,9 +53,9 @@ public class NaverMigrationServiceImpl implements NaverMigrationService {
 			}, taskExecutor);
 		} catch (Exception e) {
 			log.error("마이그레이션 작업 실행중 오류 발생: {}", e.getMessage(), e);
-			task.markAsFailed(e.getMessage());
-			taskManager.updateTaskStatus(TaskType.MIGRATION, TaskStatus.FAILED);
+			taskManager.removeTask(TaskType.MIGRATION);
 		}
+		taskManager.removeTask(TaskType.MIGRATION);
 		return TaskResponseDto.fromTask(task);
 	}
 
@@ -96,7 +94,7 @@ public class NaverMigrationServiceImpl implements NaverMigrationService {
 			log.error("지역 {} 마이그레이션 작업 중 오류 발생: {}", regionId, e.getMessage(), e);
 			task.markAsFailed(e.getMessage());
 			// 추후 실패작업 재실행 구현시 삭제
-			taskManager.updateTaskStatus(TaskType.MIGRATION, TaskStatus.FAILED);
+			taskManager.removeTask(TaskType.MIGRATION);
 		}
 		taskManager.removeTask(TaskType.MIGRATION);
 		return TaskResponseDto.fromTask(task);

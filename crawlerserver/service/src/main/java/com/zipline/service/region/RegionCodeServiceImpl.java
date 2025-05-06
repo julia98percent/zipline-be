@@ -28,6 +28,7 @@ import com.zipline.infrastructure.region.RegionRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -64,6 +65,7 @@ public class RegionCodeServiceImpl implements RegionCodeService {
         logCollectionSummary();
     }
 
+    @Transactional
     private void initializeKoreaIfNotExists() {
         if (regionRepository.findByCortarNo(KOREA_CORTAR_NO).isEmpty()) {
             Region koreaRegion = RegionDTO.createKoreaRegion();
@@ -83,6 +85,8 @@ public class RegionCodeServiceImpl implements RegionCodeService {
             regions.forEach(region -> saveRegion(parentCortarNo, region, targetLevel));
         }
     }
+    
+    @Transactional
     private void collectRegionsForLevel(int targetLevel) {
         List<Region> parents = regionRepository.findByLevel(targetLevel - 1);
         for (Region parent : parents) {

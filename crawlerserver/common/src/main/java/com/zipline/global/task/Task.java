@@ -21,7 +21,7 @@ public class  Task {
     public static Task createTask(TaskType taskType, Long targetRegion) {
         return Task.builder()
                 .type(taskType)
-                .status(TaskStatus.QUEUED)
+                .status(TaskStatus.RUNNING)
                 .startTime(LocalDateTime.now())
                 .targetRegion(targetRegion)
                 .build();
@@ -30,7 +30,7 @@ public class  Task {
     public static Task createTask(TaskType taskType) {
         return Task.builder()
                 .type(taskType)
-                .status(TaskStatus.QUEUED)
+                .status(TaskStatus.RUNNING)
                 .startTime(LocalDateTime.now())
                 .build();
     }
