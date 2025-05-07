@@ -35,6 +35,7 @@ import com.zipline.repository.region.RegionRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.counsel.dto.request.CounselCreateRequestDTO;
 import com.zipline.service.counsel.dto.request.CounselModifyRequestDTO;
+import com.zipline.service.counsel.dto.response.CounselHistoryResponseDTO;
 import com.zipline.service.counsel.dto.response.CounselListResponseDTO;
 import com.zipline.service.counsel.dto.response.CounselPageResponseDTO;
 import com.zipline.service.counsel.dto.response.CounselResponseDTO;
@@ -156,5 +157,15 @@ public class CounselServiceImpl implements CounselService {
 			.toList();
 		CounselPageResponseDTO result = new CounselPageResponseDTO(savedCounsels, data);
 		return result;
+	}
+
+	@Override
+	public CounselPageResponseDTO getPropertyCounselHistories(PageRequestDTO pageRequestDTO, Long propertyUid,
+		Long userUid) {
+		Page<Counsel> savedCounsels = counselRepository.findByUserUidAndAgentPropertyUidAndDeletedAtIsNull(
+			userUid, propertyUid, pageRequestDTO.toPageable());
+
+		List<CounselHistoryResponseDTO> data = savedCounsels.stream().map(CounselHistoryResponseDTO::new).toList();
+		return new CounselPageResponseDTO(savedCounsels, data);
 	}
 }
