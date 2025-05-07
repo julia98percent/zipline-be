@@ -16,12 +16,4 @@ public interface NaverRawArticleService {
 	 * @param cortarNo 지역 코드
 	 */
 	TaskResponseDto crawlAndSaveRawArticlesForRegion(Long cortarNo);
-
-	/**
-	 * 원본 매물 정보를 데이터베이스에 저장합니다.
-	 *
-	 * @param articleNode 매물 정보 JSON 노드
-	 * @param cortarNo 지역 코드
-	 */
-	void saveRawArticle(JsonNode articleNode, Long cortarNo);
 }

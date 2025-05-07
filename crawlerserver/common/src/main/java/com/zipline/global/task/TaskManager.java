@@ -10,8 +10,6 @@ public interface TaskManager {
 
     Task createTask(TaskType taskType);
 
-    void updateTaskStatus(TaskType taskType, TaskStatus status);
-
     Task createRegionalTask(TaskType taskType, Long targetRegion);
 
     Task getTaskByType(TaskType taskType);

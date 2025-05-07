@@ -25,32 +25,18 @@ public class TaskManagerImpl implements TaskManager {
     @Override
     public Task createTask(TaskType taskType) {
         Task newTask = Task.createTask(taskType);
-        Task existingTask = taskRegistry.putIfAbsent(taskType, newTask);
-
-        if (existingTask != null) {
-            if (existingTask.getStatus() == TaskStatus.RUNNING) {
-                throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);
-            }
-            taskRegistry.put(taskType, newTask);
-            return newTask;
-        }
-
+        if (isTaskRunning(taskType)) {
+            throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);
+        }taskRegistry.put(taskType, newTask);
         return newTask;
     }
 
     @Override
     public Task createRegionalTask(TaskType taskType, Long targetRegion) {
         Task newTask = Task.createTask(taskType, targetRegion);
-        Task existingTask = taskRegistry.putIfAbsent(taskType, newTask);
-
-        if (existingTask != null) {
-            if (existingTask.getStatus() == TaskStatus.RUNNING) {
-                throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);
-            }
-            taskRegistry.put(taskType, newTask);
-            return newTask;
-        }
-
+        if (isTaskRunning(taskType)) {
+            throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);
+        }taskRegistry.put(taskType, newTask);
         return newTask;
     }
 
@@ -63,28 +49,18 @@ public class TaskManagerImpl implements TaskManager {
         return task;
     }
 
-    public void updateTask(TaskType taskType, Task updatedTask) {
-        if (!taskRegistry.containsKey(taskType)) {
-            throw new IllegalArgumentException("해당 타입의 Task가 존재하지 않습니다: " + taskType);
-        }
-        if (updatedTask.getType() != taskType) {
-            throw new IllegalArgumentException("업데이트할 Task의 타입이 요청 타입과 일치하지 않습니다.");
-        }
-
-        taskRegistry.put(taskType, updatedTask);
-    }
+//    public void updateTask(TaskType taskType, Task updatedTask) {
+//        if (!taskRegistry.containsKey(taskType)) {
+//            throw new IllegalArgumentException("해당 타입의 Task가 존재하지 않습니다: " + taskType);
+//        }
+//        if (updatedTask.getType() != taskType) {
+//            throw new IllegalArgumentException("업데이트할 Task의 타입이 요청 타입과 일치하지 않습니다.");
+//        }
+//
+//        taskRegistry.put(taskType, updatedTask);
+//    }
 
     public void removeTask(TaskType taskType) {
         taskRegistry.remove(taskType);
-    }
-
-    public void updateTaskStatus(TaskType taskType, TaskStatus newStatus) {
-        Task task = taskRegistry.get(taskType);
-        if (task == null) {
-            throw new TaskException(TaskErrorCode.TASK_NOT_FOUND);
-        }
-
-        task.setStatus(newStatus);
-        taskRegistry.put(taskType, task);
     }
 }

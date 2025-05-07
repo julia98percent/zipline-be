@@ -59,20 +59,15 @@ public class NaverMigrationServiceImpl implements NaverMigrationService {
 	}
 
 	private void executeFullMigrationAsync(Task task) {
-		task.markAsRunning();
-		taskManager.updateTaskStatus(TaskType.MIGRATION, TaskStatus.RUNNING);
 		log.info("=== 네이버 원본 매물 데이터 마이그레이션 작업 시작 ===");
 		List<Long> allRegionCodes = regionRepository.findAllCortarNos();
 		log.info("총 {} 개 지역에 대한 마이그레이션 시작", allRegionCodes.size());
-		task.markAsRunning();
 		for (Long cortarNo : allRegionCodes) {
 			try {
 				executeRegionMigrationAsync(task, cortarNo);
 				log.info("지역 {} 마이그레이션 완료", cortarNo);
-				taskManager.removeTask(TaskType.MIGRATION);
 			} catch (Exception e) {
 				log.error("지역 {} 마이그레이션 중 오류 발생: {}", cortarNo, e.getMessage());
-				taskManager.removeTask(TaskType.MIGRATION);
 			}
 		}
 		log.info("=== 네이버 원본 매물 데이터 마이그레이션 작업 완료 ===");
@@ -91,7 +86,6 @@ public class NaverMigrationServiceImpl implements NaverMigrationService {
 			}, taskExecutor);
 		} catch (Exception e) {
 			log.error("지역 {} 마이그레이션 작업 중 오류 발생: {}", regionId, e.getMessage(), e);
-			task.markAsFailed(e.getMessage());
 			// 추후 실패작업 재실행 구현시 삭제
 			taskManager.removeTask(TaskType.MIGRATION);
 		}
@@ -115,7 +109,6 @@ public class NaverMigrationServiceImpl implements NaverMigrationService {
 					migrateRawArticle(rawArticle);
 				} catch (Exception e) {
 					log.error("지역 코드 {} 마이그레이션 중 오류 발생: {}", regionId, e.getMessage(), e);
-					task.markAsFailed(e.getMessage());
 					failedCount++;
 					throw new MigrationException(MigrationErrorCode.MIGRATION_FAILED);
 				}

@@ -42,16 +42,13 @@ public class NaverRegionCrawler {
         int pageSize = 100;
         int pageNumber = 0;
         boolean hasMore = true;
-
         while (hasMore) {
             Page<Long> regions = crawlRepo.findRegionsNeedingCrawlingUpdateForNaverWithPage(cutoffDate, PageRequest.of(pageNumber, pageSize));
             if (regions.isEmpty()) break;
-
             regions.getContent().forEach(region -> {
                 executeCrawlForRegion(task, region);
                 crawlRepo.updateNaverLastCrawledAt(region, LocalDateTime.now());
             });
-
             pageNumber++;
             hasMore = pageNumber < regions.getTotalPages();
         }
@@ -74,7 +71,6 @@ public class NaverRegionCrawler {
         try {
             Region region = regionRepo.findByCortarNo(cortarNo)
                     .orElseThrow(() -> new RuntimeException("지역 없음: " + cortarNo));
-
             while (hasMore) {
                 String apiUrl = buildApiUrl(region, page++);
                 String response = naverApiClient.fetchArticleList(apiUrl);
@@ -89,15 +85,12 @@ public class NaverRegionCrawler {
                             total++;
                         }
                     }
-
                     hasMore = result.path("more").asBoolean();
                     RandomSleepUtil.sleep();
                 }
             }
-
             crawlRepo.updateNaverCrawlStatus(cortarNo, CrawlStatus.COMPLETED);
             log.info("완료 - 지역: {}, 총 매물 수: {}", region.getCortarName(), total);
-
         } catch (Exception e) {
             log.error("지역 {} 처리 실패", cortarNo, e);
             crawlRepo.updateNaverCrawlStatus(cortarNo, CrawlStatus.FAILED);
