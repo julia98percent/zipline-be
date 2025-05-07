@@ -23,4 +23,6 @@ public interface CounselService {
 		Long userUid);
 
 	CounselPageResponseDTO getDashBoardCounsels(PageRequestDTO pageRequestDTO, String sortType, Long userUid);
+
+	CounselPageResponseDTO getPropertyCounselHistories(PageRequestDTO pageRequestDTO, Long propertyUid, Long userUid);
 }

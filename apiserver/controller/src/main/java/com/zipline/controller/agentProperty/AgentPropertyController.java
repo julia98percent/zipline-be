@@ -21,6 +21,8 @@ import com.zipline.service.agentProperty.AgentPropertyService;
 import com.zipline.service.agentProperty.dto.request.AgentPropertyRequestDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyResponseDTO;
+import com.zipline.service.counsel.CounselService;
+import com.zipline.service.counsel.dto.response.CounselPageResponseDTO;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -33,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class AgentPropertyController {
 
 	private final AgentPropertyService agentPropertyService;
+	private final CounselService counselService;
 
 	@GetMapping("/{propertyUid}")
 	public ResponseEntity<ApiResponse<AgentPropertyResponseDTO>> getProperty(@PathVariable Long propertyUid,
@@ -80,6 +83,15 @@ public class AgentPropertyController {
 			Long.parseLong(principal.getName()), agentPropertyFilterRequestDTO);
 
 		ApiResponse<AgentPropertyListResponseDTO> response = ApiResponse.ok("매물 목록 조회 성공", propertyListResponseDTO);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@GetMapping("/{propertyUid}/counsels")
+	public ResponseEntity<ApiResponse<CounselPageResponseDTO>> getCounselHistories(
+		@ModelAttribute PageRequestDTO pageRequestDTO, @PathVariable Long propertyUid, Principal principal) {
+		CounselPageResponseDTO result = counselService.getPropertyCounselHistories(pageRequestDTO,
+			propertyUid, Long.parseLong(principal.getName()));
+		ApiResponse<CounselPageResponseDTO> response = ApiResponse.ok("상담 히스토리 조회 성공", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }
