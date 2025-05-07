@@ -1,5 +1,7 @@
 package com.zipline.entity.enums;
 
+import java.util.List;
+
 import lombok.Getter;
 
 @Getter
@@ -19,5 +21,13 @@ public enum ContractStatus {
 
 	ContractStatus(String description) {
 		this.description = description;
+	}
+
+	public static List<ContractStatus> getContractedStatuses() {
+		return List.of(CONTRACTED, IN_PROGRESS, PAID_COMPLETE, REGISTERED, MOVED_IN);
+	}
+
+	public static List<ContractStatus> getClosedStatuses() {
+		return List.of(CANCELLED, TERMINATED);
 	}
 }

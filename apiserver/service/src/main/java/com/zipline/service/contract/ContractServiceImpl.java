@@ -1,11 +1,14 @@
 package com.zipline.service.contract;
 
+import static com.zipline.entity.enums.ContractStatus.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -17,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.contract.ContractDocument;
+import com.zipline.entity.contract.ContractHistory;
 import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.enums.ContractCustomerRole;
@@ -37,6 +41,7 @@ import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.util.S3FileUploader;
 import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.contract.ContractDocumentRepository;
+import com.zipline.repository.contract.ContractHistoryRepository;
 import com.zipline.repository.contract.ContractQueryRepository;
 import com.zipline.repository.contract.ContractRepository;
 import com.zipline.repository.contract.CustomerContractRepository;
@@ -44,6 +49,8 @@ import com.zipline.repository.customer.CustomerRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.contract.dto.request.ContractRequestDTO;
 import com.zipline.service.contract.dto.response.ContractListResponseDTO;
+import com.zipline.service.contract.dto.response.ContractPropertyHistoryResponseDTO;
+import com.zipline.service.contract.dto.response.ContractPropertyResponseDTO;
 import com.zipline.service.contract.dto.response.ContractResponseDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -61,6 +68,7 @@ public class ContractServiceImpl implements ContractService {
 	private final AgentPropertyRepository agentPropertyRepository;
 	private final S3FileUploader s3FileUploader;
 	private final ContractHistoryService contractHistoryService;
+	private final ContractHistoryRepository contractHistoryRepository;
 
 	@Transactional(readOnly = true)
 	public ContractResponseDTO getContract(Long contractUid, Long userUid) {
@@ -178,6 +186,53 @@ public class ContractServiceImpl implements ContractService {
 			.toList();
 
 		return new ContractListResponseDTO(contractListDTO, contractPage);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public ContractPropertyResponseDTO getPropertyContract(Long propertyUid, Long userUid) {
+		List<ContractStatus> includedStatuses = getContractedStatuses();
+		Contract savedContract = contractRepository.findByUserUidAndAgentPropertyUidAndAndContractStatusNotCanceledAndDeletedAtIsNull(
+			userUid,
+			propertyUid, includedStatuses);
+		List<CustomerContract> customerContracts = customerContractRepository.findAllByContractUidWithCustomer(
+			savedContract.getUid());
+
+		return new ContractPropertyResponseDTO(savedContract, customerContracts);
+	}
+
+	@Transactional(readOnly = true)
+	public List<ContractPropertyHistoryResponseDTO> getPropertyContractHistories(Long propertyUid, Long userUid) {
+		List<ContractStatus> closedStatuses = getClosedStatuses();
+		List<Contract> closedContracts = contractRepository.findByUserUidAndAgentPropertyUidAndContractStatusCanceledDeletedAtIsNull(
+			userUid, propertyUid, closedStatuses);
+		List<Long> contractUids = closedContracts.stream().map(Contract::getUid).toList();
+		List<ContractHistory> savedContractHistory = contractHistoryRepository.findByContractUidsAndDeletedAtIsNull(
+			contractUids);
+		List<CustomerContract> customerContracts = customerContractRepository.findInContractUids(contractUids);
+		Map<Long, ContractHistory> historyMap = savedContractHistory.stream()
+			.collect(Collectors.toMap(
+				h -> h.getContract().getUid(),
+				Function.identity()
+			));
+
+		Map<Long, List<CustomerContract>> customerContractMap = customerContracts.stream()
+			.collect(Collectors.groupingBy(
+				cc -> cc.getContract().getUid()
+			));
+
+		List<ContractPropertyHistoryResponseDTO> result = closedContracts.stream()
+			.map(contract -> {
+				Long contractUid = contract.getUid();
+				ContractHistory history = historyMap.get(contractUid);
+				List<CustomerContract> customers = customerContractMap.getOrDefault(contractUid,
+					Collections.emptyList());
+
+				return new ContractPropertyHistoryResponseDTO(contract, history, customers);
+			})
+			.toList();
+
+		return result;
 	}
 
 	@Transactional
