@@ -1,8 +1,11 @@
 package com.zipline.service.contract;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -193,7 +196,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Transactional
 	public ContractResponseDTO modifyContract(ContractRequestDTO contractRequestDTO, Long contractUid,
-		List<MultipartFile> files, Long userUid) {
+		List<MultipartFile> files, List<ContractResponseDTO.DocumentDTO> existingDocs, Long userUid) {
 		Contract contract = contractRepository.findByUidAndUserUidAndDeletedAtIsNull(contractUid, userUid)
 			.orElseThrow(() -> new ContractException(ContractErrorCode.CONTRACT_NOT_FOUND));
 
@@ -217,7 +220,8 @@ public class ContractServiceImpl implements ContractService {
 			contractRequestDTO.getContractStartDate(),
 			contractRequestDTO.getContractEndDate(),
 			contractRequestDTO.getExpectedContractEndDate(),
-			newStatus
+			newStatus,
+			agentProperty
 		);
 
 		if (!prevStatus.equals(newStatus)) {
@@ -231,14 +235,15 @@ public class ContractServiceImpl implements ContractService {
 
 		updateCustomerContracts(contract, customerContracts, contractRequestDTO);
 
-		List<ContractResponseDTO.DocumentDTO> documentDTO = updateContractDocuments(contract, contractUid, files);
+		List<ContractResponseDTO.DocumentDTO> updatedDocs = updateContractDocuments(contract, contractUid, files,
+			existingDocs);
 
 		String lesseeOrBuyerName = contractRequestDTO.getLesseeOrBuyerUid() != null
 			? customerRepository.findById(contractRequestDTO.getLesseeOrBuyerUid()).get().getName()
 			: null;
 
 		return ContractResponseDTO.of(contract, customerContracts.get(0).getCustomer().getName(), lesseeOrBuyerName,
-			documentDTO);
+			updatedDocs);
 	}
 
 	private ContractStatus validateAndParseStatus(String status) {
@@ -286,21 +291,39 @@ public class ContractServiceImpl implements ContractService {
 		}
 	}
 
-	private List<ContractResponseDTO.DocumentDTO> updateContractDocuments(Contract contract, Long contractUid,
-		List<MultipartFile> files) {
-		List<ContractDocument> documents;
+	private List<ContractResponseDTO.DocumentDTO> updateContractDocuments(
+		Contract contract,
+		Long contractUid,
+		List<MultipartFile> newFiles,
+		List<ContractResponseDTO.DocumentDTO> existingDocs
+	) {
+		List<ContractDocument> currentDocs = contractDocumentRepository.findAllByContractUid(contractUid);
 
-		if (files != null && !files.isEmpty()) {
-			contractDocumentRepository.deleteAll(contractDocumentRepository.findAllByContractUid(contractUid));
+		Set<String> urlsToKeep = existingDocs != null
+			? existingDocs.stream().map(ContractResponseDTO.DocumentDTO::getFileUrl).collect(Collectors.toSet())
+			: Collections.emptySet();
 
-			List<String> uploadUrls = s3FileUploader.uploadContractFiles(files, S3Folder.CONTRACTS);
-			documents = createContractDocuments(contract, files, uploadUrls);
-			contractDocumentRepository.saveAll(documents);
-		} else {
-			documents = contractDocumentRepository.findAllByContractUid(contractUid);
+		List<ContractDocument> docsToDelete = currentDocs.stream()
+			.filter(doc -> !urlsToKeep.contains(doc.getDocumentUrl()))
+			.toList();
+
+		contractDocumentRepository.deleteAll(docsToDelete);
+
+		List<ContractDocument> savedNewDocs = new ArrayList<>();
+		if (newFiles != null && !newFiles.isEmpty()) {
+			List<String> uploadUrls = s3FileUploader.uploadContractFiles(newFiles, S3Folder.CONTRACTS);
+			savedNewDocs = createContractDocuments(contract, newFiles, uploadUrls);
+			contractDocumentRepository.saveAll(savedNewDocs);
 		}
+		List<ContractDocument> remainingDocs = currentDocs.stream()
+			.filter(doc -> urlsToKeep.contains(doc.getDocumentUrl()))
+			.toList();
 
-		return documents.stream()
+		List<ContractDocument> allDocs = new ArrayList<>();
+		allDocs.addAll(remainingDocs);
+		allDocs.addAll(savedNewDocs);
+
+		return allDocs.stream()
 			.map(doc -> new ContractResponseDTO.DocumentDTO(doc.getDocumentName(), doc.getDocumentUrl()))
 			.toList();
 	}

@@ -20,7 +20,7 @@ public interface ContractService {
 	void deleteContract(Long contractUid, Long userUid);
 
 	ContractResponseDTO modifyContract(ContractRequestDTO contractRequestDTO, Long contractUid,
-		List<MultipartFile> files, Long userUid);
+		List<MultipartFile> files, List<ContractResponseDTO.DocumentDTO> existingDocs, Long userUid);
 
 	ContractListResponseDTO getContractList(PageRequestDTO pageRequestDTO, Long userUid,
 		ContractFilterRequestDTO filter);

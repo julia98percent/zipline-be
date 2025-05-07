@@ -69,9 +69,10 @@ public class ContractController {
 		@PathVariable Long contractUid,
 		@RequestPart ContractRequestDTO contractRequestDTO,
 		@RequestPart(required = false) List<MultipartFile> files,
+		@RequestPart(value = "existingDocuments", required = false) List<ContractResponseDTO.DocumentDTO> existingDocs,
 		Principal principal) {
 		ContractResponseDTO contractResponseDTO = contractService.modifyContract(contractRequestDTO, contractUid, files,
-			Long.parseLong(principal.getName()));
+			existingDocs, Long.parseLong(principal.getName()));
 
 		ApiResponse<ContractResponseDTO> response = ApiResponse.ok("계약 수정 성공", contractResponseDTO);
 		return ResponseEntity.ok(response);

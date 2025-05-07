@@ -92,7 +92,8 @@ public class Contract extends BaseTimeEntity {
 
 	public void modifyContract(PropertyType category, BigInteger deposit, BigInteger monthlyRent, BigInteger price,
 		LocalDate contractDate, LocalDate contractStartDate,
-		LocalDate contractEndDate, LocalDate expectedContractEndDate, ContractStatus status) {
+		LocalDate contractEndDate, LocalDate expectedContractEndDate, ContractStatus status,
+		AgentProperty agentProperty) {
 		this.category = category;
 		this.deposit = deposit;
 		this.monthlyRent = monthlyRent;
@@ -102,5 +103,6 @@ public class Contract extends BaseTimeEntity {
 		this.contractEndDate = contractEndDate;
 		this.expectedContractEndDate = expectedContractEndDate;
 		this.status = status;
+		this.agentProperty = agentProperty;
 	}
 }
