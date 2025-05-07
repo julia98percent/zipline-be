@@ -1,33 +1,31 @@
 package com.zipline.global.task;
 
 import com.zipline.global.task.enums.TaskType;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class  Task<T> {
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class Task<T> {
     private String id;
     private TaskType type;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String errorMessage;
-    private T target;
+    private T targetEntity;
 
-    public static <U> Task<U> createTask(TaskType taskType, U target) {
+    public static <U> Task<U> createTask(TaskType taskType, U targetEntity) {
         return Task.<U>builder()
                 .type(taskType)
                 .startTime(LocalDateTime.now())
-                .target(target)
+                .targetEntity(targetEntity)
                 .build();
     }
 
     public static Task<?> createTask(TaskType taskType) {
-        return Task.builder()
-                .type(taskType)
-                .startTime(LocalDateTime.now())
-                .build();
+        return createTask(taskType, null);
     }
 }

@@ -33,12 +33,7 @@ public class TaskManagerImpl implements TaskManager {
 
     @Override
     public Task<?> createTask(TaskType taskType) {
-        if (isTaskRunning(taskType)) {
-            throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);
-        }
-        Task<?> newTask = Task.createTask(taskType);
-        taskRegistry.put(taskType, newTask);
-        return newTask;
+        return createTask(taskType, null);
     }
 
     @Override

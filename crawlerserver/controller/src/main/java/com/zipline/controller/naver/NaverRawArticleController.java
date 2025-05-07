@@ -31,9 +31,9 @@ public class NaverRawArticleController {
 	}
 
 	@GetMapping("/region/{cortarNo}")
-	public ResponseEntity<ApiResponse<Void>> crawlRawArticlesByRegion(@PathVariable Long cortarNo) {
-		return checkAndExecute(crawlingStatusManager, 
-			() -> naverRawArticleService.crawlAndSaveRawArticlesForRegion(cortarNo), 
-			"지역 " + cortarNo + " 원본 매물 정보 수집이 시작되었습니다.");
+	public ResponseEntity<ApiResponse<TaskResponseDto>> crawlRawArticlesByRegion(@PathVariable Long cortarNo) {
+    TaskResponseDto result = naverRawArticleService.crawlAndSaveRawArticlesForRegion(cortarNo);
+    ApiResponse<TaskResponseDto> response = ApiResponse.ok("지역 " + cortarNo + " 원본 매물 정보 수집이 시작되었습니다.", result);
+    return ResponseEntity.ok(response);
 	}
 }

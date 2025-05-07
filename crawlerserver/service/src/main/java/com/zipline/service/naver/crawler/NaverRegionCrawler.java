@@ -6,7 +6,6 @@ import com.zipline.domain.entity.enums.CrawlStatus;
 import com.zipline.domain.entity.enums.MigrationStatus;
 import com.zipline.domain.entity.naver.NaverRawArticle;
 import com.zipline.domain.entity.region.Region;
-import com.zipline.global.task.Task;
 import com.zipline.global.util.CoordinateUtil;
 import com.zipline.global.util.RandomSleepUtil;
 import com.zipline.infrastructure.crawl.CrawlRepository;
@@ -36,7 +35,7 @@ public class NaverRegionCrawler {
     /**
      * 전체 지역에 대한 크롤링 실행
      */
-    public void executeCrawl(Task task) {
+    public void executeCrawl(Object ignored) {
         log.info("=== 네이버 원본 매물 정보 수집 시작 ===");
         LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
         int pageSize = 100;
@@ -46,7 +45,7 @@ public class NaverRegionCrawler {
             Page<Long> regions = crawlRepo.findRegionsNeedingCrawlingUpdateForNaverWithPage(cutoffDate, PageRequest.of(pageNumber, pageSize));
             if (regions.isEmpty()) break;
             regions.getContent().forEach(region -> {
-                executeCrawlForRegion(task, region);
+                executeCrawlForRegion(region);
                 crawlRepo.updateNaverLastCrawledAt(region, LocalDateTime.now());
             });
             pageNumber++;
@@ -58,7 +57,7 @@ public class NaverRegionCrawler {
     /**
      * 특정 지역에 대한 크롤링 실행
      */
-    public void executeCrawlForRegion(Task task, Long cortarNo) {
+    public void executeCrawlForRegion(Long cortarNo) {
         log.info("네이버 원본 매물 수집 시작 - 지역 코드: {}", cortarNo);
         crawlRepo.updateNaverCrawlStatus(cortarNo, CrawlStatus.PROCESSING);
         articleRepo.resetMigrationStatusForRegion(cortarNo, MigrationStatus.PENDING);

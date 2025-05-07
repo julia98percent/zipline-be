@@ -11,14 +11,14 @@ public class TaskDefinition<T> {
     private TaskType type;
     private String description;
     private RunnableWithArg<T> task;
-    private T target;
+    private T targetEntity;
 
     @FunctionalInterface
     public interface RunnableWithArg<T> {
-        void run(T target);
+        void run(T targetEntity);
     }
 
-    public static <T> TaskDefinition<T> of(TaskType type, String description, RunnableWithArg<T> task, T target) {
-        return new TaskDefinition<>(type, description, task, target);
+    public static <T> TaskDefinition<T> of(TaskType type, String description, RunnableWithArg<T> task, T targetEntity) {
+        return new TaskDefinition<>(type, description, task, targetEntity);
     }
 }
