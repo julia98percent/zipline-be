@@ -49,13 +49,11 @@ public class RegionCodeServiceImpl implements RegionCodeService {
         CompletableFuture.runAsync(() -> {
             try {
                 executeCrawlAndSaveRegions(task);
-                task.markAsCompleted();
-                taskManager.updateTaskStatus(TaskType.NAVERCRAWLING, TaskStatus.COMPLETED);
+                taskManager.removeTask(TaskType.NAVERCRAWLING);
                 log.info("지역 정보 수집 완료됨");
             } catch (Exception e) {
                 log.error("테스크 실행중 오류 발생 {}", e.getMessage(), e);
-                task.markAsFailed(e.getMessage());
-                taskManager.updateTaskStatus(TaskType.NAVERCRAWLING, TaskStatus.FAILED);
+                taskManager.removeTask(TaskType.NAVERCRAWLING);
             }
         }, taskExecutor);
 

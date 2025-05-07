@@ -9,7 +9,7 @@ import com.zipline.global.task.enums.TaskType;
 import org.springframework.stereotype.Component;
 
 /**
- * 마이그레이션 작업 관리 구현체
+ * 마이그레이션 작업 관리 구현체 bean이라 싱글톤처럼 작동
  * Thread-safe implementation using ConcurrentHashMap only
  */
 @Component
@@ -19,7 +19,7 @@ public class TaskManagerImpl implements TaskManager {
     @Override
     public boolean isTaskRunning(TaskType taskType) {
         Task task = taskRegistry.get(taskType);
-        return task != null && task.getStatus() == TaskStatus.RUNNING;
+        return task != null;
     }
 
     @Override

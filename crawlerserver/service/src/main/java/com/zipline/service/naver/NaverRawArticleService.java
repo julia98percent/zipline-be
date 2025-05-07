@@ -1,20 +1,21 @@
 package com.zipline.service.naver;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.zipline.global.task.dto.TaskResponseDto;
 
 public interface NaverRawArticleService {
 
 	/**
 	 * 모든 지역에 대한 원본 매물 정보를 수집합니다.
 	 */
-	void crawlAndSaveRawArticles();
+	TaskResponseDto crawlAndSaveRawArticles();
 
 	/**
 	 * 특정 지역의 원본 매물 정보를 수집하고 저장합니다.
 	 *
 	 * @param cortarNo 지역 코드
 	 */
-	void crawlAndSaveRawArticlesForRegion(Long cortarNo);
+	TaskResponseDto crawlAndSaveRawArticlesForRegion(Long cortarNo);
 
 	/**
 	 * 원본 매물 정보를 데이터베이스에 저장합니다.

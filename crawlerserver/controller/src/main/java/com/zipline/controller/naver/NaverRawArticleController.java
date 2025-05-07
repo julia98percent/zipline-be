@@ -3,6 +3,7 @@ package com.zipline.controller.naver;
 
 
 import com.zipline.global.response.ApiResponse;
+import com.zipline.global.task.dto.TaskResponseDto;
 import com.zipline.global.util.CrawlingStatusManager;
 import com.zipline.service.naver.NaverRawArticleService;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +24,10 @@ public class NaverRawArticleController {
 	private final CrawlingStatusManager crawlingStatusManager;
 
 	@GetMapping("/all")
-	public ResponseEntity<ApiResponse<Void>> crawlAllRawArticleFromNaver() {
-		return checkAndExecute(crawlingStatusManager, 
-			() -> naverRawArticleService.crawlAndSaveRawArticles(), 
-			"레벨 " + 3 + " 원본 매물 정보 수집이 시작되었습니다.");
+	public ResponseEntity<ApiResponse<TaskResponseDto>> crawlAllRawArticleFromNaver() {
+		TaskResponseDto result = naverRawArticleService.crawlAndSaveRawArticles();
+		ApiResponse<TaskResponseDto> response = ApiResponse.ok("원본 매물 정보 수집이 시작되었습니다.", result);
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/region/{cortarNo}")

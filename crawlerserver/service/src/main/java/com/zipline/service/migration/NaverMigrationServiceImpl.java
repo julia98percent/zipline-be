@@ -39,7 +39,6 @@ public class NaverMigrationServiceImpl implements NaverMigrationService {
 	private final NaverRawArticleRepository naverRawArticleRepository;
 	private final PropertyArticleRepository propertyArticleRepository;
 	private final ObjectMapper objectMapper;
-
 	private static final int BATCH_SIZE = 100;
 
 	@Override
@@ -70,10 +69,10 @@ public class NaverMigrationServiceImpl implements NaverMigrationService {
 			try {
 				executeRegionMigrationAsync(task, cortarNo);
 				log.info("지역 {} 마이그레이션 완료", cortarNo);
-				task.markAsCompleted();
+				taskManager.removeTask(TaskType.MIGRATION);
 			} catch (Exception e) {
 				log.error("지역 {} 마이그레이션 중 오류 발생: {}", cortarNo, e.getMessage());
-				task.markAsFailed(e.getMessage());
+				taskManager.removeTask(TaskType.MIGRATION);
 			}
 		}
 		log.info("=== 네이버 원본 매물 데이터 마이그레이션 작업 완료 ===");

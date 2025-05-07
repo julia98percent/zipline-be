@@ -3,8 +3,16 @@ package com.zipline.service.naver;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
+import com.zipline.global.exception.task.TaskException;
+import com.zipline.global.exception.task.errorcode.TaskErrorCode;
+import com.zipline.global.task.Task;
+import com.zipline.global.task.TaskManager;
+import com.zipline.global.task.dto.TaskResponseDto;
+import com.zipline.global.task.enums.TaskType;
 import com.zipline.infrastructure.crawl.CrawlRepository;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -34,6 +42,8 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 	private final RegionRepository regionRepository;
 	private final NaverRawArticleRepository naverRawArticleRepository;
 	private final CrawlRepository crawlRepository;
+	private final TaskManager taskManager;
+	private final TaskExecutor taskExecutor;
 
 	private static final String BASE_URL = "https://m.land.naver.com/cluster/ajax/articleList";
 	private static final int RECENT_DAYS = 14; // 최근 2일
@@ -42,7 +52,23 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 	/**
 	 * 특정 레벨의 모든 지역에 대한 원본 매물 정보를 수집합니다.
 	 */
-	public void crawlAndSaveRawArticles() {
+	public TaskResponseDto crawlAndSaveRawArticles() {
+		if (taskManager.isTaskRunning(TaskType.NAVERCRAWLING)) {
+			throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);}
+		Task task = taskManager.createTask(TaskType.NAVERCRAWLING);
+		try {
+			CompletableFuture.runAsync(() -> {
+				executeCrawlAndSaveRawArticles(task);
+			}, taskExecutor);
+		} catch (Exception e) {
+			log.error("마이그레이션 작업 실행중 오류 발생: {}", e.getMessage(), e);
+			taskManager.removeTask(TaskType.MIGRATION);
+		}
+		taskManager.removeTask(TaskType.MIGRATION);
+		return TaskResponseDto.fromTask(task);
+	}
+
+	private void executeCrawlAndSaveRawArticles(Task task) {
 		log.info("=== 레벨 {} 네이버 원본 매물 정보 수집 시작 ===");
 		try {
 			LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
@@ -103,7 +129,22 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 	 *
 	 * @param cortarNo 지역 코드
 	 */
-	public void crawlAndSaveRawArticlesForRegion(Long cortarNo) {
+	public TaskResponseDto crawlAndSaveRawArticlesForRegion(Long cortarNo) {
+		if (taskManager.isTaskRunning(TaskType.MIGRATION)){
+			throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);}
+		Task task = taskManager.createTask(TaskType.MIGRATION);
+		try {
+			CompletableFuture.runAsync(() -> {
+				executeCrawlAndSaveRawArticlesForRegion(task, cortarNo);
+			}, taskExecutor);
+		} catch (Exception e) {
+			log.error("마이그레이션 작업 실행중 오류 발생: {}", e.getMessage(), e);
+			taskManager.removeTask(TaskType.MIGRATION);
+		}
+		taskManager.removeTask(TaskType.MIGRATION);
+		return TaskResponseDto.fromTask(task);
+	}
+	private void executeCrawlAndSaveRawArticlesForRegion(Task task, Long cortarNo) {
 		log.info("네이버 원본 매물 정보 수집 시작 - 지역 코드: {}", cortarNo);
 
 		// 상태 업데이트 - 직접 리포지토리 메서드 사용
