@@ -62,9 +62,9 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 			}, taskExecutor);
 		} catch (Exception e) {
 			log.error("마이그레이션 작업 실행중 오류 발생: {}", e.getMessage(), e);
-			taskManager.removeTask(TaskType.MIGRATION);
+			taskManager.removeTask(TaskType.NAVERCRAWLING);
 		}
-		taskManager.removeTask(TaskType.MIGRATION);
+		taskManager.removeTask(TaskType.NAVERCRAWLING);
 		return TaskResponseDto.fromTask(task);
 	}
 
@@ -109,14 +109,11 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 						// 필요시 재시도 로직 추가
 					}
 				}
-
 				// 다음 페이지로 이동
 				pageNumber++;
-
 				// 마지막 페이지인지 확인
 				hasMoreData = pageNumber < regionPage.getTotalPages();
 			}
-
 			log.info("=== 레벨 {} 네이버 원본 매물 정보 수집 완료 ===");
 		} catch (Exception e) {
 			log.error("네이버 원본 매물 정보 수집 중 오류 발생: {}", e.getMessage(), e);
@@ -130,18 +127,18 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 	 * @param cortarNo 지역 코드
 	 */
 	public TaskResponseDto crawlAndSaveRawArticlesForRegion(Long cortarNo) {
-		if (taskManager.isTaskRunning(TaskType.MIGRATION)){
+		if (taskManager.isTaskRunning(TaskType.NAVERCRAWLING)){
 			throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);}
-		Task task = taskManager.createTask(TaskType.MIGRATION);
+		Task task = taskManager.createTask(TaskType.NAVERCRAWLING);
 		try {
 			CompletableFuture.runAsync(() -> {
 				executeCrawlAndSaveRawArticlesForRegion(task, cortarNo);
 			}, taskExecutor);
 		} catch (Exception e) {
 			log.error("마이그레이션 작업 실행중 오류 발생: {}", e.getMessage(), e);
-			taskManager.removeTask(TaskType.MIGRATION);
+			taskManager.removeTask(TaskType.NAVERCRAWLING);
 		}
-		taskManager.removeTask(TaskType.MIGRATION);
+		taskManager.removeTask(TaskType.NAVERCRAWLING);
 		return TaskResponseDto.fromTask(task);
 	}
 	private void executeCrawlAndSaveRawArticlesForRegion(Task task, Long cortarNo) {
@@ -224,7 +221,6 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 			ZOOM_LEVEL
 		);
 
-		// [top, right, bottom, left] 순서로 반환됨
 		double top = bounds[0];
 		double right = bounds[1];
 		double bottom = bounds[2];
@@ -280,10 +276,8 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 					.migratedAt(null)
 					.createdAt(existing.getCreatedAt())
 					.build();
-
 				log.info("기존 원본 매물 정보 업데이트: {}", articleId);
 			} else {
-				// 빌더 패턴 사용하여 새 객체 생성
 				rawArticle = NaverRawArticle.builder()
 					.articleId(articleId)
 					.cortarNo(cortarNo)
@@ -291,10 +285,8 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 					.migrationStatus(MigrationStatus.PENDING)
 					.createdAt(LocalDateTime.now())
 					.build();
-
 				log.info("새로운 원본 매물 정보 생성: {}", articleId);
 			}
-
 			naverRawArticleRepository.save(rawArticle);
 			log.info("원본 매물 정보 저장 완료: {}", articleId);
 		} catch (Exception e) {
@@ -313,14 +305,12 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 		try {
 			java.net.URL url = new java.net.URL(apiUrl);
 			java.net.HttpURLConnection conn = (java.net.HttpURLConnection)url.openConnection();
-
 			conn.setRequestMethod("GET");
 			conn.setRequestProperty("Accept", "application/json");
 			conn.setRequestProperty("Accept-Language", "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7");
 			conn.setRequestProperty("Host", "m.land.naver.com");
 			conn.setRequestProperty("Referer", "https://m.land.naver.com/");
-			conn.setRequestProperty("sec-ch-ua",
-				"\"Chromium\";v=\"122\", \"Not(A:Brand\";v=\"24\", \"Google Chrome\";v=\"122\"");
+			conn.setRequestProperty("sec-ch-ua", "\"Chromium\";v=\"122\", \"Not(A:Brand\";v=\"24\", \"Google Chrome\";v=\"122\"");
 			conn.setRequestProperty("sec-ch-ua-mobile", "?1");
 			conn.setRequestProperty("sec-ch-ua-platform", "\"Android\"");
 			conn.setRequestProperty("Sec-Fetch-Dest", "empty");
@@ -334,7 +324,7 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 
 			if (responseCode == 200) {
 				try (java.io.BufferedReader reader = new java.io.BufferedReader(
-					new java.io.InputStreamReader(conn.getInputStream()))) {
+						new java.io.InputStreamReader(conn.getInputStream()))) {
 					StringBuilder response = new StringBuilder();
 					String line;
 					while ((line = reader.readLine()) != null) {
