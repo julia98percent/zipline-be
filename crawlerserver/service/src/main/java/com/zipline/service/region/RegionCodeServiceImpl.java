@@ -21,7 +21,6 @@ import com.zipline.global.exception.task.errorcode.TaskErrorCode;
 import com.zipline.global.task.Task;
 import com.zipline.global.task.TaskManager;
 import com.zipline.global.task.dto.TaskResponseDto;
-import com.zipline.global.task.enums.TaskStatus;
 import com.zipline.global.task.enums.TaskType;
 import com.zipline.global.util.RandomSleepUtil;
 import com.zipline.infrastructure.region.RegionRepository;

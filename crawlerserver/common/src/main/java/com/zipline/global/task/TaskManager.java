@@ -1,7 +1,5 @@
 package com.zipline.global.task;
 
-import com.zipline.global.task.dto.ProgressDto;
-import com.zipline.global.task.enums.TaskStatus;
 import com.zipline.global.task.enums.TaskType;
 
 // 작업 관리 인터페이스
