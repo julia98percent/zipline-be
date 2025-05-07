@@ -102,7 +102,10 @@ public class ContractServiceImpl implements ContractService {
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
-		PropertyType category = validateAndParseCategory(contractRequestDTO.getCategory());
+		PropertyType category = null;
+		if (contractRequestDTO.getCategory() != null) {
+			category = validateAndParseCategory(contractRequestDTO.getCategory());
+		}
 		contractRequestDTO.validateDateOrder();
 		contractRequestDTO.validateProperty();
 		contractRequestDTO.validateDistinctParties();
@@ -208,7 +211,10 @@ public class ContractServiceImpl implements ContractService {
 			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
 
 		ContractStatus status = validateAndParseStatus(contractRequestDTO.getStatus());
-		PropertyType category = validateAndParseCategory(String.valueOf(contractRequestDTO.getCategory()));
+		PropertyType category = null;
+		if (contractRequestDTO.getCategory() != null) {
+			category = validateAndParseCategory(String.valueOf(contractRequestDTO.getCategory()));
+		}
 		ContractStatus prevStatus = contract.getStatus();
 		ContractStatus newStatus = validateAndParseStatus(contractRequestDTO.getStatus());
 		contract.modifyContract(
