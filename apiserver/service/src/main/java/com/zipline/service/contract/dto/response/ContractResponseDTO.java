@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.zipline.entity.contract.Contract;
+import com.zipline.entity.contract.CustomerContract;
+import com.zipline.entity.enums.ContractCustomerRole;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -42,11 +44,22 @@ public class ContractResponseDTO {
 		}
 	}
 
-	public static ContractResponseDTO of(Contract contract, String lessorOrSellerName, String lesseeOrBuyerName,
+	public static ContractResponseDTO of(Contract contract, List<CustomerContract> customerContracts,
 		List<DocumentDTO> documents) {
+		String lessorOrSellerName = customerContracts.stream()
+			.filter(cc -> cc.getRole() == ContractCustomerRole.LESSOR_OR_SELLER)
+			.map(cc -> cc.getCustomer().getName())
+			.findFirst()
+			.orElse(null);
+
+		String lesseeOrBuyerName = customerContracts.stream()
+			.filter(cc -> cc.getRole() == ContractCustomerRole.LESSEE_OR_BUYER)
+			.map(cc -> cc.getCustomer().getName())
+			.findFirst()
+			.orElse(null);
 		return ContractResponseDTO.builder()
 			.uid(contract.getUid())
-			.category(String.valueOf(contract.getCategory()))
+			.category(contract.getCategory() != null ? String.valueOf(contract.getCategory()) : null)
 			.price(contract.getPrice())
 			.deposit(contract.getDeposit())
 			.monthlyRent(contract.getMonthlyRent())
