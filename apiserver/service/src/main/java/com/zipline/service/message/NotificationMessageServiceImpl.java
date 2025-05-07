@@ -4,6 +4,7 @@ import com.zipline.entity.contract.Contract;
 import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.enums.MessageTemplateCategory;
+import com.zipline.entity.enums.MessageTemplateVariables;
 import com.zipline.entity.message.MessageTemplate;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.message.MessageException;
@@ -158,10 +159,24 @@ private Mono<String> sendMessagesToGroup(String groupId, Map<String, Object> wra
 
   private Map<String, Object> createMessageMap(Customer customer, MessageTemplate messageTemplate) {
     String formattedPhoneNo = customer.getPhoneNo().replaceAll("-", "");
+
+    String messageContent = replaceTemplateVariables(messageTemplate.getContent(), Map.of(
+        MessageTemplateVariables.NAME, customer.getName(),
+        MessageTemplateVariables.BIRTH_DATE, customer.getBirthday(),
+        MessageTemplateVariables.INTEREST_AREA, customer.getLegalDistrictCode()
+    ));
+
     return Map.of(
         "to",formattedPhoneNo,
         "from", fromNumber,
-        "text", messageTemplate.getContent()
+        "text", messageContent
     );
+  }
+
+  private String replaceTemplateVariables(String template, Map<MessageTemplateVariables, String> variables) {
+    return variables.entrySet().stream()
+        .reduce(template,
+            (acc, entry) -> acc.replace(entry.getKey().getTemplateKey(), entry.getValue()),
+            (s1, s2) -> s1);
   }
 }
