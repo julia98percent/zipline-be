@@ -15,6 +15,7 @@ import com.zipline.infrastructure.naver.NaverRawArticleRepository;
 import com.zipline.infrastructure.region.RegionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -29,13 +30,20 @@ public class NaverArticleCrawler {
     private final RegionRepository regionRepo;
     private final NaverRawArticleRepository articleRepo;
     private final CrawlRepository crawlRepo;
-    private static final int RECENT_DAYS = 14;
+
+    @Value("${crawler.recent-days:14}")
+    private int recentDays;
+
+    @Value("${crawler.page-size:100}")
+    private int pageSize;
+
+    @Value("${crawler.max-retry-count:10}")
+    private int maxRetryCount;
 
     public void executeCrawl(Fetcher fetcher) {
         log.info("=== 네이버 원본 매물 정보 수집 시작 ===");
-        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(recentDays);
 
-        int pageSize = 100;
         int pageNumber = 0;
         boolean hasMore = true;
 
@@ -67,9 +75,16 @@ public class NaverArticleCrawler {
         int total = 0;
 
         FetchConfigDTO fetchConfig = FetchConfigDTO.builder()
-                .referer("https://m.land.naver.com/")
-                .userAgent("Mozilla/5.0")
                 .accept("application/json")
+                .host("m.land.naver.com")
+                .referer("https://m.land.naver.com/")
+                .secChUa("\"Chromium\";v=\"122\", \"Not(A:Brand\";v=\"24\", \"Google Chrome\";v=\"122\"")
+                .secChUaMobile("?1")
+                .secChUaPlatform("\"Android\"")
+                .secFetchDest("empty")
+                .secFetchMode("cors")
+                .secFetchSite("same-origin")
+                .userAgent("Mozilla/5.0")
                 .connectTimeout(5000)
                 .readTimeout(10000)
                 .build();

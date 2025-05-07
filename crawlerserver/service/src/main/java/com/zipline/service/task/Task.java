@@ -1,8 +1,11 @@
 package com.zipline.service.task;
 
 import com.zipline.service.task.enums.TaskType;
-import lombok.*;
-
+import lombok.Getter;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Getter
