@@ -1,7 +1,6 @@
 package com.zipline.service.message;
 
 import com.zipline.entity.contract.Contract;
-import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.enums.MessageTemplateCategory;
 import com.zipline.entity.enums.MessageTemplateVariables;
@@ -10,9 +9,12 @@ import com.zipline.entity.user.User;
 import com.zipline.global.exception.message.MessageException;
 import com.zipline.global.exception.message.errorcode.MessageErrorCode;
 import com.zipline.repository.contract.ContractRepository;
+import com.zipline.repository.customer.CustomerRepository;
 import com.zipline.repository.message.MessageTemplateRepository;
 import com.zipline.repository.user.UserRepository;
-import com.zipline.service.message.dto.request.NotificationMessageDTO;
+import com.zipline.service.message.dto.request.BirthdayNotificationMessageDTO;
+import com.zipline.service.message.dto.request.ExpiredNotificationMessageDTO;
+import com.zipline.service.message.dto.request.NotificationMessage;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -35,6 +38,8 @@ public class NotificationMessageServiceImpl implements NotificationMessageServic
   private final MessageTemplateRepository messageTemplateRepository;
   private final ContractRepository contractRepository;
   private final UserRepository userRepository;
+  private final CustomerRepository customerRepository;
+
 
   @Value("${sms.fromNumber}")
   private String fromNumber;
@@ -47,30 +52,72 @@ public class NotificationMessageServiceImpl implements NotificationMessageServic
 
     for (User user : users) {
         try {
-            LocalDate userEndDate = today.plusMonths(user.getNoticeMonth());
-            processUserNotificationMessages(user, userEndDate);
+          LocalDate userEndDate = today.plusMonths(user.getNoticeMonth());
+          processUserNotificationMessages(user, userEndDate);
+          processBirthdayMessages(user, today);
         } catch (Exception e) {
             log.error("유저 {} 처리 중 오류 발생: {}", user.getUid(), e.getMessage(), e);
         }
     }
 }
 
-private void processUserNotificationMessages(User user, LocalDate endDate) {
+  private void processUserNotificationMessages(User user, LocalDate endDate) {
     try {
-      MessageTemplate template = getMessageTemplate(user);
       List<Contract> expiringContracts = findExpiringContracts(user, endDate);
-        if (!expiringContracts.isEmpty()) {
-            scheduleUserNotifications(user, expiringContracts, template);
-        }
-    } catch (MessageException e) {
-        log.error("유저 {} 알림 처리 실패: {}", user.getUid(), e.getMessage(), e);
-    }
-}
+      MessageTemplate template = getMessageTemplate(user, MessageTemplateCategory.EXPIRED_NOTI);
 
-  private void scheduleUserNotifications(User user, List<Contract> contracts, MessageTemplate template) {
-    contracts.stream()
-        .map(contract -> createNotificationMessage(contract, template, user))
-        .forEach(this::sendScheduledMessage);
+      if (!expiringContracts.isEmpty()) {
+        List<ExpiredNotificationMessageDTO> notifications = expiringContracts.stream()
+            .map(contract -> createNotificationMessage(contract, template, user))
+            .toList();
+
+        processNotificationMessages(user, MessageTemplateCategory.EXPIRED_NOTI, notifications);
+      }
+    } catch (Exception e) {
+      log.error("유저 {} 계약 만료 알림 처리 실패: {}", user.getUid(), e.getMessage(), e);
+    }
+  }
+
+  private void processBirthdayMessages(User user, LocalDate today) {
+    try {
+      List<Customer> birthdayCustomers = findCustomersWithBirthdayToday(user, today);
+      MessageTemplate template = getMessageTemplate(user, MessageTemplateCategory.BIRTHDAY);
+
+      if (!birthdayCustomers.isEmpty()) {
+        List<BirthdayNotificationMessageDTO> notifications = birthdayCustomers.stream()
+            .map(customer -> BirthdayNotificationMessageDTO.builder()
+                .customers(List.of(customer))
+                .messageTemplate(template)
+                .alertDateTime(LocalDateTime.of(LocalDate.now(), user.getNoticeTime()))
+                .build())
+            .toList();
+
+        processNotificationMessages(user, MessageTemplateCategory.BIRTHDAY, notifications);
+      }
+    } catch (Exception e) {
+      log.error("유저 {} 생일 알림 처리 실패: {}", user.getUid(), e.getMessage(), e);
+    }
+  }
+
+
+  private void processNotificationMessages(User user, MessageTemplateCategory category,
+      List<? extends NotificationMessage> notifications) {
+    try {
+      if (!notifications.isEmpty()) {
+        notifications.forEach(this::sendScheduledMessage);
+      }
+    } catch (MessageException e) {
+      log.error("유저 {} {} 알림 처리 실패: {}",
+          user.getUid(),
+          category.name(),
+          e.getMessage(),
+          e);
+    }
+  }
+
+  private List<Customer> findCustomersWithBirthdayToday(User user, LocalDate today) {
+    String todayMMdd = String.format("%02d%02d", today.getMonthValue(), today.getDayOfMonth());
+    return customerRepository.findCustomersWithBirthdayToday(user.getUid(), todayMMdd);
   }
 
   private List<Contract> findExpiringContracts(User user, LocalDate endDate) {
@@ -80,8 +127,8 @@ private void processUserNotificationMessages(User user, LocalDate endDate) {
     );
   }
 
-  private NotificationMessageDTO createNotificationMessage(Contract contract, MessageTemplate template, User user) {
-    return NotificationMessageDTO.builder()
+  private ExpiredNotificationMessageDTO createNotificationMessage(Contract contract, MessageTemplate template, User user) {
+    return ExpiredNotificationMessageDTO.builder()
         .contract(contract)
         .messageTemplate(template)
         .alertDateTime(calculateAlertDateTime(contract, user))
@@ -94,17 +141,24 @@ private void processUserNotificationMessages(User user, LocalDate endDate) {
     return LocalDateTime.of(adjustedAlertDate, user.getNoticeTime());
   }
 
-  private MessageTemplate getMessageTemplate(User user) {
+  private MessageTemplate getMessageTemplate(User user, MessageTemplateCategory category) {
     return messageTemplateRepository
-        .findByCategoryAndUserUidAndDeletedAtIsNull(
-            MessageTemplateCategory.EXPIRED_NOTI,
-            user.getUid()
-        )
-        .orElseThrow(() -> new MessageException(MessageErrorCode.EXPIRED_NOTI_MESSAGE_TEMPLATE_NOT_FOUND));
+        .findByCategoryAndUserUidAndDeletedAtIsNull(category, user.getUid())
+        .orElseThrow(() -> new MessageException(
+            category == MessageTemplateCategory.BIRTHDAY
+                ? MessageErrorCode.BIRTHDAY_MESSAGE_TEMPLATE_NOT_FOUND
+                : MessageErrorCode.EXPIRED_NOTI_MESSAGE_TEMPLATE_NOT_FOUND
+        ));
+
   }
 
-  private void sendScheduledMessage(NotificationMessageDTO notificationData) {
+  private void sendScheduledMessage(NotificationMessage notificationData) {
     List<Map<String, Object>> messages = createMessagesList(notificationData);
+
+    if (messages.isEmpty()) {
+      return;
+    }
+
     Map<String, Object> wrappedRequest = Map.of("messages", messages);
 
     webClient.post()
@@ -113,14 +167,16 @@ private void processUserNotificationMessages(User user, LocalDate endDate) {
         .bodyToMono(String.class)
         .flatMap(response -> {
           String groupId = response.replaceAll(".*\"groupId\"\\s*:\\s*\"([^\"]+)\".*", "$1");
-
-
           return sendMessagesToGroup(groupId, wrappedRequest, notificationData.getAlertDateTime());
         })
         .doOnSuccess(response -> log.info("메시지 예약 발송 설정 완료 - Response: {}", response))
         .doOnError(error -> log.error("메시지 발송 실패: {}", error.getMessage(), error))
+        .onErrorResume(e -> {
+          log.error("메시지 발송 중 오류 발생: {}", e.getMessage());
+          return Mono.empty();
+        })
         .subscribe();
-}
+  }
 
 private Mono<String> sendMessagesToGroup(String groupId, Map<String, Object> wrappedRequest,
     LocalDateTime alertDateTime) {
@@ -148,9 +204,8 @@ private Mono<String> sendMessagesToGroup(String groupId, Map<String, Object> wra
         .bodyToMono(String.class);
   }
 
-  private List<Map<String, Object>> createMessagesList(NotificationMessageDTO notificationData) {
-    return notificationData.getContract().getCustomerContracts().stream()
-        .map(CustomerContract::getCustomer)
+  private List<Map<String, Object>> createMessagesList(NotificationMessage notificationData) {
+    return notificationData.getTargetCustomers().stream()
         .filter(customer -> customer.getPhoneNo() != null)
         .map(customer -> createMessageMap(customer, notificationData.getMessageTemplate()))
         .toList();
