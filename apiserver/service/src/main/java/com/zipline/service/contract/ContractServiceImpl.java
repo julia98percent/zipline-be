@@ -263,7 +263,6 @@ public class ContractServiceImpl implements ContractService {
 	private void updateCustomerContracts(List<CustomerContract> customerContracts,
 		ContractRequestDTO requestDTO) {
 		boolean hasLessee = false;
-		boolean hasLessor = false;
 
 		for (CustomerContract cc : customerContracts) {
 			if (cc.getRole() == ContractCustomerRole.LESSOR_OR_SELLER) {
@@ -279,23 +278,20 @@ public class ContractServiceImpl implements ContractService {
 				}
 			}
 		}
-		if (!hasLessor) {
-			Customer newLessor = customerRepository.findById(requestDTO.getLessorOrSellerUid())
-				.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
-			Contract contract = customerContracts.get(0).getContract();
-			customerContractRepository.save(
-				CustomerContract.builder()
-					.contract(contract)
-					.customer(newLessor)
-					.role(ContractCustomerRole.LESSOR_OR_SELLER)
-					.build()
-			);
-		}
+		Customer newLessor = customerRepository.findById(requestDTO.getLessorOrSellerUid())
+			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
+		Contract contract = customerContracts.get(0).getContract();
+		customerContractRepository.save(
+			CustomerContract.builder()
+				.contract(contract)
+				.customer(newLessor)
+				.role(ContractCustomerRole.LESSOR_OR_SELLER)
+				.build()
+		);
 
 		if (!hasLessee && requestDTO.getLesseeOrBuyerUid() != null) {
 			Customer newLessee = customerRepository.findById(requestDTO.getLesseeOrBuyerUid())
 				.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
-			Contract contract = customerContracts.get(0).getContract();
 			customerContractRepository.save(
 				CustomerContract.builder()
 					.contract(contract)
