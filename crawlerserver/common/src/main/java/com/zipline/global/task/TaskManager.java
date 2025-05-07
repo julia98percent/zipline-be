@@ -8,9 +8,9 @@ import com.zipline.global.task.enums.TaskType;
 public interface TaskManager {
     boolean isTaskRunning(TaskType taskType);
 
-    Task createTask(TaskType taskType);
+    <T> Task<T> createTask(TaskType taskType, T targetEntity);
 
-    Task createRegionalTask(TaskType taskType, Long targetRegion);
+    Task createTask(TaskType taskType);
 
     Task getTaskByType(TaskType taskType);
 

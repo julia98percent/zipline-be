@@ -79,7 +79,7 @@ public class NaverMigrationServiceImpl implements NaverMigrationService {
 			log.error("마이그레이션 작업이 이미 실행 중입니다.");
 			throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);
 		}
-		Task task = taskManager.createRegionalTask(TaskType.MIGRATION, regionId);
+		Task task = taskManager.createTask(TaskType.MIGRATION, regionId);
 		try {
 			CompletableFuture.runAsync(() -> {
 				executeRegionMigrationAsync(task, regionId);
@@ -128,7 +128,7 @@ public class NaverMigrationServiceImpl implements NaverMigrationService {
 
 	@Transactional
 	private void migrateRawArticle(NaverRawArticle rawArticle){
-		log.info("네이버 원본 매물 데이터 마이그레이션 시작", rawArticle.getArticleId());
+		log.info("네이버 원본 매물 데이터 {} 마이그레이션 시작", rawArticle.getArticleId());
 		try{
 			JsonNode articleNode = objectMapper.readTree(rawArticle.getRawData());
 
@@ -143,7 +143,7 @@ public class NaverMigrationServiceImpl implements NaverMigrationService {
 			propertyArticleRepository.save(article);
 			rawArticle.updateMigrationStatus(MigrationStatus.COMPLETED);
 			naverRawArticleRepository.save(rawArticle);
-			log.info("네이버 원본 매물 데이터 마이그레이션 완료", rawArticle.getArticleId());
+			log.info("네이버 원본 매물 데이터 {} 마이그레이션 완료", rawArticle.getArticleId());
 		} catch (Exception e) {
 			log.error("네이버 원본 매물 데이터 마이그레이션 중 오류 발생: {}", e.getMessage(), e);
 			throw new MigrationException(MigrationErrorCode.MIGRATION_FAILED);
