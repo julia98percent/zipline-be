@@ -17,4 +17,7 @@ public interface CustomerContractRepository extends JpaRepository<CustomerContra
 	List<CustomerContract> findByCustomerUidAndUserUid(Long customerUid, Long userUid);
 
 	List<CustomerContract> findAllByContractUid(Long contractUid);
+
+	@Query("SELECT cc FROM CustomerContract cc JOIN FETCH cc.customer WHERE cc.contract.uid = :contractUid")
+	List<CustomerContract> findAllByContractUidWithCustomer(Long contractUid);
 }
