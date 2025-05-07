@@ -3,10 +3,9 @@ package com.zipline.service.region.dto;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.zipline.domain.entity.enums.CrawlStatus;
 import com.zipline.domain.entity.region.Region;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
@@ -46,7 +45,7 @@ public class RegionDTO {
     //todo: 상태관리 이전대애서 구현필요
     public static Region createKoreaRegion() {
         return Region.builder()
-                .cortarNo(0000000000L)
+                .cortarNo(0L)
                 .cortarName("대한민국")
                 .level(0)
                 .centerLat(36.5)

@@ -12,3 +12,4 @@ apiserver/.settings
 apiserver/bin
 .idea
 **/src/main/resources/application.yml
+crawlerserver/service/bin/main/com/zipline/service

@@ -7,22 +7,28 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.EnumType;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "crawls")
 @Getter
 @Builder
 public class Crawl {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "cortar_no")
+    @Column(name = "cortar_no", nullable = false, unique = true)
     private Long cortarNo;
 
     @Column(name = "naver_status")
@@ -38,9 +44,6 @@ public class Crawl {
 
     @Column(name = "zigbang_last_crawled_at")
     private LocalDateTime zigbangLastCrawledAt;
-
-    protected Crawl() {
-    }
 
     public Crawl(Long id, Long cortarNo, CrawlStatus naverStatus, LocalDateTime naverLastCrawledAt,
                  CrawlStatus zigbangStatus, LocalDateTime zigbangLastCrawledAt) {

@@ -9,6 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import com.zipline.domain.entity.region.Region;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.global.exception.task.TaskException;
 import com.zipline.global.exception.task.errorcode.TaskErrorCode;
 import com.zipline.global.task.Task;
@@ -16,19 +23,12 @@ import com.zipline.global.task.TaskManager;
 import com.zipline.global.task.dto.TaskResponseDto;
 import com.zipline.global.task.enums.TaskStatus;
 import com.zipline.global.task.enums.TaskType;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zipline.service.region.dto.RegionDTO;
-import com.zipline.domain.entity.region.Region;
 import com.zipline.global.util.RandomSleepUtil;
 import com.zipline.infrastructure.region.RegionRepository;
+import com.zipline.service.region.dto.RegionDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,21 +40,15 @@ public class RegionCodeServiceImpl implements RegionCodeService {
     private static final Long KOREA_CORTAR_NO = 0L;
 
     public TaskResponseDto crawlAndSaveRegions() {
-        // First check if task is already running
         if (taskManager.isTaskRunning(TaskType.NAVERCRAWLING)) {
             throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);
         }
 
-        // Create task and immediately get a reference to it
         final Task task = taskManager.createTask(TaskType.NAVERCRAWLING);
 
-        // Start async processing
         CompletableFuture.runAsync(() -> {
             try {
-                // Main crawler logic
                 executeCrawlAndSaveRegions(task);
-
-                // Mark as successful upon completion
                 task.markAsCompleted();
                 taskManager.updateTaskStatus(TaskType.NAVERCRAWLING, TaskStatus.COMPLETED);
                 log.info("지역 정보 수집 완료됨");
@@ -74,13 +68,20 @@ public class RegionCodeServiceImpl implements RegionCodeService {
         collectRegionsForLevel(1);
         collectRegionsForLevel(2);
         collectRegionsForLevel(3);
+        logCollectionSummary();
     }
 
     @Transactional
     private void initializeKoreaIfNotExists() {
-        if (regionRepository.findByCortarNo(KOREA_CORTAR_NO).isEmpty()) {
-            Region koreaRegion = RegionDTO.createKoreaRegion();
-            regionRepository.save(koreaRegion);
+        try {
+            if (regionRepository.findByCortarNo(KOREA_CORTAR_NO).isEmpty()) {
+                Region koreaRegion = RegionDTO.createKoreaRegion();
+                log.info("한국 지역 생성 성공");
+                regionRepository.save(koreaRegion);
+            }
+        } catch (Exception e) {
+            log.error("한국 지역 생성 오류: {}", e.getMessage(), e);
+            throw e; // Re-throw to allow proper error handling
         }
     }
 
@@ -97,24 +98,19 @@ public class RegionCodeServiceImpl implements RegionCodeService {
         }
     }
 
-    @Transactional
     private void collectRegionsForLevel(int targetLevel) {
         List<Region> parents = regionRepository.findByLevel(targetLevel - 1);
         int total = parents.size();
         int count = 0;
-
         for (Region parent : parents) {
             count++;
-            // Log progress periodically for visibility
             if (count % 10 == 0 || count == total) {
                 log.info("수집 중: 레벨 {} - {} / {} 완료", targetLevel, count, total);
             }
-
             try {
                 RandomSleepUtil.sleepShort();
                 collectRegionsForParent(parent.getCortarNo(), targetLevel);
             } catch (Exception e) {
-                // Log error but continue with next item
                 log.error("Region {} processing failed: {}", parent.getCortarNo(), e.getMessage());
             }
         }
@@ -174,7 +170,6 @@ public class RegionCodeServiceImpl implements RegionCodeService {
         }
     }
 
-    @Transactional
     private void saveRegion(Long parentCortarNo, RegionDTO dto, int level) {
         try {
             Region parentRegion = parentCortarNo == null ?
@@ -202,7 +197,6 @@ public class RegionCodeServiceImpl implements RegionCodeService {
             }
         } catch (Exception e) {
             log.error("지역 정보 파싱 중 오류 발생: {}", e.getMessage());
-            // Return what we have so far instead of throwing
             return regions;
         }
         return regions;

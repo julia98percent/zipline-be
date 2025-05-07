@@ -1,20 +1,33 @@
 package com.zipline.domain.entity.migration;
+
 import com.zipline.domain.entity.enums.CrawlStatus;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "migrations")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Builder
+@Entity
+@Table(name = "migrations")
 public class Migration {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "cortar_no")
+    @Column(name = "cortar_no", nullable = false, unique = true)
     private Long cortarNo;
 
     @Column(name = "naver_status")
@@ -31,8 +44,6 @@ public class Migration {
     @Column(name = "zigbang_last_migrated_at")
     private LocalDateTime zigbangLastMigratedAt;
 
-    protected Migration() {
-    }
 
     public Migration(Long id, Long cortarNo, CrawlStatus naverStatus, LocalDateTime naverLastCrawledAt,
                      CrawlStatus zigbangStatus, LocalDateTime zigbangLastCrawledAt) {
