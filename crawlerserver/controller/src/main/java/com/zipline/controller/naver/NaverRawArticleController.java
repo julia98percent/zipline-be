@@ -1,19 +1,12 @@
 package com.zipline.controller.naver;
 
-
-
 import com.zipline.global.response.ApiResponse;
-import com.zipline.global.task.dto.TaskResponseDto;
+import com.zipline.service.task.dto.TaskResponseDto;
 import com.zipline.global.util.CrawlingStatusManager;
 import com.zipline.service.naver.NaverRawArticleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import static com.zipline.global.util.CrawlingStatusUtil.checkAndExecute;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/crawl/naver")
@@ -24,16 +17,19 @@ public class NaverRawArticleController {
 	private final CrawlingStatusManager crawlingStatusManager;
 
 	@GetMapping("/all")
-	public ResponseEntity<ApiResponse<TaskResponseDto>> crawlAllRawArticleFromNaver() {
-		TaskResponseDto result = naverRawArticleService.crawlAndSaveRawArticles();
+	public ResponseEntity<ApiResponse<TaskResponseDto>> crawlAllRawArticleFromNaver(
+			@RequestParam(defaultValue = "false") Boolean useProxy) {
+		TaskResponseDto result = naverRawArticleService.crawlAndSaveRawArticles(useProxy);
 		ApiResponse<TaskResponseDto> response = ApiResponse.ok("원본 매물 정보 수집이 시작되었습니다.", result);
 		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/region/{cortarNo}")
-	public ResponseEntity<ApiResponse<TaskResponseDto>> crawlRawArticlesByRegion(@PathVariable Long cortarNo) {
-    TaskResponseDto result = naverRawArticleService.crawlAndSaveRawArticlesForRegion(cortarNo);
-    ApiResponse<TaskResponseDto> response = ApiResponse.ok("지역 " + cortarNo + " 원본 매물 정보 수집이 시작되었습니다.", result);
-    return ResponseEntity.ok(response);
+	public ResponseEntity<ApiResponse<TaskResponseDto>> crawlRawArticlesByRegion(
+			@PathVariable Long cortarNo,
+			@RequestParam(defaultValue = "false") Boolean useProxy) {
+    	TaskResponseDto result = naverRawArticleService.crawlAndSaveRawArticlesForRegion(useProxy,cortarNo);
+    	ApiResponse<TaskResponseDto> response = ApiResponse.ok("지역 " + cortarNo + " 원본 매물 정보 수집이 시작되었습니다.", result);
+    	return ResponseEntity.ok(response);
 	}
 }

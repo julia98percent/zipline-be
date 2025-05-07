@@ -9,9 +9,10 @@ import com.zipline.domain.entity.region.Region;
 import com.zipline.global.util.CoordinateUtil;
 import com.zipline.global.util.RandomSleepUtil;
 import com.zipline.infrastructure.crawl.CrawlRepository;
+import com.zipline.infrastructure.crawl.fetch.Fetcher;
+import com.zipline.infrastructure.crawl.fetch.dto.FetchConfigDTO;
 import com.zipline.infrastructure.naver.NaverRawArticleRepository;
 import com.zipline.infrastructure.region.RegionRepository;
-import com.zipline.service.naver.client.NaverApiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,59 +21,66 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class NaverRegionCrawler {
+public class NaverArticleCrawler {
 
-    private final NaverApiClient naverApiClient;
     private final RegionRepository regionRepo;
     private final NaverRawArticleRepository articleRepo;
     private final CrawlRepository crawlRepo;
     private static final int RECENT_DAYS = 14;
 
-    /**
-     * 전체 지역에 대한 크롤링 실행
-     */
-    public void executeCrawl(Object ignored) {
+    public void executeCrawl(Fetcher fetcher) {
         log.info("=== 네이버 원본 매물 정보 수집 시작 ===");
         LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RECENT_DAYS);
+
         int pageSize = 100;
         int pageNumber = 0;
         boolean hasMore = true;
+
         while (hasMore) {
-            Page<Long> regions = crawlRepo.findRegionsNeedingCrawlingUpdateForNaverWithPage(cutoffDate, PageRequest.of(pageNumber, pageSize));
+            Page<Long> regions = crawlRepo.findRegionsNeedingCrawlingUpdateForNaverWithPage(cutoffDate,
+                    PageRequest.of(pageNumber, pageSize));
             if (regions.isEmpty()) break;
+
             regions.getContent().forEach(region -> {
-                executeCrawlForRegion(region);
+                executeCrawlForRegion(fetcher,region);
                 crawlRepo.updateNaverLastCrawledAt(region, LocalDateTime.now());
             });
+
             pageNumber++;
             hasMore = pageNumber < regions.getTotalPages();
         }
+
         log.info("=== 네이버 원본 매물 정보 수집 완료 ===");
     }
 
-    /**
-     * 특정 지역에 대한 크롤링 실행
-     */
-    public void executeCrawlForRegion(Long cortarNo) {
+    public void executeCrawlForRegion(Fetcher fetcher, Long cortarNo) {
         log.info("네이버 원본 매물 수집 시작 - 지역 코드: {}", cortarNo);
         crawlRepo.updateNaverCrawlStatus(cortarNo, CrawlStatus.PROCESSING);
         articleRepo.resetMigrationStatusForRegion(cortarNo, MigrationStatus.PENDING);
-        ObjectMapper objectMapper = new ObjectMapper();
 
+        ObjectMapper objectMapper = new ObjectMapper();
         int page = 1;
         boolean hasMore = true;
         int total = 0;
 
+        FetchConfigDTO fetchConfig = FetchConfigDTO.builder()
+                .referer("https://m.land.naver.com/")
+                .userAgent("Mozilla/5.0")
+                .accept("application/json")
+                .connectTimeout(5000)
+                .readTimeout(10000)
+                .build();
+
         try {
             Region region = regionRepo.findByCortarNo(cortarNo)
                     .orElseThrow(() -> new RuntimeException("지역 없음: " + cortarNo));
+
             while (hasMore) {
                 String apiUrl = buildApiUrl(region, page++);
-                String response = naverApiClient.fetchArticleList(apiUrl);
+                String response = fetcher.fetch(apiUrl, fetchConfig);
 
                 if (response != null && !response.isEmpty()) {
                     JsonNode result = objectMapper.readTree(response);
@@ -84,12 +92,15 @@ public class NaverRegionCrawler {
                             total++;
                         }
                     }
+
                     hasMore = result.path("more").asBoolean();
                     RandomSleepUtil.sleep();
                 }
             }
+
             crawlRepo.updateNaverCrawlStatus(cortarNo, CrawlStatus.COMPLETED);
             log.info("완료 - 지역: {}, 총 매물 수: {}", region.getCortarName(), total);
+
         } catch (Exception e) {
             log.error("지역 {} 처리 실패", cortarNo, e);
             crawlRepo.updateNaverCrawlStatus(cortarNo, CrawlStatus.FAILED);
@@ -120,6 +131,7 @@ public class NaverRegionCrawler {
     private void saveRawArticle(JsonNode node, Long cortarNo) {
         String articleId = node.path("atclNo").asText();
         Optional<NaverRawArticle> existing = articleRepo.findByArticleId(articleId);
+
         NaverRawArticle raw = existing.map(e -> NaverRawArticle.builder()
                         .id(e.getId())
                         .articleId(articleId)
@@ -135,6 +147,7 @@ public class NaverRegionCrawler {
                         .migrationStatus(MigrationStatus.PENDING)
                         .createdAt(LocalDateTime.now())
                         .build());
+
         articleRepo.save(raw);
     }
 }

@@ -1,14 +1,15 @@
-package com.zipline.global.task;
+package com.zipline.service.task;
 
 import com.zipline.global.exception.task.TaskException;
 import com.zipline.global.exception.task.errorcode.TaskErrorCode;
-import com.zipline.global.task.dto.TaskResponseDto;
+import com.zipline.service.task.dto.TaskResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -17,20 +18,20 @@ public class TaskExecutionHandler {
     private final TaskManager taskManager;
     private final TaskExecutor taskExecutor;
 
-    public <T> TaskResponseDto execute(TaskDefinition<T> definition) {
+    public TaskResponseDto execute(TaskDefinition definition) {
         if (taskManager.isTaskRunning(definition.getType())) {
             throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);
         }
 
-        Task<T> task = Task.createTask(definition.getType(), definition.getTargetEntity());
+        Task task = Task.createTask(definition.getType(), null);
         taskManager.createTask(task.getType());
 
         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
             try {
-                definition.getTask().run(task.getTargetEntity());
+                definition.getTask().run();
             } catch (Exception e) {
                 log.error("{} 실행 중 예외 발생", definition.getDescription(), e);
-                throw e;
+                throw new RuntimeException(e);
             }
         }, taskExecutor);
 

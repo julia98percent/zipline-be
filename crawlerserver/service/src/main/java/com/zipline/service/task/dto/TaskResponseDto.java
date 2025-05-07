@@ -1,7 +1,7 @@
-package com.zipline.global.task.dto;
+package com.zipline.service.task.dto;
 
-import com.zipline.global.task.Task;
-import com.zipline.global.task.enums.TaskType;
+import com.zipline.service.task.Task;
+import com.zipline.service.task.enums.TaskType;
 import lombok.Builder;
 import lombok.Getter;
 

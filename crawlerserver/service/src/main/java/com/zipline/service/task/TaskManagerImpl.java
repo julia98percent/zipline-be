@@ -1,10 +1,10 @@
-package com.zipline.global.task;
+package com.zipline.service.task;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.zipline.global.exception.task.TaskException;
 import com.zipline.global.exception.task.errorcode.TaskErrorCode;
-import com.zipline.global.task.enums.TaskType;
+import com.zipline.service.task.enums.TaskType;
 import org.springframework.stereotype.Component;
 
 /**

@@ -1,6 +1,6 @@
-package com.zipline.global.task;
+package com.zipline.service.task;
 
-import com.zipline.global.task.enums.TaskType;
+import com.zipline.service.task.enums.TaskType;
 
 public interface TaskManager {
     boolean isTaskRunning(TaskType taskType);

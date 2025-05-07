@@ -1,4 +1,4 @@
-package com.zipline.global.task.dto;
+package com.zipline.service.task.dto;
 
 
 import lombok.Builder;

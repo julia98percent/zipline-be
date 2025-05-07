@@ -1,28 +1,26 @@
-package com.zipline.service.naver.client;
+package com.zipline.infrastructure.crawl.fetch;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zipline.infrastructure.crawl.fetch.Connection;
 import com.zipline.infrastructure.crawl.fetch.dto.FetchConfigDTO;
 import com.zipline.infrastructure.proxy.ProxyPool;
 import com.zipline.infrastructure.proxy.dto.ProxyInfoDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.URL;
+
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
-public class ProxyNaverApiClient {
+public class ProxyFetcher implements Fetcher {
 
     private final ProxyPool proxyPool;
-    private final ObjectMapper objectMapper;
 
     @Value("${crawler.max-retry-count:10}")
     private int maxRetryCount;
@@ -30,10 +28,10 @@ public class ProxyNaverApiClient {
     @Value("${crawler.retry-delay-ms:1000}")
     private long retryDelayMs;
 
-    public String fetchArticleList(String apiUrl) {
+    @Override
+    public String fetch(String url, FetchConfigDTO config) throws Exception {
         ProxyInfoDTO proxy = null;
         int retryCount = 0;
-        Exception lastException = null;
 
         while (retryCount < maxRetryCount) {
             try {
@@ -42,48 +40,35 @@ public class ProxyNaverApiClient {
                     proxyPool.refreshProxyPool();
                     proxy = proxyPool.getNextAvailableProxy();
                 }
-
-                if (proxy == null) {
-                    throw new RuntimeException("프록시 풀 비어 있음.");
-                }
-
-                log.info("API 요청: {}, 프록시: {}", apiUrl, proxy.getKey());
-
-                URL url = new URL(apiUrl);
+                if (proxy == null) throw new RuntimeException("프록시 풀 비어 있음.");
+                log.info("API 요청: {}, 프록시: {}", url, proxy.getKey());
                 java.net.Proxy javaProxy = new java.net.Proxy(java.net.Proxy.Type.HTTP,
                         new InetSocketAddress(proxy.getHost(), proxy.getPort()));
 
-                //HttpURLConnection conn = Connection.HTTPURLConnection(apiUrl, FetchConfigDTO.naverConfig());
+                HttpURLConnection conn = Connection.HTTPURLConnection(url, config);
 
-                //int code = conn.getResponseCode();
-//                if (code == 200) {
-//                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-//                        StringBuilder sb = new StringBuilder();
-//                        String line;
-//                        while ((line = reader.readLine()) != null) {
-//                            sb.append(line);
-//                        }
-//                        return sb.toString();
-//                    }
-//                } else {
-//                    log.warn("HTTP 오류 코드: {}, 재시도 중...", code);
-//                    proxyPool.markProxyAsFailed(proxy);
-//                    retryCount++;
-//                }
-
+                if (conn.getResponseCode() == 200) {
+                    try (BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()))) {
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) sb.append(line);
+                        return sb.toString();
+                    }
+                } else {
+                    log.warn("HTTP 오류 코드: {}, 재시도 중...", conn.getResponseCode());
+                    proxyPool.markProxyAsFailed(proxy);
+                    retryCount++;
+                }
             } catch (Exception e) {
-                lastException = e;
                 log.error("프록시 요청 실패: {}", e.getMessage());
                 if (proxy != null) proxyPool.markProxyAsFailed(proxy);
                 retryCount++;
                 sleepWithBackoff(retryCount);
             }
         }
-
-        log.error("모든 재시도 실패: {}", lastException.getMessage());
-        return null;
+        throw new RuntimeException("모든 재시도 실패");
     }
-
     private void sleepWithBackoff(int retryCount) {
         try {
             Thread.sleep(retryDelayMs * retryCount);

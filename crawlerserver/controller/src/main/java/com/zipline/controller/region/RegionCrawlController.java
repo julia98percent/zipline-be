@@ -1,7 +1,7 @@
 package com.zipline.controller.region;
 
 import com.zipline.global.response.ApiResponse;
-import com.zipline.global.task.dto.TaskResponseDto;
+import com.zipline.service.task.dto.TaskResponseDto;
 import com.zipline.service.region.RegionCodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

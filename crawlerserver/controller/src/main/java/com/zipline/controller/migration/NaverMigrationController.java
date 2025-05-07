@@ -1,8 +1,8 @@
 package com.zipline.controller.migration;
 
 import com.zipline.global.response.ApiResponse;
-import com.zipline.global.task.dto.TaskResponseDto;
-import com.zipline.global.task.enums.TaskType;
+import com.zipline.service.task.dto.TaskResponseDto;
+import com.zipline.service.task.enums.TaskType;
 import com.zipline.service.migration.NaverMigrationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
