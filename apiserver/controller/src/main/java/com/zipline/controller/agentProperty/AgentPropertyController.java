@@ -1,6 +1,7 @@
 package com.zipline.controller.agentProperty;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,9 @@ import com.zipline.service.agentProperty.AgentPropertyService;
 import com.zipline.service.agentProperty.dto.request.AgentPropertyRequestDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyResponseDTO;
+import com.zipline.service.contract.ContractService;
+import com.zipline.service.contract.dto.response.ContractPropertyHistoryResponseDTO;
+import com.zipline.service.contract.dto.response.ContractPropertyResponseDTO;
 import com.zipline.service.counsel.CounselService;
 import com.zipline.service.counsel.dto.response.CounselPageResponseDTO;
 
@@ -36,6 +40,7 @@ public class AgentPropertyController {
 
 	private final AgentPropertyService agentPropertyService;
 	private final CounselService counselService;
+	private final ContractService contractService;
 
 	@GetMapping("/{propertyUid}")
 	public ResponseEntity<ApiResponse<AgentPropertyResponseDTO>> getProperty(@PathVariable Long propertyUid,
@@ -92,6 +97,24 @@ public class AgentPropertyController {
 		CounselPageResponseDTO result = counselService.getPropertyCounselHistories(pageRequestDTO,
 			propertyUid, Long.parseLong(principal.getName()));
 		ApiResponse<CounselPageResponseDTO> response = ApiResponse.ok("상담 히스토리 조회 성공", result);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@GetMapping("/{propertyUid}/contract")
+	public ResponseEntity<ApiResponse<ContractPropertyResponseDTO>> getPropertyContract(@PathVariable Long propertyUid,
+		Principal principal) {
+		ContractPropertyResponseDTO result = contractService.getPropertyContract(propertyUid,
+			Long.parseLong(principal.getName()));
+		ApiResponse<ContractPropertyResponseDTO> response = ApiResponse.ok("성사된 계약 정보 조회 성공", result);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@GetMapping("/{propertyUid}/contract-history")
+	public ResponseEntity<ApiResponse<List<ContractPropertyHistoryResponseDTO>>> getPropertyContractHistory(
+		@PathVariable Long propertyUid, Principal principal) {
+		List<ContractPropertyHistoryResponseDTO> result = contractService.getPropertyContractHistories(
+			propertyUid, Long.parseLong(principal.getName()));
+		ApiResponse<List<ContractPropertyHistoryResponseDTO>> response = ApiResponse.ok("계약 히스토리 정보 조회 성공", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }
