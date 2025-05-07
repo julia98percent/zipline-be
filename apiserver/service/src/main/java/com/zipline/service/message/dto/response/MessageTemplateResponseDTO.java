@@ -1,4 +1,4 @@
-package com.zipline.service.message.dto.message.response;
+package com.zipline.service.message.dto.response;
 
 import com.zipline.entity.enums.MessageTemplateCategory;
 import com.zipline.entity.message.MessageTemplate;

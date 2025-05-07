@@ -1,7 +1,7 @@
 package com.zipline.service.message;
 
-import com.zipline.service.message.dto.message.response.MessageTemplateResponseDTO;
 import com.zipline.service.message.dto.request.MessageTemplateRequestDTO;
+import com.zipline.service.message.dto.response.MessageTemplateResponseDTO;
 import java.util.List;
 
 public interface MessageTemplateService {
