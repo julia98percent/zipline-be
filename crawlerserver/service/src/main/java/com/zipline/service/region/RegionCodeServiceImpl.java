@@ -43,9 +43,7 @@ public class RegionCodeServiceImpl implements RegionCodeService {
         if (taskManager.isTaskRunning(TaskType.NAVERCRAWLING)) {
             throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);
         }
-
         final Task task = taskManager.createTask(TaskType.NAVERCRAWLING);
-
         CompletableFuture.runAsync(() -> {
             try {
                 executeCrawlAndSaveRegions(task);
@@ -56,7 +54,6 @@ public class RegionCodeServiceImpl implements RegionCodeService {
                 taskManager.removeTask(TaskType.NAVERCRAWLING);
             }
         }, taskExecutor);
-
         return TaskResponseDto.fromTask(task);
     }
 
