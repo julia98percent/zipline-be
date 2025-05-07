@@ -14,13 +14,13 @@ public class  Task<T> {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String errorMessage;
-    private T targetEntity;
+    private T target;
 
-    public static <U> Task<U> createTask(TaskType taskType, U targetEntity) {
+    public static <U> Task<U> createTask(TaskType taskType, U target) {
         return Task.<U>builder()
                 .type(taskType)
                 .startTime(LocalDateTime.now())
-                .targetEntity(targetEntity)
+                .target(target)
                 .build();
     }
 

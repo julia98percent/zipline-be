@@ -14,7 +14,7 @@ public class TaskResponseDto {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String message;
-    private Object targetEntity;
+    private Object target;
     private ProgressDto progress;
 
     public static <T> TaskResponseDto fromTask(Task<T> task) {
@@ -23,7 +23,7 @@ public class TaskResponseDto {
                 .startTime(task.getStartTime())
                 .endTime(task.getEndTime())
                 .message(task.getErrorMessage())
-                .targetEntity(task.getTargetEntity())
+                .target(task.getTarget())
                 .build();
     }
 }

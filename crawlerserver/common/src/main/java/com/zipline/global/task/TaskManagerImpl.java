@@ -22,11 +22,11 @@ public class TaskManagerImpl implements TaskManager {
     }
 
     @Override
-    public <T> Task<T> createTask(TaskType taskType, T targetEntity) {
+    public <T> Task<T> createTask(TaskType taskType, T target) {
         if (isTaskRunning(taskType)) {
             throw new TaskException(TaskErrorCode.TASK_ALREADY_RUNNING);
         }
-        Task<T> newTask = Task.createTask(taskType, targetEntity);
+        Task<T> newTask = Task.createTask(taskType, target);
         taskRegistry.put(taskType, newTask);
         return newTask;
     }

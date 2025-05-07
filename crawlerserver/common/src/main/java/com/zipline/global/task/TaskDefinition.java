@@ -1,25 +1,24 @@
 package com.zipline.global.task;
 
 import com.zipline.global.task.enums.TaskType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
-public class TaskDefinition {
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class TaskDefinition<T> {
     private TaskType type;
     private String description;
-    private Task task;
+    private RunnableWithArg<T> task;
+    private T target;
 
-    public static TaskDefinition of(TaskType type, String description, Task task) {
-        return builder()
-                .type(type)
-                .description(description)
-                .task(task)
-                .build();
+    @FunctionalInterface
+    public interface RunnableWithArg<T> {
+        void run(T target);
+    }
+
+    public static <T> TaskDefinition<T> of(TaskType type, String description, RunnableWithArg<T> task, T target) {
+        return new TaskDefinition<>(type, description, task, target);
     }
 }
