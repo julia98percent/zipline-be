@@ -63,6 +63,7 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 				agentPropertyRequestDTO.getCustomerUid(), userUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
+		agentPropertyRequestDTO.constructionYearValidate();
 		AgentProperty agentProperty = agentPropertyRequestDTO.toEntity(loggedInUser, customer);
 
 		AgentProperty save = agentPropertyRepository.save(agentProperty);
@@ -94,6 +95,7 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 		Customer customer = customerRepository.findById(agentPropertyRequestDTO.getCustomerUid())
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
+		agentPropertyRequestDTO.constructionYearValidate();
 		agentProperty.modifyProperty(customer, agentPropertyRequestDTO.getAddress(),
 			agentPropertyRequestDTO.getLegalDistrictCode(), agentPropertyRequestDTO.getDeposit(),
 			agentPropertyRequestDTO.getMonthlyRent(), agentPropertyRequestDTO.getPrice(),

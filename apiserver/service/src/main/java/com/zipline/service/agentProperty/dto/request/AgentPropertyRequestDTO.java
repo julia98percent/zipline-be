@@ -10,6 +10,8 @@ import com.zipline.entity.customer.Customer;
 import com.zipline.entity.enums.PropertyCategory;
 import com.zipline.entity.enums.PropertyType;
 import com.zipline.entity.user.User;
+import com.zipline.global.exception.agentProperty.PropertyException;
+import com.zipline.global.exception.agentProperty.errorcode.PropertyErrorCode;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -139,5 +141,11 @@ public class AgentPropertyRequestDTO {
 			.totalArea(totalArea)
 			.details(details)
 			.build();
+	}
+
+	public void constructionYearValidate() {
+		int year = constructionYear.getValue();
+		if (year < 1000 || year > 9999)
+			throw new PropertyException(PropertyErrorCode.INVALID_CONSTRUCTION_YEAR_FORMAT);
 	}
 }
