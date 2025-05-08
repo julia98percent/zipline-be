@@ -8,6 +8,8 @@ import com.zipline.global.request.ContractFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.service.contract.dto.request.ContractRequestDTO;
 import com.zipline.service.contract.dto.response.ContractListResponseDTO;
+import com.zipline.service.contract.dto.response.ContractPropertyHistoryResponseDTO;
+import com.zipline.service.contract.dto.response.ContractPropertyResponseDTO;
 import com.zipline.service.contract.dto.response.ContractResponseDTO;
 
 public interface ContractService {
@@ -24,4 +26,8 @@ public interface ContractService {
 
 	ContractListResponseDTO getContractList(PageRequestDTO pageRequestDTO, Long userUid,
 		ContractFilterRequestDTO filter);
+
+	List<ContractPropertyHistoryResponseDTO> getPropertyContractHistories(Long propertyUid, Long userUid);
+
+	ContractPropertyResponseDTO getPropertyContract(Long propertyUid, Long userUid);
 }
