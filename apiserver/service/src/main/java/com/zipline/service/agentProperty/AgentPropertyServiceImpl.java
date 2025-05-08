@@ -11,6 +11,7 @@ import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.contract.Contract;
 import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.customer.Customer;
+import com.zipline.entity.enums.ContractCustomerRole;
 import com.zipline.entity.enums.ContractStatus;
 import com.zipline.entity.user.User;
 import com.zipline.global.exception.agentProperty.PropertyException;
@@ -63,6 +64,9 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 				agentPropertyRequestDTO.getCustomerUid(), userUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
+		if (agentPropertyRequestDTO.getConstructionYear() != null) {
+			agentPropertyRequestDTO.constructionYearValidate();
+		}
 		AgentProperty agentProperty = agentPropertyRequestDTO.toEntity(loggedInUser, customer);
 
 		AgentProperty save = agentPropertyRepository.save(agentProperty);
@@ -75,6 +79,7 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 				.build();
 			CustomerContract customerContract = CustomerContract.builder()
 				.customer(save.getCustomer())
+				.role(ContractCustomerRole.LESSOR_OR_SELLER)
 				.contract(contract)
 				.build();
 			contractRepository.save(contract);
@@ -94,6 +99,9 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 		Customer customer = customerRepository.findById(agentPropertyRequestDTO.getCustomerUid())
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
+		if (agentPropertyRequestDTO.getConstructionYear() != null) {
+			agentPropertyRequestDTO.constructionYearValidate();
+		}
 		agentProperty.modifyProperty(customer, agentPropertyRequestDTO.getAddress(),
 			agentPropertyRequestDTO.getLegalDistrictCode(),
 			agentPropertyRequestDTO.getDetailAddress(), agentPropertyRequestDTO.getDeposit(),
