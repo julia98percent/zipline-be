@@ -44,15 +44,19 @@ public class Migration {
     @Column(name = "zigbang_last_migrated_at")
     private LocalDateTime zigbangLastMigratedAt;
 
+    @Column(name = "error_log")
+    private String errorLog;
+
 
     public Migration(Long id, Long cortarNo, CrawlStatus naverStatus, LocalDateTime naverLastCrawledAt,
-                     CrawlStatus zigbangStatus, LocalDateTime zigbangLastCrawledAt) {
+                     CrawlStatus zigbangStatus, LocalDateTime zigbangLastCrawledAt, String errorLog) {
         this.id = id;
         this.cortarNo = cortarNo;
         this.naverStatus = naverStatus;
         this.naverLastMigratedAt = naverLastCrawledAt;
         this.zigbangStatus = zigbangStatus;
         this.zigbangLastMigratedAt = zigbangLastCrawledAt;
+        this.errorLog = errorLog;
     }
 
     public Migration CreateMigration(Long cortarNo) {
@@ -88,6 +92,28 @@ public class Migration {
     public Migration updateZigbangMigrationStatus(CrawlStatus status) {
         this.zigbangStatus = status;
         this.zigbangLastMigratedAt = LocalDateTime.now();
+        return this;
+    }
+
+    /**
+     * 새로운 에러 로그를 기존 로그에 추가합니다.
+     *
+     * @param newError 새롭게 발생한 에러 메시지
+     * @param maxLength 최대 허용 길이 (기본값: 1000)
+     * @return Migration 객체 자기 자신 반환
+     */
+    public Migration appendErrorLog(String newError, int maxLength) {
+        String currentLog = this.errorLog != null ? this.errorLog : "";
+
+        String updatedLog = currentLog.isEmpty() ?
+                String.format("[%s] %s", LocalDateTime.now(), newError) :
+                currentLog + "\n" + String.format("[%s] %s", LocalDateTime.now(), newError);
+
+        if (updatedLog.length() > maxLength) {
+            updatedLog = updatedLog.substring(updatedLog.length() - maxLength);
+        }
+
+        this.errorLog = updatedLog;
         return this;
     }
 }

@@ -30,7 +30,10 @@ public interface CrawlRepository extends JpaRepository<Crawl, Long> {
     @Query("SELECT r.cortarNo FROM Crawl r WHERE r.naverLastCrawledAt IS NULL OR r.naverLastCrawledAt < :cutoffDate OR r.naverStatus IN ('FAILED', 'PROCESSING')")
     Page<Long> findRegionsNeedingCrawlingUpdateForNaverWithPage(@Param("cutoffDate") LocalDateTime cutoffDate, Pageable pageable);
 
-
+    @Transactional
+    @Modifying
+    @Query("UPDATE Crawl m SET m.errorLog = :errorLog WHERE m.cortarNo = :cortarNo")
+    void updateErrorLog(@Param("cortarNo") Long cortarNo, @Param("errorLog") String errorLog);
 
 //    /**
 //     * 네이버 크롤링이 필요한 지역 목록 조회
