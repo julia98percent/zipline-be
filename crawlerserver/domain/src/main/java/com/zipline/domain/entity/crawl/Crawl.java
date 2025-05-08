@@ -2,6 +2,7 @@ package com.zipline.domain.entity.crawl;
 
 import com.zipline.domain.entity.enums.CrawlStatus;
 
+import com.zipline.domain.entity.enums.Platform;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -112,6 +113,28 @@ public class Crawl {
             updatedLog = updatedLog.substring(updatedLog.length() - maxLength);
         }
 
+        this.errorLog = updatedLog;
+        return this;
+    }
+
+    public Crawl errorWithLog(Platform platform, String newError, int maxLength, CrawlStatus status) {
+        String currentLog = this.errorLog != null ? this.errorLog : "";
+
+        String updatedLog = currentLog.isEmpty() ?
+                String.format("[%s] %s", LocalDateTime.now(), newError) :
+                currentLog + "\n" + String.format("[%s] %s", LocalDateTime.now(), newError);
+
+        if (updatedLog.length() > maxLength) {
+            updatedLog = updatedLog.substring(updatedLog.length() - maxLength);
+        }
+        if (platform == Platform.NAVER) {
+            this.naverStatus = status;
+            this.naverLastCrawledAt = LocalDateTime.now();
+        }
+        if (platform == Platform.ZIGBANG) {
+            this.zigbangStatus = status;
+            this.zigbangLastCrawledAt = LocalDateTime.now();
+        }
         this.errorLog = updatedLog;
         return this;
     }

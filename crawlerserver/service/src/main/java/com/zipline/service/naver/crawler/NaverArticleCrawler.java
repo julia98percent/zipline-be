@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.domain.entity.crawl.Crawl;
 import com.zipline.domain.entity.enums.CrawlStatus;
 import com.zipline.domain.entity.enums.MigrationStatus;
+import com.zipline.domain.entity.enums.Platform;
 import com.zipline.domain.entity.naver.NaverRawArticle;
 import com.zipline.domain.entity.region.Region;
 import com.zipline.global.util.CoordinateUtil;
@@ -85,6 +86,7 @@ public class NaverArticleCrawler {
         ObjectMapper objectMapper = new ObjectMapper();
         int page = 1;
         boolean hasMore = true;
+        boolean is307 = false;
         int total = 0;
 
         FetchConfigDTO fetchConfig = FetchConfigDTO.builder()
@@ -111,7 +113,11 @@ public class NaverArticleCrawler {
                 String response = fetcher.fetch(apiUrl, fetchConfig);
 
                 if (response == null) {
-                    log.warn("네이버 원본 데이터 조회 실패 - 데이터 없음으로 간주하고 스킵: {}",apiUrl);
+                    String errorMessage = String.format("[ERROR307]"+"네이버 원본 데이터 조회 실패 307: API URL: %s", apiUrl);
+                    log.warn(errorMessage);
+                    crawlRegion.errorWithLog(Platform.NAVER, errorMessage, 1000, CrawlStatus.ERROR307);
+                    crawlRepo.save(crawlRegion);
+                    is307 = true;
                     break;
                 }
 
@@ -130,11 +136,14 @@ public class NaverArticleCrawler {
                 }
             }
             LocalDateTime now = LocalDateTime.now();
-            crawlRepo.updateNaverCrawlStatusAndLastCrawledAt(cortarNo, CrawlStatus.COMPLETED, now);
+            if (!is307) crawlRepo.updateNaverCrawlStatusAndLastCrawledAt(cortarNo, CrawlStatus.COMPLETED, now);
             log.info("완료 - 지역: {}, 총 매물 수: {}", crawlRegion.getCortarNo(), total);
         } catch (Exception e) {
-            log.error("지역 {} 처리 실패", cortarNo, e);
-            crawlRepo.updateNaverCrawlStatus(cortarNo, CrawlStatus.FAILED);
+            String errorMessage = String.format("[FAILED]"+"지역 %s 처리 실패: %s", cortarNo, e.getMessage());
+            log.error(errorMessage, e);
+            Crawl crawl = crawlRepo.findByCortarNo(cortarNo);
+            crawl.errorWithLog(Platform.NAVER, errorMessage, 1000, CrawlStatus.FAILED);
+            crawlRepo.save(crawl);
         }
     }
 
