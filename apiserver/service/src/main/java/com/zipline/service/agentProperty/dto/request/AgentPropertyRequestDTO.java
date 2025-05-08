@@ -111,9 +111,8 @@ public class AgentPropertyRequestDTO {
 	@Size(max = 255, message = "상세 정보는 255자 이내로 입력해주세요.")
 	@Schema(description = "기타 상세 사항", example = "풀옵션, 관리비 별도")
 	private String details;
-
-	@NotNull(message = "계약 생성 여부를 선택해주세요.")
-	@Schema(description = "계약 자동 생성 여부", example = "true", required = true)
+	
+	@Schema(description = "계약 자동 생성 여부", example = "true")
 	private Boolean createContract;
 
 	public AgentProperty toEntity(User user, Customer customer) {
