@@ -14,8 +14,6 @@ import com.zipline.infrastructure.crawl.fetch.Fetcher;
 import com.zipline.infrastructure.crawl.fetch.dto.FetchConfigDTO;
 import com.zipline.infrastructure.naver.NaverRawArticleRepository;
 import com.zipline.infrastructure.region.RegionRepository;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -28,8 +26,6 @@ import java.util.Optional;
 
 @Slf4j
 @Service("naverArticleCrawler")
-@RequiredArgsConstructor
-@AllArgsConstructor
 public class NaverArticleCrawler {
 
     private final ObjectMapper objectMapper;
@@ -45,6 +41,18 @@ public class NaverArticleCrawler {
 
     @Value("${crawler.max-retry-count:10}")
     private int maxRetryCount;
+
+    public NaverArticleCrawler(
+            ObjectMapper objectMapper,
+            CrawlRepository crawlRepo,
+            RegionRepository regionRepo,
+            NaverRawArticleRepository articleRepo
+    ) {
+        this.objectMapper = objectMapper;
+        this.crawlRepo = crawlRepo;
+        this.regionRepo = regionRepo;
+        this.articleRepo = articleRepo;
+    }
 
     public void executeCrawl(Fetcher fetcher) {
         log.info("=== 네이버 원본 매물 정보 수집 시작 ===");

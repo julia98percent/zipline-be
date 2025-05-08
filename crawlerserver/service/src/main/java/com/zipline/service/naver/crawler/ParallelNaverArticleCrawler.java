@@ -35,11 +35,14 @@ public class ParallelNaverArticleCrawler extends NaverArticleCrawler {
     @Value("${crawler.max-concurrent-requests:10}")
     private int MAX_CONCURRENT_REQUESTS;
 
-    private int localRecentDays;
+    @Value("${crawler.recent-days:14}")
+    private int recentDays;
 
-    private int localPageSize;
+    @Value("${crawler.page-size:100}")
+    private int pageSize;
 
-    private int localMaxRetryCount;
+    @Value("${crawler.max-retry-count:10}")
+    private int maxRetryCount;
 
     @Autowired
     private CrawlRepository crawlRepo;
@@ -48,13 +51,9 @@ public class ParallelNaverArticleCrawler extends NaverArticleCrawler {
             ObjectMapper objectMapper,
             RegionRepository regionRepo,
             NaverRawArticleRepository articleRepo,
-            @Value("${crawler.recent-days:14}") int recentDays,
-            @Value("${crawler.page-size:100}") int pageSize,
-            @Value("${crawler.max-retry-count:10}") int maxRetryCount) {
-        super(objectMapper, regionRepo, articleRepo, null, recentDays, pageSize, maxRetryCount);
-        this.localRecentDays = recentDays;
-        this.localPageSize = pageSize;
-        this.localMaxRetryCount = maxRetryCount;
+            CrawlRepository crawlRepo
+            ) {
+        super(objectMapper, crawlRepo, regionRepo, articleRepo);
     }
 
     @Override
@@ -62,7 +61,7 @@ public class ParallelNaverArticleCrawler extends NaverArticleCrawler {
 
         log.info("=== 프록시를 통한 네이버 병렬 크롤링 시작 ===");
 
-        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(localRecentDays);
+        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(recentDays);
         int pageNumber = 0;
         boolean hasMore = true;
 
@@ -70,7 +69,7 @@ public class ParallelNaverArticleCrawler extends NaverArticleCrawler {
 
         while (hasMore) {
             Page<Long> regions = crawlRepo.findRegionsNeedingCrawlingUpdateForNaverWithPage(cutoffDate,
-                    PageRequest.of(pageNumber++, localPageSize));
+                    PageRequest.of(pageNumber++, pageSize));
             if (regions.isEmpty()) break;
 
             for (Long region : regions.getContent()) {

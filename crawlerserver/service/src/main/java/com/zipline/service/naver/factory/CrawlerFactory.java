@@ -3,16 +3,23 @@ package com.zipline.service.naver.factory;
 import com.zipline.service.naver.crawler.NaverArticleCrawler;
 import com.zipline.service.naver.crawler.ParallelNaverArticleCrawler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class CrawlerFactory {
 
-    private final NaverArticleCrawler singleThreadCrawler;
-    private final ParallelNaverArticleCrawler parallelCrawler;
+    private final NaverArticleCrawler defaultCrawler;
+    private final NaverArticleCrawler parallelCrawler;
+
+    public CrawlerFactory(
+            @Qualifier("naverArticleCrawler") NaverArticleCrawler defaultCrawler,
+            @Qualifier("parallelNaverArticleCrawler") NaverArticleCrawler parallelCrawler) {
+        this.defaultCrawler = defaultCrawler;
+        this.parallelCrawler = parallelCrawler;
+    }
 
     public NaverArticleCrawler getCrawler(boolean useProxy) {
-        return useProxy ? parallelCrawler : singleThreadCrawler;
+        return useProxy ? parallelCrawler : defaultCrawler;
     }
 }
