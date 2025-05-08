@@ -1,6 +1,7 @@
 package com.zipline.service.naver;
 
 import com.zipline.service.naver.crawler.NaverArticleCrawler;
+import com.zipline.service.naver.factory.CrawlerFactory;
 import com.zipline.service.task.TaskDefinition;
 import com.zipline.service.task.TaskExecutionHandler;
 import com.zipline.service.task.dto.TaskResponseDto;
@@ -11,13 +12,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NaverRawArticleServiceImpl implements NaverRawArticleService {
-	private final NaverArticleCrawler crawler;
+
+	private final CrawlerFactory crawlerFactory;
 	private final TaskExecutionHandler taskExecutionHandler;
 
 	@Autowired
@@ -28,12 +28,13 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 	@Qualifier("proxyFetcher")
 	private Fetcher proxyFetcher;
 
-	/**
-	 * 전체 지역 크롤링 시작 (프록시 사용 여부에 따라 다름)
-	 */
 	@Override
 	public TaskResponseDto crawlAndSaveRawArticles(Boolean useProxy) {
+
+		//NOTE: 요청방식과 크롤링방식에 대한 유연성을 위해 별도로 구현했습니다.
+		NaverArticleCrawler crawler = crawlerFactory.getCrawler(useProxy);
 		Fetcher fetcher = useProxy ? proxyFetcher : defaultFetcher;
+
 		return taskExecutionHandler.execute(
 				TaskDefinition.of(
 						TaskType.NAVERCRAWLING,
@@ -43,12 +44,11 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 		);
 	}
 
-	/**
-	 * 특정 지역 크롤링 시작
-	 */
 	@Override
 	public TaskResponseDto crawlAndSaveRawArticlesForRegion(Boolean useProxy, Long cortarNo) {
+		NaverArticleCrawler crawler = crawlerFactory.getCrawler(useProxy);
 		Fetcher fetcher = useProxy ? proxyFetcher : defaultFetcher;
+
 		return taskExecutionHandler.execute(
 				TaskDefinition.of(
 						TaskType.NAVERCRAWLING,
@@ -57,4 +57,4 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 				)
 		);
 	}
-}
+};

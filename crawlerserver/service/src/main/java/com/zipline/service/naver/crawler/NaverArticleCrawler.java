@@ -14,6 +14,7 @@ import com.zipline.infrastructure.crawl.fetch.Fetcher;
 import com.zipline.infrastructure.crawl.fetch.dto.FetchConfigDTO;
 import com.zipline.infrastructure.naver.NaverRawArticleRepository;
 import com.zipline.infrastructure.region.RegionRepository;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,11 +25,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class NaverArticleCrawler {
 
+    private final ObjectMapper objectMapper;
     private final RegionRepository regionRepo;
     private final NaverRawArticleRepository articleRepo;
     private final CrawlRepository crawlRepo;
@@ -86,7 +90,8 @@ public class NaverArticleCrawler {
                 .secFetchDest("empty")
                 .secFetchMode("cors")
                 .secFetchSite("same-origin")
-                .userAgent("Mozilla/5.0")
+                .userAgent("Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36")
+                .acceptLanguage("ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7")
                 .connectTimeout(5000)
                 .readTimeout(10000)
                 .build();
@@ -98,7 +103,12 @@ public class NaverArticleCrawler {
                 String apiUrl = buildApiUrl(crawlRegion, page++);
                 String response = fetcher.fetch(apiUrl, fetchConfig);
 
-                if (response != null && !response.isEmpty()) {
+                if (response == null) {
+                    log.warn("네이버 원본 데이터 조회 실패 - 데이터 없음으로 간주하고 스킵: {}",apiUrl);
+                    break;
+                }
+
+                if (!response.isEmpty()) {
                     JsonNode result = objectMapper.readTree(response);
                     JsonNode articles = result.path("body");
 
