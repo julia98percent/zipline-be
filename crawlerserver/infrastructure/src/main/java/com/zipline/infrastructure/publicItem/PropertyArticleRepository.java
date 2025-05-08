@@ -12,4 +12,5 @@ import com.zipline.domain.entity.publicitem.PropertyArticle;
 public interface PropertyArticleRepository extends JpaRepository<PropertyArticle, Long> {
     List<PropertyArticle> findByRegionCode(String regionCode);
     Optional<PropertyArticle> findByArticleId(String articleId);
+    void deleteByArticleId(String articleId);
 }

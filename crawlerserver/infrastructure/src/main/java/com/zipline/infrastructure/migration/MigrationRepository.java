@@ -2,7 +2,6 @@ package com.zipline.infrastructure.migration;
 
 import com.zipline.domain.entity.migration.Migration;
 import com.zipline.domain.entity.enums.CrawlStatus;
-import com.zipline.domain.entity.enums.MigrationStatus;
 import com.zipline.domain.entity.region.Region;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,14 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 
 public interface MigrationRepository {
-    List<Migration> findByRegionCode(String regionCode);
-    Optional<Migration> findByArticleId(String articleId);
-    List<Migration> findByStatus(MigrationStatus status);
-    List<Migration> findByStatusAndRegionCode(MigrationStatus status, String regionCode);
+    
+    @Query("SELECT r.cortarNo FROM Migration r")
+    List<Long> findAllCortarNos();
+    
+    Migration findByCortarNo(Long cortarNo);
 
     @Transactional
     @Modifying
@@ -62,4 +61,5 @@ public interface MigrationRepository {
     @Query("UPDATE Migration m SET m.errorLog = :errorLog WHERE m.cortarNo = :cortarNo")
     void updateErrorLog(@Param("cortarNo") Long cortarNo, @Param("errorLog") String errorLog);
 
+    void save(Migration migration);
 }

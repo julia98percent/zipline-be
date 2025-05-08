@@ -1,6 +1,7 @@
 package com.zipline.domain.entity.migration;
 
-import com.zipline.domain.entity.enums.CrawlStatus;
+import com.zipline.domain.entity.enums.MigrationStatus;
+import com.zipline.domain.entity.enums.Platform;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -32,14 +33,14 @@ public class Migration {
 
     @Column(name = "naver_status")
     @Enumerated(EnumType.STRING)
-    private CrawlStatus naverStatus;
+    private MigrationStatus naverStatus;
 
     @Column(name = "naver_last_migrated_at")
     private LocalDateTime naverLastMigratedAt;
 
     @Column(name = "zigbang_status")
     @Enumerated(EnumType.STRING)
-    private CrawlStatus zigbangStatus;
+    private MigrationStatus zigbangStatus;
 
     @Column(name = "zigbang_last_migrated_at")
     private LocalDateTime zigbangLastMigratedAt;
@@ -48,8 +49,8 @@ public class Migration {
     private String errorLog;
 
 
-    public Migration(Long id, Long cortarNo, CrawlStatus naverStatus, LocalDateTime naverLastCrawledAt,
-                     CrawlStatus zigbangStatus, LocalDateTime zigbangLastCrawledAt, String errorLog) {
+    public Migration(Long id, Long cortarNo, MigrationStatus naverStatus, LocalDateTime naverLastCrawledAt,
+                     MigrationStatus zigbangStatus, LocalDateTime zigbangLastCrawledAt, String errorLog) {
         this.id = id;
         this.cortarNo = cortarNo;
         this.naverStatus = naverStatus;
@@ -61,8 +62,8 @@ public class Migration {
 
     public Migration CreateMigration(Long cortarNo) {
         this.cortarNo = cortarNo;
-        this.naverStatus = CrawlStatus.NEW;
-        this.zigbangStatus = CrawlStatus.NEW;
+        this.naverStatus = MigrationStatus.PENDING;
+        this.zigbangStatus = MigrationStatus.PENDING;
         this.naverLastMigratedAt = null;
         this.zigbangLastMigratedAt = null;
         return this;
@@ -70,8 +71,8 @@ public class Migration {
 
     public Migration UpdateMigration(Long cortarNo) {
         this.cortarNo = cortarNo;
-        this.naverStatus = CrawlStatus.NEW;
-        this.zigbangStatus = CrawlStatus.NEW;
+        this.naverStatus = MigrationStatus.PENDING;
+        this.zigbangStatus = MigrationStatus.PENDING;
         this.naverLastMigratedAt = null;
         this.zigbangLastMigratedAt = null;
         return this;
@@ -80,7 +81,7 @@ public class Migration {
     /**
      * 네이버 크롤링 상태를 업데이트합니다.
      */
-    public Migration updateNaverMigrationStatus(CrawlStatus status) {
+    public Migration updateNaverMigrationStatus(MigrationStatus status) {
         this.naverStatus = status;
         this.naverLastMigratedAt = LocalDateTime.now();
         return this;
@@ -89,7 +90,7 @@ public class Migration {
     /**
      * 직방 크롤링 상태를 업데이트합니다.
      */
-    public Migration updateZigbangMigrationStatus(CrawlStatus status) {
+    public Migration updateZigbangMigrationStatus(MigrationStatus status) {
         this.zigbangStatus = status;
         this.zigbangLastMigratedAt = LocalDateTime.now();
         return this;
@@ -113,6 +114,28 @@ public class Migration {
             updatedLog = updatedLog.substring(updatedLog.length() - maxLength);
         }
 
+        this.errorLog = updatedLog;
+        return this;
+    }
+
+    public Migration errorWithLog(Platform platform, String newError, int maxLength, MigrationStatus status) {
+        String currentLog = this.errorLog != null ? this.errorLog : "";
+
+        String updatedLog = currentLog.isEmpty() ?
+                String.format("[%s] %s", LocalDateTime.now(), newError) :
+                currentLog + "\n" + String.format("[%s] %s", LocalDateTime.now(), newError);
+
+        if (updatedLog.length() > maxLength) {
+            updatedLog = updatedLog.substring(updatedLog.length() - maxLength);
+        }
+        if (platform == Platform.NAVER) {
+            this.naverStatus = status;
+            this.naverLastMigratedAt = LocalDateTime.now();
+        }
+        if (platform == Platform.ZIGBANG) {
+            this.zigbangStatus = status;
+            this.zigbangLastMigratedAt = LocalDateTime.now();
+        }
         this.errorLog = updatedLog;
         return this;
     }
