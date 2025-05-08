@@ -68,7 +68,6 @@ public class NaverArticleCrawler {
 
             regions.getContent().forEach(region -> {
                 executeCrawlForRegion(fetcher,region);
-                crawlRepo.updateNaverLastCrawledAt(region, LocalDateTime.now());
             });
 
             pageNumber++;
@@ -126,12 +125,12 @@ public class NaverArticleCrawler {
                             total++;
                         }
                     }
-
                     hasMore = result.path("more").asBoolean();
                     RandomSleepUtil.sleep();
                 }
             }
-            crawlRepo.updateNaverCrawlStatus(cortarNo, CrawlStatus.COMPLETED);
+            LocalDateTime now = LocalDateTime.now();
+            crawlRepo.updateNaverCrawlStatusAndLastCrawledAt(cortarNo, CrawlStatus.COMPLETED, now);
             log.info("완료 - 지역: {}, 총 매물 수: {}", crawlRegion.getCortarNo(), total);
         } catch (Exception e) {
             log.error("지역 {} 처리 실패", cortarNo, e);

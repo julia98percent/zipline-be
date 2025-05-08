@@ -1,8 +1,6 @@
 package com.zipline.service.naver.factory;
 
 import com.zipline.service.naver.crawler.NaverArticleCrawler;
-import com.zipline.service.naver.crawler.ParallelNaverArticleCrawler;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 

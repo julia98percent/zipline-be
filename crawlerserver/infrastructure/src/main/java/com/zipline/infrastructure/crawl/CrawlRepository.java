@@ -9,9 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
-import java.util.List;
 
 public interface CrawlRepository extends JpaRepository<Crawl, Long> {
     Crawl findByCortarNo(Long cortarNo);
@@ -29,25 +27,24 @@ public interface CrawlRepository extends JpaRepository<Crawl, Long> {
                                                 @Param("status") CrawlStatus status,
                                                 @Param("lastCrawledAt") LocalDateTime lastCrawledAt);
 
-    /**
-     * 네이버 크롤링이 필요한 지역 목록 조회
-     */
-    @Query("SELECT r FROM Crawl r WHERE r.naverLastCrawledAt < :cutoffDate OR r.naverStatus <> 'COMPLETED'")
-    List<Crawl> findRegionsNeedingCrawlingUpdateForNaver(@Param("cutoffDate") LocalDateTime cutoffDate);
-
-    /**
-     * 네이버 크롤링이 필요한 지역 코드 페이징 조회
-     */
-    @Query("SELECT r.cortarNo FROM Crawl r WHERE r.naverLastCrawledAt < :cutoffDate OR r.naverStatus <> 'COMPLETED'")
+    @Query("SELECT r.cortarNo FROM Crawl r WHERE r.naverLastCrawledAt IS NULL OR r.naverLastCrawledAt < :cutoffDate OR r.naverStatus IN ('FAILED', 'PROCESSING')")
     Page<Long> findRegionsNeedingCrawlingUpdateForNaverWithPage(@Param("cutoffDate") LocalDateTime cutoffDate, Pageable pageable);
 
-    /**
-     * 네이버 크롤링 최종 시간 업데이트
-     */
-    @Transactional
-    @Modifying
-    @Query("UPDATE Crawl r SET r.naverLastCrawledAt = :lastCrawledAt WHERE r.cortarNo = :cortarNo")
-    void updateNaverLastCrawledAt(@Param("cortarNo") Long cortarNo,
-                                  @Param("lastCrawledAt") LocalDateTime lastCrawledAt);
 
+
+//    /**
+//     * 네이버 크롤링이 필요한 지역 목록 조회
+//     */
+//    @Query("SELECT r FROM Crawl r WHERE r.naverLastCrawledAt < :cutoffDate OR r.naverStatus IN ('FAILED', 'PROCESSING')")
+//    List<Crawl> findRegionsNeedingCrawlingUpdateForNaver(@Param("cutoffDate") LocalDateTime cutoffDate);
+//
+//    /**
+//     * 네이버 크롤링 최종 시간 업데이트
+//     */
+//    @Transactional
+//    @Modifying
+//    @Query("UPDATE Crawl r SET r.naverLastCrawledAt = :lastCrawledAt WHERE r.cortarNo = :cortarNo")
+//    void updateNaverLastCrawledAt(@Param("cortarNo") Long cortarNo,
+//                                  @Param("lastCrawledAt") LocalDateTime lastCrawledAt);
+//
 }

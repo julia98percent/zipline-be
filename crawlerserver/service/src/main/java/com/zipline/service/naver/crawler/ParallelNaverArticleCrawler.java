@@ -76,7 +76,6 @@ public class ParallelNaverArticleCrawler extends NaverArticleCrawler {
                 CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                     try {
                         executeCrawlForRegion(fetcher, region);
-                        crawlRepo.updateNaverLastCrawledAt(region, LocalDateTime.now());
                     } catch (Exception e) {
                         log.error("병렬 크롤링 실패 - 지역: {}", region, e);
                     }
