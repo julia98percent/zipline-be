@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
-@Service
+@Service("parallelNaverArticleCrawler")
 public class ParallelNaverArticleCrawler extends NaverArticleCrawler {
 
     private final ExecutorService executor = Executors.newFixedThreadPool(5);

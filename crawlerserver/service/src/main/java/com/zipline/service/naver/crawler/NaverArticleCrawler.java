@@ -27,7 +27,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Slf4j
-@Service
+@Service("naverArticleCrawler")
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class NaverArticleCrawler {
