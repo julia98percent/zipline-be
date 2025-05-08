@@ -20,7 +20,7 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
 	int countByUserUidAndStatusIn(Long userId, List<ContractStatus> statuses);
 
 	@Query("SELECT c FROM Contract c WHERE c.user.uid = :userUid AND c.agentProperty.uid = :propertyUid AND c.deletedAt IS NULL AND c.status IN :includedStatuses ORDER BY c.createdAt DESC LIMIT 1")
-	Contract findByUserUidAndAgentPropertyUidAndAndContractStatusNotCanceledAndDeletedAtIsNull(Long userUid,
+	Contract findByUserUidAndAgentPropertyUidAndContractStatusNotCanceledAndDeletedAtIsNull(Long userUid,
 		Long propertyUid, List<ContractStatus> includedStatuses);
 
 	@Query("SELECT c FROM Contract c WHERE c.user.uid = :userUid AND c.agentProperty.uid = :propertyUid AND c.deletedAt IS NULL AND c.status IN :closedStatuses ORDER BY c.createdAt DESC")

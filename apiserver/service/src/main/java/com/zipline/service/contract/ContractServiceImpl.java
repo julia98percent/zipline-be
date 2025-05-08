@@ -192,7 +192,7 @@ public class ContractServiceImpl implements ContractService {
 	@Transactional(readOnly = true)
 	public ContractPropertyResponseDTO getPropertyContract(Long propertyUid, Long userUid) {
 		List<ContractStatus> includedStatuses = getContractedStatuses();
-		Contract savedContract = contractRepository.findByUserUidAndAgentPropertyUidAndAndContractStatusNotCanceledAndDeletedAtIsNull(
+		Contract savedContract = contractRepository.findByUserUidAndAgentPropertyUidAndContractStatusNotCanceledAndDeletedAtIsNull(
 			userUid,
 			propertyUid, includedStatuses);
 		List<CustomerContract> customerContracts = customerContractRepository.findAllByContractUidWithCustomer(
