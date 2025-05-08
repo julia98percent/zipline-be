@@ -95,7 +95,8 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
 		agentProperty.modifyProperty(customer, agentPropertyRequestDTO.getAddress(),
-			agentPropertyRequestDTO.getLegalDistrictCode(), agentPropertyRequestDTO.getDeposit(),
+			agentPropertyRequestDTO.getLegalDistrictCode(),
+			agentPropertyRequestDTO.getDetailAddress(), agentPropertyRequestDTO.getDeposit(),
 			agentPropertyRequestDTO.getMonthlyRent(), agentPropertyRequestDTO.getPrice(),
 			agentPropertyRequestDTO.getType(), agentPropertyRequestDTO.getLongitude(),
 			agentPropertyRequestDTO.getLatitude(), agentPropertyRequestDTO.getStartDate(),

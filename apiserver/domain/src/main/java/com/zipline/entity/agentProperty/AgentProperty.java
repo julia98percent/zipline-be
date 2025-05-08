@@ -50,6 +50,9 @@ public class AgentProperty extends BaseTimeEntity {
 	@Column(name = "legal_district_code", length = 10, nullable = false)
 	private String legalDistrictCode;
 
+	@Column(name = "detail_address")
+	private String detailAddress;
+
 	@Column(name = "deposit")
 	private BigInteger deposit;
 
@@ -107,7 +110,8 @@ public class AgentProperty extends BaseTimeEntity {
 	private String details;
 
 	@Builder
-	private AgentProperty(Customer customer, User user, String address, String legalDistrictCode, BigInteger deposit,
+	private AgentProperty(Customer customer, User user, String address, String legalDistrictCode, String detailAddress,
+		BigInteger deposit,
 		BigInteger monthlyRent, BigInteger price, PropertyType type, Double longitude, Double latitude,
 		LocalDate startDate,
 		LocalDate endDate, LocalDate moveInDate, PropertyCategory realCategory, Boolean petsAllowed, Integer floor,
@@ -117,6 +121,7 @@ public class AgentProperty extends BaseTimeEntity {
 		this.user = user;
 		this.address = address;
 		this.legalDistrictCode = legalDistrictCode;
+		this.detailAddress = detailAddress;
 		this.deposit = deposit;
 		this.monthlyRent = monthlyRent;
 		this.price = price;
@@ -137,7 +142,8 @@ public class AgentProperty extends BaseTimeEntity {
 		this.details = details;
 	}
 
-	public void modifyProperty(Customer customer, String address, String legalDistrictCode, BigInteger deposit,
+	public void modifyProperty(Customer customer, String address, String legalDistrictCode, String detailAddress,
+		BigInteger deposit,
 		BigInteger monthlyRent, BigInteger price, PropertyType type, Double longitude, Double latitude,
 		LocalDate startDate,
 		LocalDate endDate, LocalDate moveInDate, PropertyCategory realCategory, Boolean petsAllowed, Integer floor,
@@ -145,6 +151,7 @@ public class AgentProperty extends BaseTimeEntity {
 		String details) {
 		this.customer = customer;
 		this.address = address;
+		this.detailAddress = detailAddress;
 		this.deposit = deposit;
 		this.monthlyRent = monthlyRent;
 		this.price = price;
