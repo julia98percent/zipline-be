@@ -17,13 +17,17 @@ import java.net.HttpURLConnection;
         public String fetch(String url, FetchConfigDTO config) throws Exception {
             HttpURLConnection conn = Connection.HTTPURLConnection(url, config);
 
-            if (conn.getResponseCode() == 200) {
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
                     StringBuilder sb = new StringBuilder();
                     String line;
                     while ((line = reader.readLine()) != null) sb.append(line);
                     return sb.toString();
                 }
+            }else if(responseCode == 307){
+                log.warn("307 리다이렉트 발생 - 데이터 없음으로 간주하고 스킵: {}",url);
+                return null;
             } else {
                 throw new RuntimeException("HTTP Error: " + conn.getResponseCode());
             }

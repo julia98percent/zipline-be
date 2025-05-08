@@ -16,6 +16,12 @@ public class Connection {
         conn.setRequestProperty("User-Agent", config.getUserAgent());
         conn.setRequestProperty("Accept", config.getAccept());
         conn.setRequestProperty("Accept-Language", config.getAcceptLanguage());
+        conn.setRequestProperty("Host", config.getHost());
+        conn.setRequestProperty("Referer", config.getReferer());
+        conn.setRequestProperty("User-Agent", config.getUserAgent());
+        conn.setRequestProperty("Accept", config.getAccept());
+        conn.setRequestProperty("Accept-Language", config.getAcceptLanguage());
+
         return conn;
     }
 }
