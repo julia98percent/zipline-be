@@ -16,14 +16,14 @@ import java.util.List;
 public interface CrawlRepository extends JpaRepository<Crawl, Long> {
     Crawl findByCortarNo(Long cortarNo);
 
-    @Modifying
     @Transactional
+    @Modifying
     @Query("UPDATE Crawl r SET r.naverStatus = :status WHERE r.cortarNo = :cortarNo")
     void updateNaverCrawlStatus(@Param("cortarNo") Long cortarNo,
                                 @Param("status") CrawlStatus status);
 
-    @Modifying
     @Transactional
+    @Modifying
     @Query("UPDATE Crawl r SET r.naverStatus = :status, r.naverLastCrawledAt = :lastCrawledAt WHERE r.cortarNo = :cortarNo")
     void updateNaverCrawlStatusAndLastCrawledAt(@Param("cortarNo") Long cortarNo,
                                                 @Param("status") CrawlStatus status,
@@ -44,8 +44,8 @@ public interface CrawlRepository extends JpaRepository<Crawl, Long> {
     /**
      * 네이버 크롤링 최종 시간 업데이트
      */
-    @Modifying
     @Transactional
+    @Modifying
     @Query("UPDATE Crawl r SET r.naverLastCrawledAt = :lastCrawledAt WHERE r.cortarNo = :cortarNo")
     void updateNaverLastCrawledAt(@Param("cortarNo") Long cortarNo,
                                   @Param("lastCrawledAt") LocalDateTime lastCrawledAt);

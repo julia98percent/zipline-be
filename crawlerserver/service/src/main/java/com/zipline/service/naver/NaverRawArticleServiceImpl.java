@@ -34,7 +34,6 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 	@Override
 	public TaskResponseDto crawlAndSaveRawArticles(Boolean useProxy) {
 		Fetcher fetcher = useProxy ? proxyFetcher : defaultFetcher;
-
 		return taskExecutionHandler.execute(
 				TaskDefinition.of(
 						TaskType.NAVERCRAWLING,
@@ -50,7 +49,6 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 	@Override
 	public TaskResponseDto crawlAndSaveRawArticlesForRegion(Boolean useProxy, Long cortarNo) {
 		Fetcher fetcher = useProxy ? proxyFetcher : defaultFetcher;
-
 		return taskExecutionHandler.execute(
 				TaskDefinition.of(
 						TaskType.NAVERCRAWLING,

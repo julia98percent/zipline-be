@@ -2,6 +2,7 @@ package com.zipline.service.naver.crawler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zipline.domain.entity.crawl.Crawl;
 import com.zipline.domain.entity.enums.CrawlStatus;
 import com.zipline.domain.entity.enums.MigrationStatus;
 import com.zipline.domain.entity.naver.NaverRawArticle;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -64,10 +66,10 @@ public class NaverArticleCrawler {
         log.info("=== 네이버 원본 매물 정보 수집 완료 ===");
     }
 
+    @Transactional
     public void executeCrawlForRegion(Fetcher fetcher, Long cortarNo) {
         log.info("네이버 원본 매물 수집 시작 - 지역 코드: {}", cortarNo);
         crawlRepo.updateNaverCrawlStatus(cortarNo, CrawlStatus.PROCESSING);
-        articleRepo.resetMigrationStatusForRegion(cortarNo, MigrationStatus.PENDING);
 
         ObjectMapper objectMapper = new ObjectMapper();
         int page = 1;
@@ -90,11 +92,10 @@ public class NaverArticleCrawler {
                 .build();
 
         try {
-            Region region = regionRepo.findByCortarNo(cortarNo)
-                    .orElseThrow(() -> new RuntimeException("지역 없음: " + cortarNo));
+            Crawl crawlRegion = crawlRepo.findByCortarNo(cortarNo);
 
             while (hasMore) {
-                String apiUrl = buildApiUrl(region, page++);
+                String apiUrl = buildApiUrl(crawlRegion, page++);
                 String response = fetcher.fetch(apiUrl, fetchConfig);
 
                 if (response != null && !response.isEmpty()) {
@@ -112,33 +113,40 @@ public class NaverArticleCrawler {
                     RandomSleepUtil.sleep();
                 }
             }
-
             crawlRepo.updateNaverCrawlStatus(cortarNo, CrawlStatus.COMPLETED);
-            log.info("완료 - 지역: {}, 총 매물 수: {}", region.getCortarName(), total);
-
+            log.info("완료 - 지역: {}, 총 매물 수: {}", crawlRegion.getCortarNo(), total);
         } catch (Exception e) {
             log.error("지역 {} 처리 실패", cortarNo, e);
             crawlRepo.updateNaverCrawlStatus(cortarNo, CrawlStatus.FAILED);
         }
     }
 
-    private String buildApiUrl(Region region, int page) {
+    private String buildApiUrl(Crawl crawlRegion, int page) {
+        Optional<Region> region = regionRepo.findByCortarNo(crawlRegion.getCortarNo());
+        Double lat = region.map(Region::getCenterLat).orElse(null);
+        Double lon = region.map(Region::getCenterLon).orElse(null);
+
+        if (lat == null || lon == null) {
+            log.error("지역 좌표 정보 없음: {}", crawlRegion.getCortarNo());
+            throw new RuntimeException("지역 좌표 정보 없음: " + crawlRegion.getCortarNo());
+        }
+
         double[] bounds = CoordinateUtil.calculateBounds(
-                region.getCenterLat(),
-                region.getCenterLon(),
+                lat,
+                lon,
                 12
         );
         return String.format(
                 "https://m.land.naver.com/cluster/ajax/articleList?" +
                         "rletTpCd=APT:OPST:VL:YR:DSD:ABYG:OBYG:JGC:JWJT:DDDGG:SGJT:HOJT:JGB:OR:GSW:SG:SMS:GJCG:GM:TJ:APTHGJ&" +
                         "tradTpCd=A1:B1:B2:B3&z=12&lat=%.6f&lon=%.6f&btm=%.6f&lft=%.6f&top=%.6f&rgt=%.6f&cortarNo=%d&sort=rank&page=%d",
-                region.getCenterLat(),
-                region.getCenterLon(),
+                lat,
+                lon,
                 bounds[2],
                 bounds[3],
                 bounds[0],
                 bounds[1],
-                region.getCortarNo(),
+                region.get().getCortarNo(),
                 page
         );
     }
