@@ -56,7 +56,7 @@ public class Crawl {
 
     }
 
-    public Crawl CreateCrawl(Long cortarNo) {
+    public Crawl createCrawl(Long cortarNo) {
         this.cortarNo = cortarNo;
         this.naverStatus = CrawlStatus.NEW;
         this.zigbangStatus = CrawlStatus.NEW;
@@ -65,7 +65,7 @@ public class Crawl {
         return this;
     }
 
-    public Crawl UpdateCrawl(Long cortarNo) {
+    public Crawl updateCrawl(Long cortarNo) {
         this.cortarNo = cortarNo;
         this.naverStatus = CrawlStatus.NEW;
         this.zigbangStatus = CrawlStatus.NEW;
