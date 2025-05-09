@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -213,27 +212,20 @@ public class ContractServiceImpl implements ContractService {
 		List<Contract> closedContracts = contractRepository.findByUserUidAndAgentPropertyUidAndContractStatusCanceledDeletedAtIsNull(
 			userUid, propertyUid, closedStatuses);
 		List<Long> contractUids = closedContracts.stream().map(Contract::getUid).toList();
-		List<ContractHistory> savedContractHistory = contractHistoryRepository.findByContractUidsAndDeletedAtIsNull(
-			contractUids);
+		List<ContractHistory> savedContractHistories = contractHistoryRepository
+			.findByContractUidsAndDeletedAtIsNull(contractUids);
+
 		List<CustomerContract> customerContracts = customerContractRepository.findInContractUids(contractUids);
-		Map<Long, ContractHistory> historyMap = savedContractHistory.stream()
-			.collect(Collectors.toMap(
-				h -> h.getContract().getUid(),
-				Function.identity()
-			));
 
 		Map<Long, List<CustomerContract>> customerContractMap = customerContracts.stream()
 			.collect(Collectors.groupingBy(
 				cc -> cc.getContract().getUid()
 			));
 
-		List<ContractPropertyHistoryResponseDTO> result = closedContracts.stream()
-			.map(contract -> {
-				Long contractUid = contract.getUid();
-				ContractHistory history = historyMap.get(contractUid);
-				List<CustomerContract> customers = customerContractMap.getOrDefault(contractUid,
-					Collections.emptyList());
-
+		List<ContractPropertyHistoryResponseDTO> result = savedContractHistories.stream()
+			.map(history -> {
+				Contract contract = history.getContract();
+				List<CustomerContract> customers = customerContractMap.getOrDefault(contract.getUid(), List.of());
 				return new ContractPropertyHistoryResponseDTO(contract, history, customers);
 			})
 			.toList();
