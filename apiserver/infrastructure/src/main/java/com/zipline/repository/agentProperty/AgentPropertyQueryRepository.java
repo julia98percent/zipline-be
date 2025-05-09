@@ -51,7 +51,7 @@ public class AgentPropertyQueryRepository {
 		}
 
 		if (filter.getLegalDistrictCode() != null && !filter.getLegalDistrictCode().isBlank()) {
-			builder.and(agentProperty.legalDistrictCode.eq(filter.getLegalDistrictCode()));
+			builder.and(agentProperty.legalDistrictCode.startsWith(filter.getLegalDistrictCode()));
 		}
 
 		if (filter.getMinDeposit() != null) {
