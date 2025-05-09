@@ -2,6 +2,7 @@ package com.zipline.controller.naver;
 
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.task.dto.TaskResponseDto;
+import com.zipline.global.util.CrawlingStatusManager;
 import com.zipline.service.naver.NaverRawArticleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class NaverRawArticleController {
 
 	private final NaverRawArticleService naverRawArticleService;
+	private final CrawlingStatusManager crawlingStatusManager;
 
 	@GetMapping("/all")
 	public ResponseEntity<ApiResponse<TaskResponseDto>> crawlAllRawArticleFromNaver(
