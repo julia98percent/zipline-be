@@ -130,6 +130,5 @@ public class ParallelNaverArticleCrawler extends NaverArticleCrawler {
 | `NaverArticleCrawler.java` | 공통 크롤링 로직 |
 | `ParallelNaverArticleCrawler.java` | 병렬 크롤링 로직 |
 | `CrawlerFactory.java` | 크롤러 전략 선택 |
-| `build.gradle` | 컴파일 옵션 포함 여부 확인 (선택사항) |
 
 ---
