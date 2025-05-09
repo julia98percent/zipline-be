@@ -21,6 +21,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'net.minidev:json-smart:2.4.7'
 
+    implementation 'org.liquibase:liquibase-core:4.31.1'
+
     // Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
