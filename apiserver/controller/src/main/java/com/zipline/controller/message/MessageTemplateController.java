@@ -2,8 +2,8 @@ package com.zipline.controller.message;
 
 import com.zipline.global.response.ApiResponse;
 import com.zipline.service.message.MessageTemplateService;
-import com.zipline.service.message.dto.message.response.MessageTemplateResponseDTO;
 import com.zipline.service.message.dto.request.MessageTemplateRequestDTO;
+import com.zipline.service.message.dto.response.MessageTemplateResponseDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.security.Principal;

@@ -1,8 +1,5 @@
 package com.zipline.entity.contract;
 
-import java.math.BigInteger;
-import java.time.LocalDate;
-
 import com.zipline.entity.BaseTimeEntity;
 import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.enums.ContractStatus;
@@ -19,7 +16,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -71,6 +73,9 @@ public class Contract extends BaseTimeEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "agent_property_uid", nullable = false)
 	private AgentProperty agentProperty;
+
+	@OneToMany(mappedBy = "contract", fetch = FetchType.LAZY)
+	private List<CustomerContract> customerContracts = new ArrayList<>();
 
 	@Builder
 	private Contract(User user, PropertyType category, BigInteger deposit, BigInteger monthlyRent, BigInteger price,
