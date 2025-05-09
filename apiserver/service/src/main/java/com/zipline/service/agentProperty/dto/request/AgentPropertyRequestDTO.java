@@ -42,6 +42,10 @@ public class AgentPropertyRequestDTO {
 	@Schema(description = "법정동 코드", example = "1100000000", required = true)
 	private String legalDistrictCode;
 
+	@Size(max = 100, message = "상세 주소는 100자 이하로 입력해주세요.")
+	@Schema(description = "상세 주소", example = "305호")
+	private String detailAddress;
+
 	@PositiveOrZero(message = "보증금은 0 이상의 값이어야 합니다.")
 	@Schema(description = "보증금", example = "50000000")
 	private BigInteger deposit;
@@ -121,6 +125,7 @@ public class AgentPropertyRequestDTO {
 			.customer(customer)
 			.address(address)
 			.legalDistrictCode(legalDistrictCode)
+			.detailAddress(detailAddress)
 			.deposit(deposit)
 			.monthlyRent(monthlyRent)
 			.price(price)

@@ -18,6 +18,7 @@ public class AgentPropertyResponseDTO {
 	private String customer;
 	private String address;
 	private String legalDistrictCode;
+	private String detailAddress;
 	private BigInteger deposit;
 	private BigInteger monthlyRent;
 	private BigInteger price;
@@ -42,6 +43,7 @@ public class AgentPropertyResponseDTO {
 			.customer(property.getCustomer().getName())
 			.address(property.getAddress())
 			.legalDistrictCode(property.getLegalDistrictCode())
+			.detailAddress(property.getDetailAddress())
 			.deposit(property.getDeposit())
 			.monthlyRent(property.getMonthlyRent())
 			.price(property.getPrice())

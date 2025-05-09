@@ -103,7 +103,8 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 			agentPropertyRequestDTO.constructionYearValidate();
 		}
 		agentProperty.modifyProperty(customer, agentPropertyRequestDTO.getAddress(),
-			agentPropertyRequestDTO.getLegalDistrictCode(), agentPropertyRequestDTO.getDeposit(),
+			agentPropertyRequestDTO.getLegalDistrictCode(),
+			agentPropertyRequestDTO.getDetailAddress(), agentPropertyRequestDTO.getDeposit(),
 			agentPropertyRequestDTO.getMonthlyRent(), agentPropertyRequestDTO.getPrice(),
 			agentPropertyRequestDTO.getType(), agentPropertyRequestDTO.getLongitude(),
 			agentPropertyRequestDTO.getLatitude(), agentPropertyRequestDTO.getStartDate(),
