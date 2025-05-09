@@ -142,8 +142,11 @@ public class CustomerServiceImpl implements CustomerService {
 		List<LabelCustomer> updatedLabelMappings = labelCustomerRepository.findAllByCustomerUid(
 			savedCustomer.getUid());
 
-		String preferredRegion = regionRepository.findWithParentsByDistrictCode(
-			Long.valueOf(savedCustomer.getLegalDistrictCode()));
+		String preferredRegion = null;
+		if (customerModifyRequestDTO.getLegalDistrictCode() != null) {
+			preferredRegion = regionRepository.findWithParentsByDistrictCode(
+				Long.valueOf(savedCustomer.getLegalDistrictCode()));
+		}
 		return new CustomerDetailResponseDTO(savedCustomer, preferredRegion, updatedLabelMappings);
 	}
 
