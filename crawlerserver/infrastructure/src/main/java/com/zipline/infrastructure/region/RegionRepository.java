@@ -18,54 +18,27 @@ import com.zipline.domain.entity.region.Region;
 
 @Repository
 public interface RegionRepository extends JpaRepository<Region, Long> {
-    /**
-     * 지역 코드로 지역 정보 조회
-     */
     Optional<Region> findByCortarNo(Long cortarNo);
 
-    /**
-     * 레벨별 지역 목록 조회
-     */
     List<Region> findByLevel(Integer level);
 
-    /**
-     * 지역 코드의 레벨 조회
-     */
     Integer findLevelByCortarNo(Long cortarNo);
 
-    /**
-     * 상위 지역 코드로 하위 지역 목록 조회
-     */
     @Query("SELECT r FROM Region r WHERE CONCAT(r.cortarNo, '') LIKE CONCAT(:parentCortarNo, '%')")
     List<Region> findByParentCortarNo(@Param("parentCortarNo") Long parentCortarNo);
 
-    /**
-     * 모든 지역 코드 목록 조회
-     */
     @Query("SELECT r.cortarNo FROM Region r")
     List<Long> findAllCortarNos();
 
-    /**
-     * 특정 레벨의 지역 코드 목록 조회
-     */
     @Query("SELECT r.cortarNo FROM Region r WHERE r.level = :level")
     List<Long> findCortarNosByLevel(@Param("level") int level);
 
-    /**
-     * 특정 레벨 이하의 지역 코드 목록 조회
-     */
     @Query("SELECT r.cortarNo FROM Region r WHERE r.level <= :maxLevel")
     List<Long> findCortarNosByLevelLessThanEqual(@Param("maxLevel") int maxLevel);
 
-    /**
-     * 특정 레벨 이상의 지역 코드 목록 조회
-     */
     @Query("SELECT r.cortarNo FROM Region r WHERE r.level >= :minLevel")
     List<Long> findCortarNosByLevelGreaterThanEqual(@Param("minLevel") int minLevel);
 
-    /**
-     * 특정 레벨 범위의 지역 코드 목록 조회
-     */
     @Query("SELECT r.cortarNo FROM Region r WHERE r.level BETWEEN :minLevel AND :maxLevel")
     List<Long> findCortarNosByLevelBetween(@Param("minLevel") int minLevel,
                                            @Param("maxLevel") int maxLevel);

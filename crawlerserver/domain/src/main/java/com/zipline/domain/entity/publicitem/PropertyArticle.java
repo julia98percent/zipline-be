@@ -81,15 +81,7 @@ public class PropertyArticle {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    /**
-     * 네이버 매물 JSON 데이터로부터 PropertyArticle 객체를 생성합니다.
-     * 
-     * @param articleNode 네이버 매물 JSON 노드
-     * @param region 지역 정보
-     * @return 생성된 PropertyArticle 객체
-     */
     public static PropertyArticle createFromNaverArticle(JsonNode articleNode, Region region) {
-        // 거래 유형에 따른 가격 정보와 카테고리 설정
         PriceInfo priceInfo = extractPriceInfo(articleNode);
         return PropertyArticle.builder()
             .articleId(articleNode.path("atclNo").asText())
@@ -111,9 +103,6 @@ public class PropertyArticle {
             .build();
     }
 
-    /**
-     * 네이버 매물 JSON 데이터로부터 PropertyArticle 객체를 생성합니다.
-     */
     public static PropertyArticle createFromNaverRawArticle(JsonNode articleNode, String regionCode) {
         String articleId = articleNode.path("atclNo").asText();
 
@@ -139,12 +128,6 @@ public class PropertyArticle {
         return builder.build();
     }
 
-    /**
-     * 거래 유형에 따른 가격 정보와 카테고리를 추출합니다.
-     * 
-     * @param articleNode 네이버 매물 JSON 노드
-     * @return 가격 정보 객체
-     */
     private static PriceInfo extractPriceInfo(JsonNode articleNode) {
         String tradTpNm = articleNode.path("tradTpNm").asText();
         Category category;
@@ -197,9 +180,6 @@ public class PropertyArticle {
         }
     }
 
-      /**
-     * 가격 정보를 담는 내부 클래스
-     */
     private static class PriceInfo {
         final Category category;
         final Long price;

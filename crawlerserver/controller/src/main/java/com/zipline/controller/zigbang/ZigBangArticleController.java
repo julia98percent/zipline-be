@@ -1,16 +1,16 @@
-package com.zipline.controller.naver;
+package com.zipline.controller.zigbang;
 
 import com.zipline.global.response.ApiResponse;
-import com.zipline.service.task.dto.TaskResponseDto;
 import com.zipline.service.naver.NaverRawArticleService;
+import com.zipline.service.task.dto.TaskResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/crawl/naver")
+@RequestMapping("/api/v1/crawl/zigbang")
 @RequiredArgsConstructor
-public class NaverRawArticleController {
+public class ZigBangArticleController {
 
 	private final NaverRawArticleService naverRawArticleService;
 
