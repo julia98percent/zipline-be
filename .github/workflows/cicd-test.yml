@@ -108,6 +108,7 @@ jobs:
             SMS_API_KEY=${{ secrets.SMS_API_KEY }}
             SMS_AUTH_KEY=${{ secrets.SMS_AUTH_KEY }}
             SMS_SEC_KEY=${{ secrets.SMS_SEC_KEY }}
+            SMS_FROM_NUMBER=${{ secrets.SMS_FROM_NUMBER }}
             SURVEY_DELIMITER=${{ secrets.SURVEY_DELIMITER }}
             MAX_HTTP_TOMCAT_FORM_POST_SIZE=${{ secrets.MAX_HTTP_TOMCAT_FORM_POST_SIZE }}
             SPRING_PROFILES_ACTIVE=test
