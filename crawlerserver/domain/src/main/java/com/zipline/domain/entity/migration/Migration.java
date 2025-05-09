@@ -78,31 +78,18 @@ public class Migration {
         return this;
     }
 
-    /**
-     * 네이버 크롤링 상태를 업데이트합니다.
-     */
     public Migration updateNaverMigrationStatus(MigrationStatus status) {
         this.naverStatus = status;
         this.naverLastMigratedAt = LocalDateTime.now();
         return this;
     }
 
-    /**
-     * 직방 크롤링 상태를 업데이트합니다.
-     */
     public Migration updateZigbangMigrationStatus(MigrationStatus status) {
         this.zigbangStatus = status;
         this.zigbangLastMigratedAt = LocalDateTime.now();
         return this;
     }
 
-    /**
-     * 새로운 에러 로그를 기존 로그에 추가합니다.
-     *
-     * @param newError 새롭게 발생한 에러 메시지
-     * @param maxLength 최대 허용 길이 (기본값: 1000)
-     * @return Migration 객체 자기 자신 반환
-     */
     public Migration appendErrorLog(String newError, int maxLength) {
         String currentLog = this.errorLog != null ? this.errorLog : "";
 

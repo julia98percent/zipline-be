@@ -9,9 +9,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * 페이지 크롤링 결과를 저장하는 DTO 클래스
- */
 @Getter
 @Builder
 @NoArgsConstructor

@@ -163,16 +163,4 @@ public class NaverMigrationServiceImpl implements NaverMigrationService {
 		Task task = taskManager.getTaskByType(taskName);
 		return TaskResponseDto.fromTask(task);
 	}
-
-//	@Override
-//	public MigrationStatisticsDTO getMigrationStatistics() {
-//		MigrationStatisticsDTO statistics = migrationRepository.getMigrationStatistics();
-//		return statics;
-//	}
-//
-//	@Override
-//	public MigrationStatisticsDTO getMigrationStatisticsForRegion(Long cortarNo) {
-//		MigrationStatisticsDTO statistics = migrationRepository.getMigrationStatisticsForRegion(cortarNo);
-//		return statics;
-//	}
 }
