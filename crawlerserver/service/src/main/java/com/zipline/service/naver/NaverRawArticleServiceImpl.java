@@ -1,7 +1,7 @@
 package com.zipline.service.naver;
 
 import com.zipline.service.naver.crawler.NaverArticleCrawler;
-import com.zipline.service.naver.factory.CrawlerFactory;
+import com.zipline.service.naver.factory.NaverCrawlerFactory;
 import com.zipline.service.task.TaskDefinition;
 import com.zipline.service.task.TaskExecutionHandler;
 import com.zipline.service.task.dto.TaskResponseDto;
@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 
-	private final CrawlerFactory crawlerFactory;
+	private final NaverCrawlerFactory naverCrawlerFactory;
 	private final TaskExecutionHandler taskExecutionHandler;
 
 	@Autowired
@@ -32,7 +32,7 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 	public TaskResponseDto crawlAndSaveRawArticles(Boolean useProxy) {
 
 		//NOTE: 요청방식과 크롤링방식에 대한 유연성을 위해 별도로 구현했습니다.
-		NaverArticleCrawler crawler = crawlerFactory.getCrawler(useProxy);
+		NaverArticleCrawler crawler = naverCrawlerFactory.getCrawler(useProxy);
 		Fetcher fetcher = useProxy ? proxyFetcher : defaultFetcher;
 
 		return taskExecutionHandler.execute(
@@ -46,7 +46,7 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 
 	@Override
 	public TaskResponseDto crawlAndSaveRawArticlesForRegion(Boolean useProxy, Long cortarNo) {
-		NaverArticleCrawler crawler = crawlerFactory.getCrawler(useProxy);
+		NaverArticleCrawler crawler = naverCrawlerFactory.getCrawler(useProxy);
 		Fetcher fetcher = useProxy ? proxyFetcher : defaultFetcher;
 
 		return taskExecutionHandler.execute(

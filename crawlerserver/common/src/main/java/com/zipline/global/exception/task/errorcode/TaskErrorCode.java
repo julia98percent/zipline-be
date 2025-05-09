@@ -4,9 +4,8 @@ import com.zipline.global.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 public enum TaskErrorCode implements ErrorCode {
-    TASK_ALREADY_RUNNING("TASK-000", "이미 실행 중인 작업이 있습니다.", HttpStatus.BAD_REQUEST),
-    TASK_NOT_FOUND("TASK-001", "존재하지 않는 작업입니다.", HttpStatus.NOT_FOUND),
-    TASK_OPERATION_IN_PROGRESS("TASK-002", "작업이 진행 중입니다.", HttpStatus.CONFLICT);
+    TASK_ALREADY_RUNNING("TASK-000", "이미 실행 중인 작업이 있습니다.", HttpStatus.CONFLICT),
+    TASK_NOT_FOUND("TASK-001", "존재하지 않는 작업입니다.", HttpStatus.NOT_FOUND);
 
     private final String code;
     private final String message;

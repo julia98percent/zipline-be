@@ -5,12 +5,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CrawlerFactory {
+public class NaverCrawlerFactory {
 
     private final NaverArticleCrawler defaultCrawler;
     private final NaverArticleCrawler parallelCrawler;
 
-    public CrawlerFactory(
+    public NaverCrawlerFactory(
             @Qualifier("naverArticleCrawler") NaverArticleCrawler defaultCrawler,
             @Qualifier("parallelNaverArticleCrawler") NaverArticleCrawler parallelCrawler) {
         this.defaultCrawler = defaultCrawler;

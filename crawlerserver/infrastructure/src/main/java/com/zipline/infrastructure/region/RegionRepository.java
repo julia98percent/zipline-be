@@ -29,6 +29,11 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     List<Region> findByLevel(Integer level);
 
     /**
+     * 지역 코드의 레벨 조회
+     */
+    Integer findLevelByCortarNo(Long cortarNo);
+
+    /**
      * 상위 지역 코드로 하위 지역 목록 조회
      */
     @Query("SELECT r FROM Region r WHERE CONCAT(r.cortarNo, '') LIKE CONCAT(:parentCortarNo, '%')")
