@@ -7,4 +7,6 @@ public interface NaverMigrationService {
 	TaskResponseDto startFullMigration();
 	TaskResponseDto migrateRegion(Long cortarNo);
 	TaskResponseDto getTaskStatus(TaskType TaskType);
+	//MigrationStatisticsDTO getMigrationStatistics();
+	//MigrationStatisticsDTO getMigrationStatisticsForRegion(Long cortarNo);
 }

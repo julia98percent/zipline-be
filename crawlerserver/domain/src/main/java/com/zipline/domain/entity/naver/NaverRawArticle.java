@@ -60,4 +60,25 @@ public class NaverRawArticle {
         this.migratedAt = LocalDateTime.now();
         return this;
     }
+    
+    /**
+     * 마이그레이션 실패 상태로 업데이트합니다.
+     */
+    public NaverRawArticle markAsFailed(String errorMessage) {
+        this.migrationStatus = MigrationStatus.FAILED;
+        this.migrationError = errorMessage;
+        this.migratedAt = LocalDateTime.now();
+        return this;
+    }
+    
+    /**
+     * 마이그레이션 상태를 초기화합니다.
+     */
+    public NaverRawArticle resetMigrationStatus() {
+        this.migrationStatus = MigrationStatus.PENDING;
+        this.migrationError = null;
+        this.migratedAt = null;
+        return this;
+    }
+    
 }
