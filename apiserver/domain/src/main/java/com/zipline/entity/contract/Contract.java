@@ -1,5 +1,10 @@
 package com.zipline.entity.contract;
 
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.zipline.entity.BaseTimeEntity;
 import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.enums.ContractStatus;
@@ -18,10 +23,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.math.BigInteger;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -56,6 +57,7 @@ public class Contract extends BaseTimeEntity {
 	private LocalDate contractEndDate;
 
 	@Column(name = "status", nullable = false)
+	@Enumerated(EnumType.STRING)
 	private ContractStatus status;
 
 	@Column(name = "expected_contract_end_date")

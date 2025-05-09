@@ -18,8 +18,17 @@ public class ContractPropertyResponseDTO {
 	private List<CustomerInfo> customers;
 
 	public ContractPropertyResponseDTO(Contract contract, List<CustomerContract> customerContracts) {
+		if (contract == null) {
+			this.contractUid = null;
+			this.contractCategory = null;
+			this.contractStartDate = null;
+			this.contractEndDate = null;
+			this.contractDate = null;
+			this.customers = List.of();
+			return;
+		}
 		this.contractUid = contract.getUid();
-		this.contractCategory = contract.getCategory().name();
+		this.contractCategory = contract.getCategory() != null ? contract.getCategory().name() : null;
 		this.contractStartDate = contract.getContractStartDate();
 		this.contractEndDate = contract.getContractEndDate();
 		this.contractDate = contract.getContractDate();

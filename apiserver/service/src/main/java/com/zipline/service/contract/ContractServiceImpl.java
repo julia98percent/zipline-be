@@ -5,10 +5,10 @@ import static com.zipline.entity.enums.ContractStatus.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -191,12 +191,18 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	@Transactional(readOnly = true)
 	public ContractPropertyResponseDTO getPropertyContract(Long propertyUid, Long userUid) {
-		List<ContractStatus> includedStatuses = getContractedStatuses();
-		Contract savedContract = contractRepository.findByUserUidAndAgentPropertyUidAndContractStatusNotCanceledAndDeletedAtIsNull(
-			userUid,
-			propertyUid, includedStatuses);
-		List<CustomerContract> customerContracts = customerContractRepository.findAllByContractUidWithCustomer(
-			savedContract.getUid());
+		List<ContractStatus> includedStatuses = ContractStatus.getContractedStatuses();
+
+		Contract savedContract =
+			contractRepository.findByUserUidAndAgentPropertyUidAndContractStatusNotCanceledAndDeletedAtIsNull(
+				userUid, propertyUid, includedStatuses);
+
+		if (savedContract == null) {
+			return new ContractPropertyResponseDTO(null, List.of());
+		}
+
+		List<CustomerContract> customerContracts =
+			customerContractRepository.findAllByContractUidWithCustomer(savedContract.getUid());
 
 		return new ContractPropertyResponseDTO(savedContract, customerContracts);
 	}
@@ -207,31 +213,30 @@ public class ContractServiceImpl implements ContractService {
 		List<Contract> closedContracts = contractRepository.findByUserUidAndAgentPropertyUidAndContractStatusCanceledDeletedAtIsNull(
 			userUid, propertyUid, closedStatuses);
 		List<Long> contractUids = closedContracts.stream().map(Contract::getUid).toList();
-		List<ContractHistory> savedContractHistory = contractHistoryRepository.findByContractUidsAndDeletedAtIsNull(
-			contractUids);
+		List<ContractHistory> savedContractHistories = contractHistoryRepository
+			.findByContractUidsAndDeletedAtIsNull(contractUids);
+
 		List<CustomerContract> customerContracts = customerContractRepository.findInContractUids(contractUids);
-		Map<Long, ContractHistory> historyMap = savedContractHistory.stream()
-			.collect(Collectors.toMap(
-				h -> h.getContract().getUid(),
-				Function.identity()
-			));
 
 		Map<Long, List<CustomerContract>> customerContractMap = customerContracts.stream()
 			.collect(Collectors.groupingBy(
 				cc -> cc.getContract().getUid()
 			));
 
-		List<ContractPropertyHistoryResponseDTO> result = closedContracts.stream()
-			.map(contract -> {
-				Long contractUid = contract.getUid();
-				ContractHistory history = historyMap.get(contractUid);
-				List<CustomerContract> customers = customerContractMap.getOrDefault(contractUid,
-					Collections.emptyList());
+		Map<Long, ContractHistory> latestHistoryMap = new LinkedHashMap<>();
 
+		for (ContractHistory history : savedContractHistories) {
+			Long contractUid = history.getContract().getUid();
+			latestHistoryMap.putIfAbsent(contractUid, history);
+		}
+
+		List<ContractPropertyHistoryResponseDTO> result = latestHistoryMap.values().stream()
+			.map(history -> {
+				Contract contract = history.getContract();
+				List<CustomerContract> customers = customerContractMap.getOrDefault(contract.getUid(), List.of());
 				return new ContractPropertyHistoryResponseDTO(contract, history, customers);
 			})
 			.toList();
-
 		return result;
 	}
 
@@ -333,23 +338,13 @@ public class ContractServiceImpl implements ContractService {
 				}
 			}
 		}
-		Customer newLessor = customerRepository.findById(requestDTO.getLessorOrSellerUid())
-			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
-		Contract contract = customerContracts.get(0).getContract();
-		customerContractRepository.save(
-			CustomerContract.builder()
-				.contract(contract)
-				.customer(newLessor)
-				.role(ContractCustomerRole.LESSOR_OR_SELLER)
-				.build()
-		);
 
 		if (!hasLessee && requestDTO.getLesseeOrBuyerUid() != null) {
 			Customer newLessee = customerRepository.findById(requestDTO.getLesseeOrBuyerUid())
 				.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 			customerContractRepository.save(
 				CustomerContract.builder()
-					.contract(contract)
+					.contract(customerContracts.get(0).getContract())
 					.customer(newLessee)
 					.role(ContractCustomerRole.LESSEE_OR_BUYER)
 					.build()
