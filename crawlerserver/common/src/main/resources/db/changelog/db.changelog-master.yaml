@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - include:
+      file: changes/v1/region/tables/01-create-regions-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/v1/region/tables/02-create-migrations-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/v1/region/tables/03-create-crawls-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/v1/region/triggers/01-drop-trigger.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/v1/region/triggers/02-create-after-region-insert-trigger.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/v1/region/triggers/03-create-after-region-update-trigger.sql
+      relativeToChangelogFile: true
+

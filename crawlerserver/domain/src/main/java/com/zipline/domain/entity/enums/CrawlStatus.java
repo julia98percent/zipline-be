@@ -2,7 +2,7 @@ package com.zipline.domain.entity.enums;
 
 public enum CrawlStatus {
     NEW,
-    PENDING,
+    ERROR307,
     PROCESSING,
     COMPLETED,
     FAILED
