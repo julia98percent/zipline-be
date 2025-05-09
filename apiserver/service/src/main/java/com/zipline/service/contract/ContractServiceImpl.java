@@ -191,12 +191,18 @@ public class ContractServiceImpl implements ContractService {
 	@Override
 	@Transactional(readOnly = true)
 	public ContractPropertyResponseDTO getPropertyContract(Long propertyUid, Long userUid) {
-		List<ContractStatus> includedStatuses = getContractedStatuses();
-		Contract savedContract = contractRepository.findByUserUidAndAgentPropertyUidAndContractStatusNotCanceledAndDeletedAtIsNull(
-			userUid,
-			propertyUid, includedStatuses);
-		List<CustomerContract> customerContracts = customerContractRepository.findAllByContractUidWithCustomer(
-			savedContract.getUid());
+		List<ContractStatus> includedStatuses = ContractStatus.getContractedStatuses();
+
+		Contract savedContract =
+			contractRepository.findByUserUidAndAgentPropertyUidAndContractStatusNotCanceledAndDeletedAtIsNull(
+				userUid, propertyUid, includedStatuses);
+
+		if (savedContract == null) {
+			return new ContractPropertyResponseDTO(null, List.of());
+		}
+
+		List<CustomerContract> customerContracts =
+			customerContractRepository.findAllByContractUidWithCustomer(savedContract.getUid());
 
 		return new ContractPropertyResponseDTO(savedContract, customerContracts);
 	}
@@ -333,23 +339,13 @@ public class ContractServiceImpl implements ContractService {
 				}
 			}
 		}
-		Customer newLessor = customerRepository.findById(requestDTO.getLessorOrSellerUid())
-			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
-		Contract contract = customerContracts.get(0).getContract();
-		customerContractRepository.save(
-			CustomerContract.builder()
-				.contract(contract)
-				.customer(newLessor)
-				.role(ContractCustomerRole.LESSOR_OR_SELLER)
-				.build()
-		);
 
 		if (!hasLessee && requestDTO.getLesseeOrBuyerUid() != null) {
 			Customer newLessee = customerRepository.findById(requestDTO.getLesseeOrBuyerUid())
 				.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 			customerContractRepository.save(
 				CustomerContract.builder()
-					.contract(contract)
+					.contract(customerContracts.get(0).getContract())
 					.customer(newLessee)
 					.role(ContractCustomerRole.LESSEE_OR_BUYER)
 					.build()
