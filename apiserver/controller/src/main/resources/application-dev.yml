@@ -54,6 +54,7 @@ sms:
   api-key: ${SMS_API_KEY}
   secret-key: ${SMS_SEC_KEY}
   auth-method: ${SMS_AUTH_KEY}
+  fromNumber: ${SMS_FROM_NUMBER}
 cloud:
   aws:
     stack:
