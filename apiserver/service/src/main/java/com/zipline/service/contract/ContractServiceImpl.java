@@ -5,6 +5,7 @@ import static com.zipline.entity.enums.ContractStatus.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -222,14 +223,20 @@ public class ContractServiceImpl implements ContractService {
 				cc -> cc.getContract().getUid()
 			));
 
-		List<ContractPropertyHistoryResponseDTO> result = savedContractHistories.stream()
+		Map<Long, ContractHistory> latestHistoryMap = new LinkedHashMap<>();
+
+		for (ContractHistory history : savedContractHistories) {
+			Long contractUid = history.getContract().getUid();
+			latestHistoryMap.putIfAbsent(contractUid, history);
+		}
+
+		List<ContractPropertyHistoryResponseDTO> result = latestHistoryMap.values().stream()
 			.map(history -> {
 				Contract contract = history.getContract();
 				List<CustomerContract> customers = customerContractMap.getOrDefault(contract.getUid(), List.of());
 				return new ContractPropertyHistoryResponseDTO(contract, history, customers);
 			})
 			.toList();
-
 		return result;
 	}
 
