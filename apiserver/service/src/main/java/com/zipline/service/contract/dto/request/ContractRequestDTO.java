@@ -14,6 +14,7 @@ import com.zipline.global.exception.contract.ContractException;
 import com.zipline.global.exception.contract.errorcode.ContractErrorCode;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,6 +41,7 @@ public class ContractRequestDTO {
 	@Schema(description = "계약 종료일", example = "2026-04-01")
 	private LocalDate contractEndDate;
 
+	@NotNull(message = "상태를 선택해주세요.")
 	@Schema(description = "계약 상태", example = "IN_PROGRESS")
 	private String status;
 
@@ -58,9 +60,11 @@ public class ContractRequestDTO {
 	@Schema(description = "임대/매도자 고객 UID 목록", example = "[1, 2]")
 	private List<Long> lessorOrSellerUids;
 
+	@NotNull(message = "임대/매도 고객을 선택해주세요.")
 	@Schema(description = "임차/매수자 고객 UID 목록", example = "[3, 4]")
 	private List<Long> lesseeOrBuyerUids;
 
+	@NotNull(message = "해당 매물을 선택해주세요.")
 	@Schema(description = "매물 UID", example = "1")
 	private Long propertyUid;
 
