@@ -28,6 +28,7 @@ import com.zipline.service.contract.dto.response.ContractListResponseDTO;
 import com.zipline.service.contract.dto.response.ContractResponseDTO;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -49,7 +50,7 @@ public class ContractController {
 	}
 
 	@PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<ApiResponse<Void>> registerContract(@RequestPart ContractRequestDTO contractRequestDTO,
+	public ResponseEntity<ApiResponse<Void>> registerContract(@Valid @RequestPart ContractRequestDTO contractRequestDTO,
 		@RequestPart(required = false) List<MultipartFile> files,
 		Principal principal) {
 		contractService.registerContract(contractRequestDTO, files, Long.parseLong(principal.getName()));
@@ -67,7 +68,7 @@ public class ContractController {
 	@PatchMapping(value = "/{contractUid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ApiResponse<ContractResponseDTO>> modifyContract(
 		@PathVariable Long contractUid,
-		@RequestPart ContractRequestDTO contractRequestDTO,
+		@Valid @RequestPart ContractRequestDTO contractRequestDTO,
 		@RequestPart(required = false) List<MultipartFile> files,
 		@RequestPart(value = "existingDocuments", required = false) List<ContractResponseDTO.DocumentDTO> existingDocs,
 		Principal principal) {
