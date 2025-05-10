@@ -33,8 +33,8 @@ public class ContractListResponseDTO {
 	@Getter
 	public static class ContractListDTO {
 		private Long uid;
-		private String lessorOrSellerName;
-		private String lesseeOrBuyerName;
+		private List<String> lessorOrSellerNames;
+		private List<String> lesseeOrBuyerNames;
 		private String category;
 		private LocalDate contractDate;
 		private LocalDate contractStartDate;
@@ -49,18 +49,19 @@ public class ContractListResponseDTO {
 			this.contractStartDate = contract.getContractStartDate();
 			this.contractEndDate = contract.getContractEndDate();
 			this.status = contract.getStatus();
-			this.lessorOrSellerName = extractCustomerNameByRole(customerContracts,
+			this.lessorOrSellerNames = extractCustomerNamesByRole(customerContracts,
 				ContractCustomerRole.LESSOR_OR_SELLER);
-			this.lesseeOrBuyerName = extractCustomerNameByRole(customerContracts, ContractCustomerRole.LESSEE_OR_BUYER);
+			this.lesseeOrBuyerNames = extractCustomerNamesByRole(customerContracts,
+				ContractCustomerRole.LESSEE_OR_BUYER);
 			this.address = contract.getAgentProperty() != null ? contract.getAgentProperty().getAddress() : null;
 		}
 
-		private String extractCustomerNameByRole(List<CustomerContract> customerContracts, ContractCustomerRole role) {
+		private List<String> extractCustomerNamesByRole(List<CustomerContract> customerContracts,
+			ContractCustomerRole role) {
 			return customerContracts.stream()
 				.filter(cc -> cc.getRole() == role)
 				.map(cc -> cc.getCustomer().getName())
-				.findFirst()
-				.orElse(null);
+				.toList();
 		}
 	}
 }

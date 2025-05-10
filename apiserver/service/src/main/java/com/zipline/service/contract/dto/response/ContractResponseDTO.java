@@ -26,8 +26,9 @@ public class ContractResponseDTO {
 	private LocalDate expectedContractEndDate;
 	private LocalDate contractDate;
 	private String status;
-	private String lessorOrSellerName;
-	private String lesseeOrBuyerName;
+	private List<String> lessorOrSellerNames;
+	private List<String> lesseeOrBuyerNames;
+
 	private List<DocumentDTO> documents;
 	private String propertyAddress;
 
@@ -46,17 +47,17 @@ public class ContractResponseDTO {
 
 	public static ContractResponseDTO of(Contract contract, List<CustomerContract> customerContracts,
 		List<DocumentDTO> documents) {
-		String lessorOrSellerName = customerContracts.stream()
+
+		List<String> lessorOrSellerNames = customerContracts.stream()
 			.filter(cc -> cc.getRole() == ContractCustomerRole.LESSOR_OR_SELLER)
 			.map(cc -> cc.getCustomer().getName())
-			.findFirst()
-			.orElse(null);
+			.toList();
 
-		String lesseeOrBuyerName = customerContracts.stream()
+		List<String> lesseeOrBuyerNames = customerContracts.stream()
 			.filter(cc -> cc.getRole() == ContractCustomerRole.LESSEE_OR_BUYER)
 			.map(cc -> cc.getCustomer().getName())
-			.findFirst()
-			.orElse(null);
+			.toList();
+
 		return ContractResponseDTO.builder()
 			.uid(contract.getUid())
 			.category(contract.getCategory() != null ? String.valueOf(contract.getCategory()) : null)
@@ -68,10 +69,11 @@ public class ContractResponseDTO {
 			.expectedContractEndDate(contract.getExpectedContractEndDate())
 			.contractDate(contract.getContractDate())
 			.status(contract.getStatus().name())
-			.lessorOrSellerName(lessorOrSellerName)
-			.lesseeOrBuyerName(lesseeOrBuyerName)
+			.lessorOrSellerNames(lessorOrSellerNames)
+			.lesseeOrBuyerNames(lesseeOrBuyerNames)
 			.documents(documents)
 			.propertyAddress(contract.getAgentProperty().getAddress())
 			.build();
 	}
+
 }
