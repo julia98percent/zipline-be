@@ -33,7 +33,7 @@ public class AgentPropertyResponseDTO {
 	private Integer floor;
 	private Boolean hasElevator;
 	private Year constructionYear;
-	private Integer parkingCapacity;
+	private Double parkingCapacity;
 	private Double netArea;
 	private Double totalArea;
 	private String details;

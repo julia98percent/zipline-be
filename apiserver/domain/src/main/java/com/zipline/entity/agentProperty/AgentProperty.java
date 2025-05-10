@@ -98,7 +98,7 @@ public class AgentProperty extends BaseTimeEntity {
 	private Year constructionYear;
 
 	@Column(name = "parking_capacity")
-	private Integer parkingCapacity;
+	private Double parkingCapacity;
 
 	@Column(name = "net_area", nullable = false)
 	private Double netArea;
@@ -115,7 +115,7 @@ public class AgentProperty extends BaseTimeEntity {
 		BigInteger monthlyRent, BigInteger price, PropertyType type, Double longitude, Double latitude,
 		LocalDate startDate,
 		LocalDate endDate, LocalDate moveInDate, PropertyCategory realCategory, Boolean petsAllowed, Integer floor,
-		Boolean hasElevator, Year constructionYear, Integer parkingCapacity, Double netArea, Double totalArea,
+		Boolean hasElevator, Year constructionYear, Double parkingCapacity, Double netArea, Double totalArea,
 		String details) {
 		this.customer = customer;
 		this.user = user;
@@ -147,7 +147,7 @@ public class AgentProperty extends BaseTimeEntity {
 		BigInteger monthlyRent, BigInteger price, PropertyType type, Double longitude, Double latitude,
 		LocalDate startDate,
 		LocalDate endDate, LocalDate moveInDate, PropertyCategory realCategory, Boolean petsAllowed, Integer floor,
-		Boolean hasElevator, Year constructionYear, Integer parkingCapacity, Double netArea, Double totalArea,
+		Boolean hasElevator, Year constructionYear, Double parkingCapacity, Double netArea, Double totalArea,
 		String details) {
 		this.customer = customer;
 		this.address = address;
