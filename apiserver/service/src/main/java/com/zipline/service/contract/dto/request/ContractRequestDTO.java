@@ -2,6 +2,7 @@ package com.zipline.service.contract.dto.request;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zipline.entity.agentProperty.AgentProperty;
@@ -13,6 +14,7 @@ import com.zipline.global.exception.contract.ContractException;
 import com.zipline.global.exception.contract.errorcode.ContractErrorCode;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,6 +41,7 @@ public class ContractRequestDTO {
 	@Schema(description = "계약 종료일", example = "2026-04-01")
 	private LocalDate contractEndDate;
 
+	@NotNull(message = "상태를 선택해주세요.")
 	@Schema(description = "계약 상태", example = "IN_PROGRESS")
 	private String status;
 
@@ -54,12 +57,14 @@ public class ContractRequestDTO {
 	@Schema(description = "매매 가격", example = "800000000")
 	private BigInteger price;
 
-	@Schema(description = "임대/매도자 고객 UID", example = "1")
-	private Long lessorOrSellerUid;
+	@Schema(description = "임대/매도자 고객 UID 목록", example = "[1, 2]")
+	private List<Long> lessorOrSellerUids;
 
-	@Schema(description = "임차/매수자 고객 UID", example = "2")
-	private Long lesseeOrBuyerUid;
+	@NotNull(message = "임대/매도 고객을 선택해주세요.")
+	@Schema(description = "임차/매수자 고객 UID 목록", example = "[3, 4]")
+	private List<Long> lesseeOrBuyerUids;
 
+	@NotNull(message = "해당 매물을 선택해주세요.")
 	@Schema(description = "매물 UID", example = "1")
 	private Long propertyUid;
 
@@ -99,9 +104,12 @@ public class ContractRequestDTO {
 	}
 
 	public void validateDistinctParties() {
-		if (lessorOrSellerUid != null && lessorOrSellerUid.equals(lesseeOrBuyerUid)) {
-			throw new ContractException(ContractErrorCode.SAME_CUSTOMER_FOR_BOTH_PARTIES);
+		if (lessorOrSellerUids != null && lesseeOrBuyerUids != null) {
+			for (Long lessor : lessorOrSellerUids) {
+				if (lesseeOrBuyerUids.contains(lessor)) {
+					throw new ContractException(ContractErrorCode.SAME_CUSTOMER_FOR_BOTH_PARTIES);
+				}
+			}
 		}
 	}
-
 }
