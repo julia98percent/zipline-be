@@ -2,6 +2,7 @@ package com.zipline.service.agentProperty;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -63,6 +64,17 @@ public class AgentPropertyServiceImpl implements AgentPropertyService {
 		Customer customer = customerRepository.findByUidAndUserUidAndDeletedAtIsNull(
 				agentPropertyRequestDTO.getCustomerUid(), userUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
+
+		Optional<AgentProperty> duplicate = agentPropertyRepository.findDuplicateProperty(
+			agentPropertyRequestDTO.getCustomerUid(),
+			agentPropertyRequestDTO.getAddress(),
+			agentPropertyRequestDTO.getDetailAddress(),
+			agentPropertyRequestDTO.getLegalDistrictCode()
+		);
+
+		if (duplicate.isPresent()) {
+			throw new PropertyException(PropertyErrorCode.DUPLICATED_PROPERTY);
+		}
 
 		if (agentPropertyRequestDTO.getConstructionYear() != null) {
 			agentPropertyRequestDTO.constructionYearValidate();
