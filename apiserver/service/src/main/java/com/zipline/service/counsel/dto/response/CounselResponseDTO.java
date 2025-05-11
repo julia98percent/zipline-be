@@ -107,7 +107,7 @@ public class CounselResponseDTO {
 		private Integer floor;
 		private Year constructionYear;
 		private boolean hasElevator;
-		private Integer parkingCapacity;
+		private Double parkingCapacity;
 		private boolean hasPet;
 		private String description;
 

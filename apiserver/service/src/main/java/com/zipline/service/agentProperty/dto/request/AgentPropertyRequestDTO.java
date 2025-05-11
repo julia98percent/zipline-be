@@ -100,7 +100,7 @@ public class AgentPropertyRequestDTO {
 
 	@PositiveOrZero(message = "주차 가능 대수는 0 이상의 값이어야 합니다.")
 	@Schema(description = "주차 가능 대수", example = "2")
-	private Integer parkingCapacity;
+	private Double parkingCapacity;
 
 	@NotNull(message = "전용 면적을 입력해주세요.")
 	@Positive(message = "전용 면적은 0보다 커야 합니다.")
@@ -115,7 +115,7 @@ public class AgentPropertyRequestDTO {
 	@Size(max = 255, message = "상세 정보는 255자 이내로 입력해주세요.")
 	@Schema(description = "기타 상세 사항", example = "풀옵션, 관리비 별도")
 	private String details;
-	
+
 	@Schema(description = "계약 자동 생성 여부", example = "true")
 	private Boolean createContract;
 
