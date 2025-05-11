@@ -12,7 +12,9 @@ public enum ContractErrorCode implements ErrorCode {
 	CONTRACT_START_DATE_NOT_BEFORE_END_DATE("CONTRACT-005", "계약 시작일은 계약 종료일보다 이전이어야 합니다.", HttpStatus.BAD_REQUEST),
 	CONTRACT_CATEGORY_NOT_FOUND("CONTRACT-006", "존재하지 않는 계약 카테고리입니다.", HttpStatus.NOT_FOUND),
 	PROPERTY_REQUIRED("CONTRACT-007", "매물을 선택해 주세요.", HttpStatus.BAD_REQUEST),
-	SAME_CUSTOMER_FOR_BOTH_PARTIES("CONTRACT-008", "계약의 임대/매도자와 임차/매수자가 동일할 수 없습니다.", HttpStatus.BAD_REQUEST);
+	SAME_CUSTOMER_FOR_BOTH_PARTIES("CONTRACT-008", "계약의 임대/매도자와 임차/매수자가 동일할 수 없습니다.", HttpStatus.BAD_REQUEST),
+	PROPERTY_ALREADY_HAS_ACTIVE_CONTRACT("CONTRACT-009", "이미 진행 중인 계약이 연결된 매물입니다.", HttpStatus.BAD_REQUEST);
+
 	private final String code;
 	private final String message;
 	private final HttpStatus status;

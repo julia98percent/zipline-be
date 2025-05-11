@@ -102,6 +102,16 @@ public class ContractServiceImpl implements ContractService {
 		contractRequestDTO.validateDateOrder();
 		contractRequestDTO.validateProperty();
 		contractRequestDTO.validateDistinctParties();
+
+		List<ContractStatus> activeStatuses = ContractStatus.getContractedStatuses();
+		boolean hasOngoingContract = contractRepository.existsByAgentPropertyUidAndStatusInAndDeletedAtIsNull(
+			contractRequestDTO.getPropertyUid(),
+			activeStatuses
+		);
+
+		if (hasOngoingContract) {
+			throw new ContractException(ContractErrorCode.PROPERTY_ALREADY_HAS_ACTIVE_CONTRACT);
+		}
 		AgentProperty agentProperty = agentPropertyRepository.findByUidAndUserUidAndDeletedAtIsNull(
 				contractRequestDTO.getPropertyUid(), userUid)
 			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
