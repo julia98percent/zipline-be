@@ -2,6 +2,8 @@ package com.zipline.repository.contract;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -14,7 +16,7 @@ public interface CustomerContractRepository extends JpaRepository<CustomerContra
 	List<CustomerContract> findInContractUids(List<Long> contractIds);
 
 	@Query("SELECT cc FROM CustomerContract cc WHERE cc.customer.uid = :customerUid AND cc.contract.user.uid =:userUid ORDER BY cc.contract.contractDate DESC")
-	List<CustomerContract> findByCustomerUidAndUserUid(Long customerUid, Long userUid);
+	Page<CustomerContract> findByCustomerUidAndUserUid(Long customerUid, Long userUid, Pageable pageable);
 
 	List<CustomerContract> findAllByContractUid(Long contractUid);
 

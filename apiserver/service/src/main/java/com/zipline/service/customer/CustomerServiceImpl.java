@@ -215,11 +215,11 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<ContractListResponseDTO.ContractListDTO> getCustomerContracts(Long customerUid, Long userUid) {
+	public ContractListResponseDTO getCustomerContracts(Long customerUid, PageRequestDTO pageRequestDTO, Long userUid) {
 		validateCustomerExistence(customerUid, userUid);
 
-		List<CustomerContract> customerContract = customerContractRepository.findByCustomerUidAndUserUid(customerUid,
-			userUid);
+		Page<CustomerContract> customerContract = customerContractRepository.findByCustomerUidAndUserUid(customerUid,
+			userUid, pageRequestDTO.toPageable());
 
 		List<Long> contracts = customerContract.stream()
 			.map(cc -> cc.getContract().getUid())
@@ -230,12 +230,14 @@ public class CustomerServiceImpl implements CustomerService {
 				contracts).stream()
 			.collect(Collectors.groupingBy(cc -> cc.getContract().getUid()));
 
-		return contractRepository.findAllById(contracts).stream()
+		List<ContractListResponseDTO.ContractListDTO> contractData = contractRepository.findAllById(contracts).stream()
 			.map(contract -> new ContractListResponseDTO.ContractListDTO(
 				contract,
 				contractIdToCustomerContracts.getOrDefault(contract.getUid(), List.of())
 			))
 			.toList();
+
+		return new ContractListResponseDTO(contractData, customerContract);
 	}
 
 	private void validateCustomerExistence(Long customerUid, Long userUid) {
