@@ -125,7 +125,11 @@ public class CustomerServiceImpl implements CustomerService {
 					.toList();
 				labelCustomerRepository.saveAll(toAddLabelMappings);
 			}
-		}
+		} else if(requestLabelUids != null) {
+				List<LabelCustomer> existingLabelMappings = labelCustomerRepository.findAllByCustomerUid(
+					savedCustomer.getUid());
+				labelCustomerRepository.deleteAll(existingLabelMappings);
+			}
 
 		savedCustomer.modifyCustomer(customerModifyRequestDTO.getName(), customerModifyRequestDTO.getPhoneNo(),
 			customerModifyRequestDTO.getTelProvider(),
