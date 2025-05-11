@@ -21,4 +21,5 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
 	Optional<Survey> findFirstByUserOrderByCreatedAtDesc(User user);
 
 	int countByUserUidAndCreatedAtAfter(Long userId, LocalDateTime oneMonthAgo);
+
 }
