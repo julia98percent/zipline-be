@@ -112,7 +112,7 @@ public class NaverArticleCrawler {
                 String apiUrl = buildApiUrl(crawlRegion, page++);
                 String response = fetcher.fetch(apiUrl, fetchConfig);
 
-                if (response == null) {
+                if (response == "307") {
                     String errorMessage = String.format("[ERROR307]"+"네이버 원본 데이터 조회 실패 307: API URL: %s", apiUrl);
                     log.warn(errorMessage);
                     crawlRegion.errorWithLog(Platform.NAVER, errorMessage, 1000, CrawlStatus.ERROR307);
