@@ -8,7 +8,6 @@ import com.zipline.domain.entity.zigbang.ZigBangArticle;
 import com.zipline.domain.entity.zigbang.ZigBangCrawl;
 import com.zipline.global.util.GeoHashGenerator;
 import com.zipline.global.util.RandomSleepUtil;
-import com.zipline.global.util.UrlEncodingUtil;
 import com.zipline.infrastructure.crawl.fetch.Fetcher;
 import com.zipline.infrastructure.crawl.fetch.dto.FetchConfigDTO;
 import com.zipline.infrastructure.zigbang.ZigBangArticleRepository;

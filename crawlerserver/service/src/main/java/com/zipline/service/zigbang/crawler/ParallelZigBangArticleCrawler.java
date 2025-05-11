@@ -43,6 +43,7 @@ public class ParallelZigBangArticleCrawler implements ZigBangArticleCrawler {
     private final ObjectMapper objectMapper;
     private final ZigBangCrawlRepository crawlRepo;
     private final ZigBangArticleRepository articleRepo;
+    private final SharedZigbangCrawler shared = new SharedZigbangCrawler();
 
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
@@ -115,7 +116,7 @@ public class ParallelZigBangArticleCrawler implements ZigBangArticleCrawler {
         crawlRepo.save(crawl);
 
         while (hasMore) {
-            String listUrl = buildListUrl(category, geohash) + "&offset=" + offset + "&limit=" + LIMIT;
+            String listUrl = shared.buildListUrl(category, geohash) + "&offset=" + offset + "&limit=" + LIMIT;
             String response = fetcher.fetch(listUrl, config);
 
             if (response != null && !response.isEmpty()) {
@@ -139,7 +140,7 @@ public class ParallelZigBangArticleCrawler implements ZigBangArticleCrawler {
 
         for (Long itemId : itemIds) {
             try {
-                String detailUrl = buildDetailUrl(itemId); // 여기서 URL 생성
+                String detailUrl = shared.buildDetailUrl(itemId); // 여기서 URL 생성
                 String response = fetcher.fetch(detailUrl, config);
 
                 if (response != null && !response.isEmpty()) {
@@ -219,20 +220,5 @@ public class ParallelZigBangArticleCrawler implements ZigBangArticleCrawler {
                 .orElse(ZigBangCrawl.create(geohash, category));
 
         crawlRepo.save(crawl.errorWithLog(message, 1000, CrawlStatus.FAILED));
-    }
-
-    public String buildListUrl(PropertyCategory category, String geohash) {
-        UrlEncodingUtil urlEncodingUtil = new UrlEncodingUtil();
-        return String.format(
-                "https://apis.zigbang.com/v2/items/%s?geohash=%s&depositMin=0&rentMin=0 " +
-                        "&salesTypes[0]=전세&salesTypes[1]=월세&salesTypes[2]=매매" +
-                        "&salesPriceMin=0&domain=zigbang&checkAnyItemWithoutFilter=true",
-                urlEncodingUtil.encode(category.getApiPath()),
-                urlEncodingUtil.encode(geohash)
-        );
-    }
-
-    public String buildDetailUrl(Long itemId) {
-        return String.format("https://api.zigbang.com/v3/items/%d ", itemId);
     }
 }
