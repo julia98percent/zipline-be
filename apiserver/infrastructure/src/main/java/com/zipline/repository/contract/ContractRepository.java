@@ -44,4 +44,7 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
 		Long agentPropertyUid,
 		List<ContractStatus> statuses
 	);
+
+	List<Contract> findByAgentPropertyUidAndContractDateAndDeletedAtIsNull(Long propertyUid, LocalDate contractDate);
+
 }
