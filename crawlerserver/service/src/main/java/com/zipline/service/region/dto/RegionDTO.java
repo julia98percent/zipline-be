@@ -18,11 +18,8 @@ public class RegionDTO {
     private String cortarName;
     private Double centerLat;
     private Double centerLon;
-    private Integer level; // 1: 시/도, 2: 시/군/구, 3: 읍/면/동
+    private Integer level;
 
-    /**
-     * Region 엔티티로부터 RegionDTO를 생성합니다.
-     */
     public static RegionDTO from(Region region) {
         return RegionDTO.builder()
             .cortarNo(region.getCortarNo())
@@ -51,8 +48,6 @@ public class RegionDTO {
                 .centerLat(36.5)
                 .centerLon(127.5)
                 .parent(null)
-                //.naverStatus(CrawlStatus.NEW)
-                //.zigbangStatus(CrawlStatus.NEW)
                 .build();
     }
 
@@ -73,8 +68,6 @@ public class RegionDTO {
                 .centerLat(this.getCenterLat())
                 .centerLon(this.getCenterLon())
                 .parent(parent)
-                //.naverStatus(CrawlStatus.NEW)
-                //.zigbangStatus(CrawlStatus.NEW)
                 .build();
     }
 }

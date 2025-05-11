@@ -31,7 +31,6 @@ public class NaverRawArticleServiceImpl implements NaverRawArticleService {
 	@Override
 	public TaskResponseDto crawlAndSaveRawArticles(Boolean useProxy) {
 
-		//NOTE: 요청방식과 크롤링방식에 대한 유연성을 위해 별도로 구현했습니다.
 		NaverArticleCrawler crawler = naverCrawlerFactory.getCrawler(useProxy);
 		Fetcher fetcher = useProxy ? proxyFetcher : defaultFetcher;
 
