@@ -111,6 +111,7 @@ jobs:
             SMS_FROM_NUMBER=${{ secrets.SMS_FROM_NUMBER }}
             SURVEY_DELIMITER=${{ secrets.SURVEY_DELIMITER }}
             MAX_HTTP_TOMCAT_FORM_POST_SIZE=${{ secrets.MAX_HTTP_TOMCAT_FORM_POST_SIZE }}
+            KAKAO_API_KEY=${{secrets.KAKAO_API_KEY}}
             SPRING_PROFILES_ACTIVE=test
             EOF
             
