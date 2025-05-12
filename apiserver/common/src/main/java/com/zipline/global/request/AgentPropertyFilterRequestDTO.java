@@ -55,10 +55,10 @@ public class AgentPropertyFilterRequestDTO {
 	private Integer maxConstructionYear;
 
 	@Min(value = 0, message = "주차 가능 대수는 0 이상이어야 합니다.")
-	private Integer minParkingCapacity;
+	private Double minParkingCapacity;
 
 	@Min(value = 0, message = "주차 가능 대수는 0 이상이어야 합니다.")
-	private Integer maxParkingCapacity;
+	private Double maxParkingCapacity;
 
 	@DecimalMin(value = "0.0", inclusive = true, message = "전용면적은 0 이상이어야 합니다.")
 	private Double minNetArea;

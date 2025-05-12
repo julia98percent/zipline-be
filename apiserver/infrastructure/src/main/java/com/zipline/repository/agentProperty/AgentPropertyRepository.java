@@ -20,4 +20,9 @@ public interface AgentPropertyRepository extends JpaRepository<AgentProperty, Lo
 
 	Page<AgentProperty> findByCustomerUidAndUserUidAndDeletedAtIsNullOrderByCreatedAtDesc(Long customerUid,
 		Long userUid, Pageable pageable);
+
+	@Query("SELECT a FROM AgentProperty a WHERE a.customer.uid = :customerUid AND a.address = :address AND a.detailAddress = :detailAddress AND a.legalDistrictCode = :legalDistrictCode AND a.deletedAt IS NULL")
+	Optional<AgentProperty> findDuplicateProperty(Long customerUid, String address, String detailAddress,
+		String legalDistrictCode);
+
 }
