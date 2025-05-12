@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.zipline.global.request.CustomerFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
@@ -29,6 +31,7 @@ import com.zipline.service.customer.dto.request.CustomerModifyRequestDTO;
 import com.zipline.service.customer.dto.request.CustomerRegisterRequestDTO;
 import com.zipline.service.customer.dto.response.CustomerDetailResponseDTO;
 import com.zipline.service.customer.dto.response.CustomerListResponseDTO;
+import com.zipline.service.excel.ExcelService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +45,7 @@ public class CustomerController {
 
 	private final CustomerService customerService;
 	private final CounselService counselService;
+	private final ExcelService excelService;
 
 	@GetMapping("/customers")
 	public ResponseEntity<ApiResponse<CustomerListResponseDTO>> getCustomers(
@@ -102,7 +106,6 @@ public class CustomerController {
 	@PutMapping("/customers/{customerUid}")
 	public ResponseEntity<ApiResponse<CustomerDetailResponseDTO>> modifyCustomer(@PathVariable Long customerUid,
 		@Valid @RequestBody CustomerModifyRequestDTO customerModifyRequestDTO, Principal principal) {
-
 		CustomerDetailResponseDTO result = customerService.modifyCustomer(
 			customerUid, customerModifyRequestDTO, Long.parseLong(principal.getName()));
 		ApiResponse<CustomerDetailResponseDTO> response = ApiResponse.ok("고객 수정에 성공하였습니다.", result);
@@ -122,6 +125,15 @@ public class CustomerController {
 		Map<String, Long> result = counselService.createCounsel(customerUid, requestDTO,
 			Long.parseLong(principal.getName()));
 		ApiResponse<Map<String, Long>> response = ApiResponse.create("상담 생성에 성공하였습니다.", result);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	@PostMapping("/customers/bulk")
+	public ResponseEntity<ApiResponse<Map<String, Integer>>> registerCustomerByExcel(@RequestPart MultipartFile file,
+		Principal principal) {
+		Map<String, Integer> result = excelService.registerCustomerByExcel(file,
+			Long.parseLong(principal.getName()));
+		ApiResponse<Map<String, Integer>> response = ApiResponse.create("고객 엑셀 등록 성공", result);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 }
