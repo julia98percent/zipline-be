@@ -1,5 +1,8 @@
 package com.zipline.repository.customer;
 
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,4 +13,6 @@ public interface QCustomerRepository {
 	Page<Customer> findByUserUidAndDeletedAtIsNullWithFilters(Long userUid,
 		CustomerFilterRequestDTO customerFilterRequestDTO,
 		Pageable pageable);
+
+	List<Customer> findByNameAndPhoneNoPairs(Set<String> keySet);
 }
