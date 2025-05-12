@@ -89,28 +89,14 @@ public class NaverArticleCrawler {
         boolean is307 = false;
         int total = 0;
 
-        FetchConfigDTO fetchConfig = FetchConfigDTO.builder()
-                .accept("application/json")
-                .host("m.land.naver.com")
-                .referer("https://m.land.naver.com/")
-                .secChUa("\"Chromium\";v=\"122\", \"Not(A:Brand\";v=\"24\", \"Google Chrome\";v=\"122\"")
-                .secChUaMobile("?1")
-                .secChUaPlatform("\"Android\"")
-                .secFetchDest("empty")
-                .secFetchMode("cors")
-                .secFetchSite("same-origin")
-                .userAgent("Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36")
-                .acceptLanguage("ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7")
-                .connectTimeout(5000)
-                .readTimeout(10000)
-                .build();
+        //TODO: DTO 관리? 서비스 관리?
+
 
         try {
             Crawl crawlRegion = crawlRepo.findByCortarNo(cortarNo);
-
             while (hasMore) {
                 String apiUrl = buildApiUrl(crawlRegion, page++);
-                String response = fetcher.fetch(apiUrl, fetchConfig);
+                String response = fetcher.fetch(apiUrl, FetchConfigDTO.naverDefaultConfig());
 
                 if (response == "307") {
                     String errorMessage = String.format("[ERROR307]"+"네이버 원본 데이터 조회 실패 307: API URL: %s", apiUrl);

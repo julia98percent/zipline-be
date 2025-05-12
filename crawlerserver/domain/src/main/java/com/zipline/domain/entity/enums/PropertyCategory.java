@@ -3,6 +3,9 @@ package com.zipline.domain.entity.enums;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Getter
 public enum PropertyCategory {
 	ONE_ROOM("oneroom"),     // 원룸
@@ -20,12 +23,12 @@ public enum PropertyCategory {
 	}
 
 	public static boolean contains(String category) {
-		for (PropertyCategory c : values()) {
-			if (c.name().equalsIgnoreCase(category)) {
-				return true;
-			}
-		}
-		return false;
+		return Arrays.stream(values())
+				.anyMatch(c -> c.name().equalsIgnoreCase(category));
+	}
+
+	public static List<PropertyCategory> supportedCategories() {
+		return Arrays.asList(VILLA, ONE_ROOM, OFFICETEL);
 	}
 
 	public boolean supportsSaleType() {

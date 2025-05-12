@@ -32,13 +32,17 @@ public class DefaultFetcher implements Fetcher {
         HttpURLConnection conn = Connection.HTTPURLConnection(url, config);
 
         int responseCode = conn.getResponseCode();
+
+        // 응답 필터 함수화 필요
         String responseMsg = conn.getResponseMessage();
         if (responseCode == 200) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
                 StringBuilder sb = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) sb.append(line);
-                return sb.toString();
+                String response = sb.toString();
+                log.info("요청 성공 - 데이터 조회 완료 - url: {}, 응답 코드: {}, 응답 값: {}", url, responseCode, response);
+                return response;
             }
         }else if(responseCode == 400){
             log.warn("400 Bad Request - 데이터 없음으로 간주하고 스킵: [{}]{}", url, responseMsg);
@@ -59,8 +63,8 @@ public class DefaultFetcher implements Fetcher {
 
     private String executePost(String url, String jsonBody, FetchConfigDTO config, int retryCount) throws Exception {
         HttpURLConnection conn = Connection.HTTPURLConnection(url, config);
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
+        conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+
 
         try (OutputStream os = conn.getOutputStream()) {
             byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
@@ -69,17 +73,23 @@ public class DefaultFetcher implements Fetcher {
 
         int responseCode = conn.getResponseCode();
         String responseMsg = conn.getResponseMessage();
+
         if (responseCode == 200) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
                 StringBuilder sb = new StringBuilder();
                 String line;
-                while ((line = reader.readLine()) != null) sb.append(line);
-                return sb.toString();
+
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+                String response = sb.toString().trim();
+                log.info("요청 성공 - 데이터 조회 완료 - url: {}, 응답 코드: {}, 응답 값: {}", url, responseCode, response);
+                return response;
             }
-        }else if(responseCode == 400){
+        } else if (responseCode == 400) {
             log.warn("400 Bad Request - 데이터 없음으로 간주하고 스킵: [{}]{}", url, responseMsg);
             return "400";
-        }else if (responseCode == 307) {
+        } else if (responseCode == 307) {
             log.warn("307 리다이렉트 발생 - 데이터 없음으로 간주하고 스킵: [{}]{}", url, responseMsg);
             return "307";
         } else {
@@ -88,7 +98,7 @@ public class DefaultFetcher implements Fetcher {
                 Thread.sleep((long) (Math.pow(2, retryCount) * 1000));
                 return executePost(url, jsonBody, config, retryCount + 1);
             } else {
-                throw new RuntimeException("POST 요청 실패: " + url + ", 응답 코드: " + responseCode);
+                throw new RuntimeException("POST 요청 실패: " + url + ", 응답 코드: " + responseCode + ", 응답 메시지: " + responseMsg);
             }
         }
     }

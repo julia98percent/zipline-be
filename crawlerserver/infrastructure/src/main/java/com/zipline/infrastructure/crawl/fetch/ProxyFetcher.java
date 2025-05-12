@@ -35,6 +35,8 @@ public class ProxyFetcher implements Fetcher {
         return executePostWithRetry(url, jsonBody, config, 0);
     }
 
+
+    //todo:프록시 사용검증 필요
     private String executeGet(String url, FetchConfigDTO config, int retryCount) throws Exception {
         ProxyInfoDTO proxy = getAvailableProxy(retryCount);
         java.net.Proxy javaProxy = new java.net.Proxy(java.net.Proxy.Type.HTTP,
@@ -69,8 +71,6 @@ public class ProxyFetcher implements Fetcher {
                 new InetSocketAddress(proxy.getHost(), proxy.getPort()));
 
         HttpURLConnection conn = Connection.HTTPURLConnection(url, config);
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
 
         try (OutputStream os = conn.getOutputStream()) {
             byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
