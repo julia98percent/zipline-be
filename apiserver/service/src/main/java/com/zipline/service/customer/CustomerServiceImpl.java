@@ -1,17 +1,5 @@
 package com.zipline.service.customer;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-
 import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.counsel.Counsel;
@@ -39,13 +27,23 @@ import com.zipline.repository.user.UserRepository;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
 import com.zipline.service.contract.dto.response.ContractListResponseDTO;
 import com.zipline.service.counsel.dto.response.CounselListResponseDTO;
+import com.zipline.service.counsel.dto.response.CounselPageResponseDTO;
 import com.zipline.service.customer.dto.request.CustomerModifyRequestDTO;
 import com.zipline.service.customer.dto.request.CustomerRegisterRequestDTO;
 import com.zipline.service.customer.dto.response.CustomerDetailResponseDTO;
 import com.zipline.service.customer.dto.response.CustomerListResponseDTO;
-
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -193,11 +191,20 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CounselListResponseDTO> getCustomerCounsels(Long customerUid, Long userUid) {
+	public CounselPageResponseDTO getCustomerCounsels(Long customerUid, PageRequestDTO pageRequestDTO, Long userUid) {
 		validateCustomerExistence(customerUid, userUid);
-		List<Counsel> savedCounsels = counselRepository.findByCustomerUidAndUserUidAndDeletedAtIsNullOrderByCreatedAtDesc(
-			customerUid, userUid);
-		return savedCounsels.stream().map(CounselListResponseDTO::createWithoutCustomerName).toList();
+		Page<Counsel> savedCounsels = counselRepository.findByCustomerUidAndUserUidAndDeletedAtIsNullOrderByCreatedAtDesc(
+			customerUid, userUid, pageRequestDTO.toPageable()
+		);
+
+		List<CounselListResponseDTO> data =  savedCounsels.getContent()
+				.stream()
+				.map(CounselListResponseDTO::createWithoutCustomerName)
+				.toList();
+
+
+		return new CounselPageResponseDTO(savedCounsels, data);
+
 	}
 
 	@Transactional(readOnly = true)
