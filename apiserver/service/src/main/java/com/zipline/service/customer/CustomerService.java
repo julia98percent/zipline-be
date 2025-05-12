@@ -1,12 +1,10 @@
 package com.zipline.service.customer;
 
-import java.util.List;
-
 import com.zipline.global.request.CustomerFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseDTO;
 import com.zipline.service.contract.dto.response.ContractListResponseDTO;
-import com.zipline.service.counsel.dto.response.CounselListResponseDTO;
+import com.zipline.service.counsel.dto.response.CounselPageResponseDTO;
 import com.zipline.service.customer.dto.request.CustomerModifyRequestDTO;
 import com.zipline.service.customer.dto.request.CustomerRegisterRequestDTO;
 import com.zipline.service.customer.dto.response.CustomerDetailResponseDTO;
@@ -26,9 +24,10 @@ public interface CustomerService {
 
 	CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid);
 
-	List<CounselListResponseDTO> getCustomerCounsels(Long customerUid, Long userUid);
+	CounselPageResponseDTO getCustomerCounsels(Long customerUid, PageRequestDTO pageRequestDTO, Long userUid);
 
 	AgentPropertyListResponseDTO getCustomerProperties(Long customerUid, PageRequestDTO pageRequestDTO, Long userUid);
 
-	List<ContractListResponseDTO.ContractListDTO> getCustomerContracts(Long customerUid, Long userUid);
+
+	ContractListResponseDTO getCustomerContracts(Long customerUid, PageRequestDTO pageRequestDTO, Long userUid);
 }
