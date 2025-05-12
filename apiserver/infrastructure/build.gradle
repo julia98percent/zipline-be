@@ -8,6 +8,12 @@ dependencies {
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+
+    implementation "org.apache.poi:poi:5.2.3"
+    implementation "org.apache.poi:poi-ooxml:5.2.3"
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
+
+    implementation "org.springframework:spring-web"
 }
 
 bootJar {
