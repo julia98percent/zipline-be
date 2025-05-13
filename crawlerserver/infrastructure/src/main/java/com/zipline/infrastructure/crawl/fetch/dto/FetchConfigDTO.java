@@ -1,9 +1,13 @@
 package com.zipline.infrastructure.crawl.fetch.dto;
 
+import com.zipline.infrastructure.proxy.dto.ProxyInfoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,9 +28,10 @@ public class FetchConfigDTO {
     private String secFetchSite;
     private String userAgent;
     private String acceptLanguage;
-    private String requestProperty;
     private int connectTimeout;
     private int readTimeout;
+    @Builder.Default
+    private Map<String, String> extraHeader = new HashMap<>();
 
     public static FetchConfigDTO naverDefaultConfig() {
         return FetchConfigDTO.builder()
@@ -70,7 +75,7 @@ public class FetchConfigDTO {
     }
 
     public static FetchConfigDTO zigbangPostConfig() {
-        return FetchConfigDTO.builder()
+        FetchConfigDTO config = FetchConfigDTO.builder()
                 .requestMethod("POST")
                 .doOutput(true)
                 .accept("application/json")
@@ -84,9 +89,18 @@ public class FetchConfigDTO {
                 .secFetchSite("same-site")
                 .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
                 .acceptLanguage("ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7")
-                .requestProperty("XZP")
                 .connectTimeout(10000)
                 .readTimeout(15000)
                 .build();
+        config.getExtraHeader().put("X-Zigbang-Platform", "www");
+        return config;
+    }
+
+    public FetchConfigDTO addHeader(String key, String value) {
+        if (extraHeader == null) {
+            extraHeader = new HashMap<>();
+        }
+        extraHeader.put(key, value);
+        return this;
     }
 }
