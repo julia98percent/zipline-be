@@ -28,6 +28,7 @@ public class ProxyPool {
     private final ConcurrentHashMap<String, AtomicInteger> proxyFailureCount = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, LocalDateTime> lastUsedTime = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Integer> usageCount = new ConcurrentHashMap<>();
+    private final ThreadLocal<ProxyInfoDTO> currentProxy = new ThreadLocal<>();
     
     @Value("${proxy.max-failures}")
     private int maxFailures;
@@ -59,8 +60,10 @@ public class ProxyPool {
             log.error("프록시 풀 초기화 중 오류 발생: {}. 애플리케이션은 계속 실행됩니다.", e.getMessage());
         }
     }
-    
 
+    public ProxyInfoDTO getCurrentProxy() {
+        return currentProxy.get();
+    }
     private void loadProxies() {
         try {
             Path filePath = Paths.get(uploadDir).resolve(proxyList);
@@ -180,7 +183,7 @@ public class ProxyPool {
             }
         }
     }
-    
+
     public int getAvailableProxyCount() {
         return availableProxies.size();
     }
