@@ -35,6 +35,7 @@ import com.zipline.repository.agentProperty.AgentPropertyRepository;
 import com.zipline.repository.customer.CustomerRepository;
 import com.zipline.repository.user.UserRepository;
 
+import io.jsonwebtoken.lang.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,11 +56,13 @@ public class ExcelServiceImpl implements ExcelService {
 	@Transactional
 	public Map<String, Integer> registerCustomerByExcel(MultipartFile excelFile, Long userUid) {
 		List<CustomerExcelDTO> dtoList = readCustomerExcel(excelFile);
+		log.info("[고객 엑셀 등록 시작] userUid={}, filename={}", userUid, excelFile.getOriginalFilename());
 		checkCustomerDuplicateInExcel(dtoList);
 		User user = getUserOrThrow(userUid);
 		checkCustomerDuplicateInDB(dtoList);
 		List<Customer> customers = mapToCustomerEntities(dtoList, user);
 		customerRepository.saveAll(customers);
+		log.info("[고객 엑셀 등록 완료] 저장된 고객 수={}", customers.size());
 		return Collections.singletonMap("success Count", customers.size());
 	}
 
@@ -67,10 +70,12 @@ public class ExcelServiceImpl implements ExcelService {
 	@Transactional
 	public Map<String, Integer> registerPropertiesByExcel(MultipartFile excelFile, Long userUid) {
 		List<AgentPropertyExcelDTO> dtoList = readPropertyExcel(excelFile);
+		log.info("[매물 엑셀 등록 시작] userUid={}, filename={}", userUid, excelFile.getOriginalFilename());
 		User user = getUserOrThrow(userUid);
 		Map<String, Customer> customerMap = prepareCustomersForProperty(dtoList, user);
 		List<AgentProperty> properties = mapToAgentProperties(dtoList, customerMap, user);
 		agentPropertyRepository.saveAll(properties);
+		log.info("[매물 엑셀 등록 완료] 저장된 매물 수={}", properties.size());
 		return Collections.singletonMap("success Count", properties.size());
 	}
 
@@ -87,6 +92,7 @@ public class ExcelServiceImpl implements ExcelService {
 		for (CustomerExcelDTO dto : list) {
 			String key = dto.getName() + "," + dto.getPhoneNo();
 			if (!uniqueKeySet.add(key)) {
+				log.info("[엑셀 중복 고객] rowNum={}, key={}", dto.getRowNum(), key);
 				throw new ExcelException(ExcelErrorCode.DUPLICATED_CUSTOMER, dto.getRowNum(), "name/phoneNo", key,
 					"엑셀에 중복된 고객이 존재합니다.");
 			}
@@ -107,6 +113,7 @@ public class ExcelServiceImpl implements ExcelService {
 	}
 
 	private List<Customer> mapToCustomerEntities(List<CustomerExcelDTO> list, User user) {
+		log.info("[고객 매핑 시작] 대상 수={}", list.size());
 		return list.stream().map(dto -> {
 			String legalCode = resolveLegalDistrictCode(dto);
 			return toCustomerEntity(dto, legalCode, user);
@@ -137,11 +144,15 @@ public class ExcelServiceImpl implements ExcelService {
 	}
 
 	private Map<String, Customer> prepareCustomersForProperty(List<AgentPropertyExcelDTO> list, User user) {
+		log.info("[매물 고객 준비 시작] 총 고객 수={}", list.size());
 		Set<String> keys = extractCustomerKeys(list);
 		Map<String, Customer> dbCustomers = findExistingCustomers(keys);
-		List<Customer> newCustomers = extractNewCustomers(list, keys, dbCustomers.keySet(), user);
+		log.info("[기존 고객 수] = {}", dbCustomers.size());
+		List<Customer> newCustomers = extractNewCustomers(list, dbCustomers.keySet(), user);
+		log.info("[신규 고객 수] = {}", newCustomers.size());
 		customerRepository.saveAll(newCustomers);
 		newCustomers.forEach(c -> dbCustomers.put(c.getName() + "," + c.getPhoneNo(), c));
+		log.info("[고객 준비 완료] 전체 고객 수 = {}", dbCustomers.size());
 		return dbCustomers;
 	}
 
@@ -156,8 +167,7 @@ public class ExcelServiceImpl implements ExcelService {
 			.collect(Collectors.toMap(c -> c.getName() + "," + c.getPhoneNo(), Function.identity()));
 	}
 
-	private List<Customer> extractNewCustomers(List<AgentPropertyExcelDTO> list, Set<String> allKeys,
-		Set<String> existingKeys, User user) {
+	private List<Customer> extractNewCustomers(List<AgentPropertyExcelDTO> list, Set<String> existingKeys, User user) {
 		return list.stream()
 			.map(dto -> Map.entry(dto.getCustomerName() + "," + dto.getPhoneNo(), dto))
 			.filter(entry -> !existingKeys.contains(entry.getKey()))
@@ -172,6 +182,7 @@ public class ExcelServiceImpl implements ExcelService {
 
 	private List<AgentProperty> mapToAgentProperties(List<AgentPropertyExcelDTO> list,
 		Map<String, Customer> customerMap, User user) {
+		log.info("[매물 매핑 시작] 대상 수 = {}", list.size());
 		return list.stream().map(dto -> {
 			GeoCodeResultVO geo = getGeoCode(dto.getRowNum(), dto.getRoadName());
 			Customer customer = customerMap.get(dto.getCustomerName() + "," + dto.getPhoneNo());
@@ -210,7 +221,12 @@ public class ExcelServiceImpl implements ExcelService {
 			throw new ExcelException(ExcelErrorCode.INVALID_INPUT_VALUE, rowNum, "roadName", roadName,
 				"주소를 찾을 수 없습니다.");
 		}
+
 		KakaoGeocodeResponseDTO.Document first = response.getDocuments().get(0);
+		if (!Strings.hasText(first.getAddress().getDongHName()) || !Strings.hasText(first.getAddress().getDongName())) {
+			throw new ExcelException(ExcelErrorCode.INVALID_INPUT_VALUE, rowNum, "roadName", roadName,
+				"해당하는 동 주소를 찾을 수 없습니다.");
+		}
 		return new GeoCodeResultVO(
 			first.getAddress() != null ? first.getAddress().getLegalDistrictCode() : null,
 			first.getLongitude(),
