@@ -72,7 +72,7 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
 					});
 		}
 
-		messageTemplate.updateInfo(request.getName(), request.getContent());
+		messageTemplate.updateInfo(request.getName(), request.getCategory(), request.getContent());
 
 		return new MessageTemplateResponseDTO(messageTemplate);
 	}
