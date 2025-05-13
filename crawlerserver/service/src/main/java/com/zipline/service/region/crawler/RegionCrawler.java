@@ -64,7 +64,7 @@ public class RegionCrawler {
         FetchConfigDTO fetchConfig = FetchConfigDTO.builder()
                 .accept("application/json")
                 .host("new.land.naver.com")
-                .referer("https://m.land.naver.com/")
+                .referer("https://new.land.naver.com/")
                 .secChUa("\"Chromium\";v=\"122\", \"Not(A:Brand\";v=\"24\", \"Google Chrome\";v=\"122\"")
                 .secChUaMobile("?0")
                 .secChUaPlatform("\"Windows\"")

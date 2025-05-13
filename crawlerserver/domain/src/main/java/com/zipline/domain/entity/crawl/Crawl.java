@@ -39,60 +39,35 @@ public class Crawl {
     @Column(name = "naver_last_crawled_at")
     private LocalDateTime naverLastCrawledAt;
 
-    @Column(name = "zigbang_status")
-    @Enumerated(EnumType.STRING)
-    private CrawlStatus zigbangStatus;
-
-    @Column(name = "zigbang_last_crawled_at")
-    private LocalDateTime zigbangLastCrawledAt;
-
     @Column(name = "error_log")
     private String errorLog;
 
     public Crawl(Long id, Long cortarNo, CrawlStatus naverStatus, LocalDateTime naverLastCrawledAt,
-                 CrawlStatus zigbangStatus, LocalDateTime zigbangLastCrawledAt, String errorLog) {
+                 String errorLog) {
         this.id = id;
         this.cortarNo = cortarNo;
         this.naverStatus = naverStatus;
         this.naverLastCrawledAt = naverLastCrawledAt;
-        this.zigbangStatus = zigbangStatus;
-        this.zigbangLastCrawledAt = zigbangLastCrawledAt;
         this.errorLog = errorLog;
     }
 
     public Crawl createCrawl(Long cortarNo) {
         this.cortarNo = cortarNo;
         this.naverStatus = CrawlStatus.NEW;
-        this.zigbangStatus = CrawlStatus.NEW;
         this.naverLastCrawledAt = null;
-        this.zigbangLastCrawledAt = null;
         return this;
     }
 
     public Crawl updateCrawl(Long cortarNo) {
         this.cortarNo = cortarNo;
         this.naverStatus = CrawlStatus.NEW;
-        this.zigbangStatus = CrawlStatus.NEW;
         this.naverLastCrawledAt = null;
-        this.zigbangLastCrawledAt = null;
         return this;
     }
 
-    /**
-     * 네이버 크롤링 상태를 업데이트합니다.
-     */
     public Crawl updateNaverCrawlStatus(CrawlStatus status) {
         this.naverStatus = status;
         this.naverLastCrawledAt = LocalDateTime.now();
-        return this;
-    }
-
-    /**
-     * 직방 크롤링 상태를 업데이트합니다.
-     */
-    public Crawl updateZigbangCrawlStatus(CrawlStatus status) {
-        this.zigbangStatus = status;
-        this.zigbangLastCrawledAt = LocalDateTime.now();
         return this;
     }
     /**
@@ -102,6 +77,7 @@ public class Crawl {
      * @param maxLength 최대 허용 길이 (기본값: 1000)
      * @return Crawl 객체 자기 자신 반환
      */
+    //TODO: 공용함수 유틸로 분리?
     public Crawl appendErrorLog(String newError, int maxLength) {
         String currentLog = this.errorLog != null ? this.errorLog : "";
 
@@ -130,10 +106,6 @@ public class Crawl {
         if (platform == Platform.NAVER) {
             this.naverStatus = status;
             this.naverLastCrawledAt = LocalDateTime.now();
-        }
-        if (platform == Platform.ZIGBANG) {
-            this.zigbangStatus = status;
-            this.zigbangLastCrawledAt = LocalDateTime.now();
         }
         this.errorLog = updatedLog;
         return this;

@@ -52,7 +52,7 @@ public class NaverRawArticle {
     @Column(name = "migrated_at")
     private LocalDateTime migratedAt;
     
-    /**
+    /**`
      * 마이그레이션 상태를 업데이트합니다.
      */
     public NaverRawArticle updateMigrationStatus(MigrationStatus status) {
