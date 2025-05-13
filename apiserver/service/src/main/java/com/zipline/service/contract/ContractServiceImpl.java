@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -102,9 +103,45 @@ public class ContractServiceImpl implements ContractService {
 		contractRequestDTO.validateDateOrder();
 		contractRequestDTO.validateProperty();
 		contractRequestDTO.validateDistinctParties();
+
+		List<ContractStatus> activeStatuses = ContractStatus.getContractedStatuses();
+		boolean hasOngoingContract = contractRepository.existsByAgentPropertyUidAndStatusInAndDeletedAtIsNull(
+			contractRequestDTO.getPropertyUid(),
+			activeStatuses
+		);
+
+		if (hasOngoingContract) {
+			throw new ContractException(ContractErrorCode.PROPERTY_ALREADY_HAS_ACTIVE_CONTRACT);
+		}
 		AgentProperty agentProperty = agentPropertyRepository.findByUidAndUserUidAndDeletedAtIsNull(
 				contractRequestDTO.getPropertyUid(), userUid)
 			.orElseThrow(() -> new PropertyException(PropertyErrorCode.PROPERTY_NOT_FOUND));
+
+		List<Contract> duplicates = contractRepository
+			.findByAgentPropertyUidAndContractDateAndDeletedAtIsNull(
+				contractRequestDTO.getPropertyUid(), contractRequestDTO.getContractDate());
+
+		Set<Long> reqLessorUids = Set.copyOf(contractRequestDTO.getLessorOrSellerUids());
+		Set<Long> reqLesseeUids = contractRequestDTO.getLesseeOrBuyerUids() != null
+			? Set.copyOf(contractRequestDTO.getLesseeOrBuyerUids())
+			: Set.of();
+
+		for (Contract c : duplicates) {
+			if (!Objects.equals(c.getCategory(), category) || c.getStatus() != status)
+				continue;
+
+			List<CustomerContract> customers = customerContractRepository.findAllByContractUid(c.getUid());
+			Set<Long> lessors = customers.stream()
+				.filter(cc -> cc.getRole() == ContractCustomerRole.LESSOR_OR_SELLER)
+				.map(cc -> cc.getCustomer().getUid()).collect(Collectors.toSet());
+			Set<Long> lessees = customers.stream()
+				.filter(cc -> cc.getRole() == ContractCustomerRole.LESSEE_OR_BUYER)
+				.map(cc -> cc.getCustomer().getUid()).collect(Collectors.toSet());
+
+			if (lessors.equals(reqLessorUids) && lessees.equals(reqLesseeUids)) {
+				throw new ContractException(ContractErrorCode.DUPLICATE_CONTRACT);
+			}
+		}
 
 		Contract contract = contractRequestDTO.toEntity(savedUser, agentProperty, status, category);
 		Contract savedContract = contractRepository.save(contract);

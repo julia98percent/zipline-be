@@ -39,4 +39,12 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
 		@Param("userUid") Long userUid,
 		@Param("endDate") LocalDate endDate
 	);
+
+	boolean existsByAgentPropertyUidAndStatusInAndDeletedAtIsNull(
+		Long agentPropertyUid,
+		List<ContractStatus> statuses
+	);
+
+	List<Contract> findByAgentPropertyUidAndContractDateAndDeletedAtIsNull(Long propertyUid, LocalDate contractDate);
+
 }

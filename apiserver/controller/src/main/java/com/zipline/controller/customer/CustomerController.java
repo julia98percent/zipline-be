@@ -25,7 +25,7 @@ import com.zipline.service.agentProperty.dto.response.AgentPropertyListResponseD
 import com.zipline.service.contract.dto.response.ContractListResponseDTO;
 import com.zipline.service.counsel.CounselService;
 import com.zipline.service.counsel.dto.request.CounselCreateRequestDTO;
-import com.zipline.service.counsel.dto.response.CounselListResponseDTO;
+import com.zipline.service.counsel.dto.response.CounselPageResponseDTO;
 import com.zipline.service.customer.CustomerService;
 import com.zipline.service.customer.dto.request.CustomerModifyRequestDTO;
 import com.zipline.service.customer.dto.request.CustomerRegisterRequestDTO;
@@ -36,6 +36,7 @@ import com.zipline.service.excel.ExcelService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -86,20 +87,20 @@ public class CustomerController {
 	}
 
 	@GetMapping("/customers/{customerUid}/counsels")
-	public ResponseEntity<ApiResponse<List<CounselListResponseDTO>>> getCustomerCounsels(@PathVariable Long customerUid,
-		Principal principal) {
-		List<CounselListResponseDTO> result = customerService.getCustomerCounsels(customerUid,
+	public ResponseEntity<ApiResponse<CounselPageResponseDTO>> getCustomerCounsels(@PathVariable Long customerUid,
+			PageRequestDTO pageRequestDTO, Principal principal) {
+		CounselPageResponseDTO result = customerService.getCustomerCounsels(customerUid, pageRequestDTO,
 			Long.parseLong(principal.getName()));
-		ApiResponse<List<CounselListResponseDTO>> response = ApiResponse.ok("상담 내역 조회 성공", result);
+		ApiResponse<CounselPageResponseDTO> response = ApiResponse.ok("상담 내역 조회 성공", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	@GetMapping("/customers/{customerUid}/contracts")
-	public ResponseEntity<ApiResponse<List<ContractListResponseDTO.ContractListDTO>>> getCustomerContracts(
-		@PathVariable Long customerUid, Principal principal) {
-		List<ContractListResponseDTO.ContractListDTO> result = customerService.getCustomerContracts(
-			customerUid, Long.parseLong(principal.getName()));
-		ApiResponse<List<ContractListResponseDTO.ContractListDTO>> response = ApiResponse.ok("계약 목록 조회 성공", result);
+	public ResponseEntity<ApiResponse<ContractListResponseDTO>> getCustomerContracts(
+		@PathVariable Long customerUid, PageRequestDTO pageRequestDTO, Principal principal) {
+		ContractListResponseDTO result = customerService.getCustomerContracts(
+			customerUid, pageRequestDTO, Long.parseLong(principal.getName()));
+		ApiResponse<ContractListResponseDTO> response = ApiResponse.ok("계약 목록 조회 성공", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
@@ -137,3 +138,4 @@ public class CustomerController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 }
+
