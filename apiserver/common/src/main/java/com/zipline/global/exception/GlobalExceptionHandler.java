@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import com.zipline.global.exception.common.errorcode.CommonErrorCode;
+import com.zipline.global.exception.excel.ExcelException;
 import com.zipline.global.response.ExceptionResponseDTO;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,18 +18,15 @@ import lombok.extern.slf4j.Slf4j;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	// @ExceptionHandler(JwtException.class)
-	// public ResponseEntity<String> handleJwtException(JwtException e) {
-	// 	log.error(e.getMessage(), e);
-	// 	ErrorCode errorCode = JwtExceptionMessageToErrorCode(e.getMessage());
-	// 	JSONObject jsonObject = ApiResponse.jsonOf(errorCode);
-	//
-	// 	return ResponseEntity.status(errorCode.getHttpStatus())
-	// 		.contentType(MediaType.APPLICATION_JSON)
-	// 		.body(jsonObject.toJSONString());
-	//
-	// }
-	//
+	@ExceptionHandler(ExcelException.class)
+	public ResponseEntity<ExceptionResponseDTO> handleException(ExcelException e) {
+		log.error(e.getMessage(), e);
+		ErrorCode errorCode = e.getErrorCode();
+		ExceptionResponseDTO response = ExceptionResponseDTO.of(errorCode.getCode(), errorCode.getMessage(),
+			e.getDetails());
+		return ResponseEntity.status(errorCode.getStatus()).body(response);
+	}
+
 	@ExceptionHandler(BaseException.class)
 	public ResponseEntity<ExceptionResponseDTO> handleException(BaseException e) {
 		log.error(e.getMessage(), e);

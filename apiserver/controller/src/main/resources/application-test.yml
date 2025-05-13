@@ -66,3 +66,7 @@ file:
 cache:
   keys:
     children-regions-prefix: ${CACHE_KEY_CHILDREN_REGIONS_PREFIX}
+
+kakao:
+  api:
+    key: ${KAKAO_API_KEY}

@@ -2,6 +2,7 @@ package com.zipline.controller.agentProperty;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.zipline.global.request.AgentPropertyFilterRequestDTO;
 import com.zipline.global.request.PageRequestDTO;
@@ -27,6 +30,7 @@ import com.zipline.service.contract.dto.response.ContractPropertyHistoryResponse
 import com.zipline.service.contract.dto.response.ContractPropertyResponseDTO;
 import com.zipline.service.counsel.CounselService;
 import com.zipline.service.counsel.dto.response.CounselPageResponseDTO;
+import com.zipline.service.excel.ExcelService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -40,6 +44,7 @@ public class AgentPropertyController {
 
 	private final AgentPropertyService agentPropertyService;
 	private final CounselService counselService;
+	private final ExcelService excelService;
 	private final ContractService contractService;
 
 	@GetMapping("/{propertyUid}")
@@ -116,5 +121,15 @@ public class AgentPropertyController {
 			propertyUid, Long.parseLong(principal.getName()));
 		ApiResponse<List<ContractPropertyHistoryResponseDTO>> response = ApiResponse.ok("계약 히스토리 정보 조회 성공", result);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@PostMapping("/bulk")
+	public ResponseEntity<ApiResponse<?>> registerPropertiesByExcel(
+		@RequestPart(required = false) MultipartFile file,
+		Principal principal) {
+		Map<String, Integer> result = excelService.registerPropertiesByExcel(file,
+			Long.parseLong(principal.getName()));
+		ApiResponse<Map<String, Integer>> response = ApiResponse.create("매물 엑셀 등록에 성공하였습니다.", result);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 }

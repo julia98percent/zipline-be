@@ -4,6 +4,7 @@ import static com.zipline.entity.customer.QCustomer.*;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,8 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.util.StringUtils;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zipline.entity.customer.Customer;
@@ -72,6 +75,17 @@ public class QCustomerRepositoryImpl implements QCustomerRepository {
 			);
 
 		return PageableExecutionUtils.getPage(result, pageable, totalCount::fetchOne);
+	}
+
+	@Override
+	public List<Customer> findByNameAndPhoneNoPairs(Set<String> keySet) {
+		StringExpression keyExpr = Expressions.stringTemplate(
+			"concat({0}, ',', {1})", customer.name, customer.phoneNo);
+
+		return queryFactory
+			.selectFrom(customer)
+			.where(keyExpr.in(keySet))
+			.fetch();
 	}
 
 	private BooleanExpression userUidEq(Long userUid) {

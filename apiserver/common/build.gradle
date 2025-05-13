@@ -34,6 +34,9 @@ dependencies {
 
     // ULID
     implementation("de.huxhorn.sulky:de.huxhorn.sulky.ulid:8.3.0")
+
+    implementation "org.apache.poi:poi:5.2.3"
+    implementation "org.apache.poi:poi-ooxml:5.2.3"
 }
 
 tasks.named('test') {
