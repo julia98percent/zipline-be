@@ -35,20 +35,21 @@ public class StaticsServiceImpl implements StaticsService {
 	@Override
 	public int getOngoingContractCount(Long userId) {
 		List<ContractStatus> ongoingStatuses = Arrays.asList(
-			ContractStatus.LISTED,
-			ContractStatus.NEGOTIATING,
-			ContractStatus.INTENT_SIGNED,
-			ContractStatus.CONTRACTED,
-			ContractStatus.IN_PROGRESS);
+				ContractStatus.NEGOTIATING,
+				ContractStatus.INTENT_SIGNED,
+				ContractStatus.CONTRACTED,
+				ContractStatus.IN_PROGRESS,
+				ContractStatus.PAID_COMPLETE,
+				ContractStatus.REGISTERED,
+				ContractStatus.MOVED_IN);
+
 		return contractRepository.countByUserUidAndStatusInAndDeletedAtIsNull(userId, ongoingStatuses);
 	}
 
 	@Override
 	public int getCompletedContractCount(Long userId) {
 		List<ContractStatus> completedStatuses = Arrays.asList(
-			ContractStatus.PAID_COMPLETE,
-			ContractStatus.REGISTERED,
-			ContractStatus.MOVED_IN,
+			ContractStatus.CANCELLED,
 			ContractStatus.TERMINATED);
 		return contractRepository.countByUserUidAndStatusInAndDeletedAtIsNull(userId, completedStatuses);
 	}
