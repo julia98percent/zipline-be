@@ -24,6 +24,9 @@ public class KakaoGeocodeResponseDTO {
 		@JsonProperty("road_address")
 		private RoadAddress roadAddress;
 
+		@JsonProperty("address_type")
+		private String addressType;
+
 		@Getter
 		public static class Address {
 			@JsonProperty("address_name")

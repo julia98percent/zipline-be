@@ -189,7 +189,7 @@ public class ExcelServiceImpl implements ExcelService {
 			return AgentProperty.builder()
 				.customer(customer)
 				.user(user)
-				.address(dto.getRoadName())
+				.address(geo.getAddressName())
 				.detailAddress(dto.getDetailAddress())
 				.longitude(Double.valueOf(geo.getLongitude()))
 				.latitude(Double.valueOf(geo.getLatitude()))
@@ -228,10 +228,21 @@ public class ExcelServiceImpl implements ExcelService {
 			throw new ExcelException(ExcelErrorCode.INVALID_INPUT_VALUE, rowNum, "roadName", roadName,
 				"해당하는 동 주소를 찾을 수 없습니다.");
 		}
+
+		String addressName = null;
+		if (first.getAddress() != null) {
+			if (first.getAddressType().equalsIgnoreCase("REGION_ADDR")) {
+				addressName = first.getAddress().getJibunAddressName();
+			}
+			if (first.getAddressType().equalsIgnoreCase("ROAD_ADDR")) {
+				addressName = first.getRoadAddress().getRoadAddressName();
+			}
+		}
 		return new GeoCodeResultVO(
 			first.getAddress() != null ? first.getAddress().getLegalDistrictCode() : null,
 			first.getLongitude(),
-			first.getLatitude()
+			first.getLatitude(),
+			addressName
 		);
 	}
 
