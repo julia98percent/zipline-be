@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.zipline.global.exception.excel.ExcelException;
 import com.zipline.global.exception.excel.errorcode.ExcelErrorCode;
@@ -48,6 +49,9 @@ public class AgentPropertyExcelRowMapper implements ExcelRowMapper<AgentProperty
 	}
 
 	private String convertPropertyTypeFromKorean(int rowNum, String type) {
+		if (!StringUtils.hasText(type)) {
+			throw new ExcelException(ExcelErrorCode.INVALID_INPUT_VALUE, rowNum, "type", "null", "매물 유형은 필수 값 입니다.");
+		}
 		switch (type) {
 			case "매매":
 				return "SALE";
@@ -62,6 +66,10 @@ public class AgentPropertyExcelRowMapper implements ExcelRowMapper<AgentProperty
 	}
 
 	private String convertRealCategoryFromKorean(int rowNum, String realCategory) {
+		if (!StringUtils.hasText(realCategory)) {
+			throw new ExcelException(ExcelErrorCode.INVALID_INPUT_VALUE, rowNum, "Property Category", "null",
+				"매물 카테고리는 필수 값 입니다.");
+		}
 		switch (realCategory) {
 			case "원룸":
 				return "ONE_ROOM";

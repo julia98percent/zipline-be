@@ -190,6 +190,7 @@ public class ExcelServiceImpl implements ExcelService {
 				.customer(customer)
 				.user(user)
 				.address(dto.getRoadName())
+				.detailAddress(dto.getDetailAddress())
 				.longitude(Double.valueOf(geo.getLongitude()))
 				.latitude(Double.valueOf(geo.getLatitude()))
 				.legalDistrictCode(geo.getLegalDistrictCode())
