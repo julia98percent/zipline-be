@@ -40,7 +40,7 @@ public class StaticsServiceImpl implements StaticsService {
 			ContractStatus.INTENT_SIGNED,
 			ContractStatus.CONTRACTED,
 			ContractStatus.IN_PROGRESS);
-		return contractRepository.countByUserUidAndStatusIn(userId, ongoingStatuses);
+		return contractRepository.countByUserUidAndStatusInAndDeletedAtIsNull(userId, ongoingStatuses);
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class StaticsServiceImpl implements StaticsService {
 			ContractStatus.REGISTERED,
 			ContractStatus.MOVED_IN,
 			ContractStatus.TERMINATED);
-		return contractRepository.countByUserUidAndStatusIn(userId, completedStatuses);
+		return contractRepository.countByUserUidAndStatusInAndDeletedAtIsNull(userId, completedStatuses);
 	}
 
 	@Override
