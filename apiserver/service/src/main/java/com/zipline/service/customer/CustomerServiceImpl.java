@@ -1,5 +1,17 @@
 package com.zipline.service.customer;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import com.zipline.entity.agentProperty.AgentProperty;
 import com.zipline.entity.contract.CustomerContract;
 import com.zipline.entity.counsel.Counsel;
@@ -32,18 +44,9 @@ import com.zipline.service.customer.dto.request.CustomerModifyRequestDTO;
 import com.zipline.service.customer.dto.request.CustomerRegisterRequestDTO;
 import com.zipline.service.customer.dto.response.CustomerDetailResponseDTO;
 import com.zipline.service.customer.dto.response.CustomerListResponseDTO;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -62,8 +65,10 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Transactional
 	public void registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUid) {
+		checkDuplicatedCustomer(customerRegisterRequestDTO.getName(), customerRegisterRequestDTO.getPhoneNo(), userUid);
 		User loginedUser = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
 		Customer customer = customerRegisterRequestDTO.toEntity(loginedUser);
 		customerRepository.save(customer);
 
@@ -88,6 +93,8 @@ public class CustomerServiceImpl implements CustomerService {
 	public CustomerDetailResponseDTO modifyCustomer(Long customerUid,
 		CustomerModifyRequestDTO customerModifyRequestDTO, Long userUid) {
 
+		checkDuplicatedCustomer(customerModifyRequestDTO.getName(), customerModifyRequestDTO.getPhoneNo(), userUid);
+		
 		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
 
@@ -123,11 +130,11 @@ public class CustomerServiceImpl implements CustomerService {
 					.toList();
 				labelCustomerRepository.saveAll(toAddLabelMappings);
 			}
-		} else if(requestLabelUids != null) {
-				List<LabelCustomer> existingLabelMappings = labelCustomerRepository.findAllByCustomerUid(
-					savedCustomer.getUid());
-				labelCustomerRepository.deleteAll(existingLabelMappings);
-			}
+		} else if (requestLabelUids != null) {
+			List<LabelCustomer> existingLabelMappings = labelCustomerRepository.findAllByCustomerUid(
+				savedCustomer.getUid());
+			labelCustomerRepository.deleteAll(existingLabelMappings);
+		}
 
 		savedCustomer.modifyCustomer(customerModifyRequestDTO.getName(), customerModifyRequestDTO.getPhoneNo(),
 			customerModifyRequestDTO.getTelProvider(),
@@ -197,11 +204,10 @@ public class CustomerServiceImpl implements CustomerService {
 			customerUid, userUid, pageRequestDTO.toPageable()
 		);
 
-		List<CounselListResponseDTO> data =  savedCounsels.getContent()
-				.stream()
-				.map(CounselListResponseDTO::createWithoutCustomerName)
-				.toList();
-
+		List<CounselListResponseDTO> data = savedCounsels.getContent()
+			.stream()
+			.map(CounselListResponseDTO::createWithoutCustomerName)
+			.toList();
 
 		return new CounselPageResponseDTO(savedCounsels, data);
 
@@ -250,6 +256,12 @@ public class CustomerServiceImpl implements CustomerService {
 	private void validateCustomerExistence(Long customerUid, Long userUid) {
 		if (!customerRepository.existsByUidAndUserUidAndDeletedAtIsNull(customerUid, userUid)) {
 			throw new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND);
+		}
+	}
+
+	private void checkDuplicatedCustomer(String customerName, String phoneNo, Long userUid) {
+		if (customerRepository.existsByNameAndPhoneNoAndUserUid(customerName, phoneNo, userUid)) {
+			throw new CustomerException(CustomerErrorCode.DUPLICATED_CUSTOMER);
 		}
 	}
 }
