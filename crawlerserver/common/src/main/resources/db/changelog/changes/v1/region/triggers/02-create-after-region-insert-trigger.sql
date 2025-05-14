@@ -7,10 +7,10 @@ AFTER INSERT ON regions
 FOR EACH ROW
 BEGIN
     IF NEW.level = 3 THEN
-        INSERT IGNORE INTO migrations (cortar_no, naver_status, zigbang_status)
-        VALUES (NEW.cortar_no, 'NEW', 'NEW');
+        INSERT IGNORE INTO migrations (cortar_no, naver_status)
+        VALUES (NEW.cortar_no, 'NEW');
 
-        INSERT IGNORE INTO crawls (cortar_no, naver_status, zigbang_status)
-        VALUES (NEW.cortar_no, 'NEW', 'NEW');
+        INSERT IGNORE INTO crawls (cortar_no, naver_status)
+        VALUES (NEW.cortar_no, 'NEW');
     END IF;
 END//
