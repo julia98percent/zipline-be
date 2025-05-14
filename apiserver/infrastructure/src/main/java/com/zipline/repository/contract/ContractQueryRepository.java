@@ -55,6 +55,8 @@ public class ContractQueryRepository {
 
 		if (Boolean.TRUE.equals(filter.getProgress())) {
 			builder.and(contract.status.in(ContractStatus.getInProgressStatuses()));
+		} else if (Boolean.FALSE.equals(filter.getProgress())) {
+			builder.and(contract.status.in(ContractStatus.getClosedStatuses()));
 		} else if (filter.getStatus() != null && !filter.getStatus().isBlank()) {
 			try {
 				builder.and(contract.status.eq(ContractStatus.valueOf(filter.getStatus())));
