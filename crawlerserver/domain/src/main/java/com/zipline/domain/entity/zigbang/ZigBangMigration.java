@@ -28,7 +28,7 @@ public class ZigBangMigration {
     @Column(name = "zigbang_last_migrated_at")
     private LocalDateTime lastMigratedAt;
 
-    @Column(name = "error_log", columnDefinition = "TEXT")
+    @Column(name = "error_log", columnDefinition = "LONGTEXT")
     private String errorLog;
 
 }

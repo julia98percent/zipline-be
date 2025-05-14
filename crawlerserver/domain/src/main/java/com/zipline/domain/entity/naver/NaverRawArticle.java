@@ -36,7 +36,7 @@ public class NaverRawArticle {
     private Long cortarNo;
     
     @Lob
-    @Column(name = "raw_data", columnDefinition = "TEXT")
+    @Column(name = "raw_data", columnDefinition = "LONGTEXT")
     private String rawData;
     
     @Column(name = "created_at")

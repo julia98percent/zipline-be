@@ -31,7 +31,7 @@ public class ZigBangArticle {
     private PropertyCategory category;
 
     @Lob
-    @Column(name = "raw_data", columnDefinition = "TEXT")
+    @Column(name = "raw_data", columnDefinition = "LONGTEXT")
     private String rawData;
 
     @Column(name = "created_at", nullable = false)

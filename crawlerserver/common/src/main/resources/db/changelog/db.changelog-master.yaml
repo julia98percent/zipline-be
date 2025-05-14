@@ -1,5 +1,11 @@
 databaseChangeLog:
   - include:
+      file: changes/v1/region/tables/altertable/alter-migration-logerror-to-longtext.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/v1/region/tables/altertable/alter-crawl-logerror-to-longtext.sql
+      relativeToChangelogFile: true
+  - include:
       file: changes/v1/region/tables/01-create-regions-table.sql
       relativeToChangelogFile: true
   - include:

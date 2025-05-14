@@ -33,7 +33,7 @@ public class PropertyArticle {
     @Column(name = "building_name")
     private String buildingName;
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "LONGTEXT")
     private String description;
 
     @Column(name = "building_type")

@@ -6,7 +6,5 @@ CREATE TABLE IF NOT EXISTS crawls (
     cortar_no BIGINT NOT NULL UNIQUE,
     naver_status VARCHAR(20),
     naver_last_crawled_at DATETIME,
-    zigbang_status VARCHAR(20),
-    zigbang_last_crawled_at DATETIME,
-    error_log TEXT
+    error_log LONGTEXT
 );

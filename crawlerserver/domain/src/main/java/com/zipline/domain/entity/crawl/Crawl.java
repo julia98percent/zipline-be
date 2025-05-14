@@ -39,7 +39,7 @@ public class Crawl {
     @Column(name = "naver_last_crawled_at")
     private LocalDateTime naverLastCrawledAt;
 
-    @Column(name = "error_log")
+    @Column(name = "error_log", columnDefinition = "LONGTEXT")
     private String errorLog;
 
     public Crawl(Long id, Long cortarNo, CrawlStatus naverStatus, LocalDateTime naverLastCrawledAt,
