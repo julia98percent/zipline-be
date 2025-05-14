@@ -60,6 +60,12 @@ public class SurveyServiceImpl implements SurveyService {
 	public Map<String, String> createSurvey(SurveyCreateRequestDTO requestDTO, Long userUid) {
 		User user = userRepository.findById(userUid)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+		List<Survey> findSurveys = surveyRepository.findByUserUidAndDeletedAtIsNull(userUid);
+		LocalDateTime now = LocalDateTime.now();
+		findSurveys.forEach(survey -> {
+			survey.delete(now);
+		});
+
 		Survey survey = new Survey(requestDTO.getTitle(), user);
 
 		requestDTO.getQuestions().forEach(questionDTO -> {
