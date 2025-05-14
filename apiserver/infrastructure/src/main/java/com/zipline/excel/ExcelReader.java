@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -28,15 +29,29 @@ public class ExcelReader {
 			DataFormatter formatter = new DataFormatter();
 
 			List<T> list = new ArrayList<>();
-			for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
-				Row row = sheet.getRow(i);
-				if (row != null) {
-					list.add(mapper.map(row, formatter));
+			for (int i = 1; i < sheet.getLastRowNum(); i++) {
+				if (isEmptyRow(sheet.getRow(i), formatter)) {
+					continue;
 				}
+				list.add(mapper.map(sheet.getRow(i), formatter));
 			}
 			return list;
 		} catch (IOException e) {
 			throw new FileUploadException(CommonErrorCode.FILE_UPLOAD_FAILED);
 		}
+	}
+
+	private boolean isEmptyRow(Row row, DataFormatter formatter) {
+		if (row == null) {
+			return true;
+		}
+
+		for (Cell cell : row) {
+			String cellValue = formatter.formatCellValue(cell);
+			if (cellValue != null && !cellValue.trim().isEmpty()) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

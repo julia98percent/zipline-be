@@ -30,6 +30,12 @@ public class KakaoGeocodeResponseDTO {
 			private String jibunAddressName;
 			@JsonProperty("b_code")
 			private String legalDistrictCode;
+
+			@JsonProperty("region_3depth_h_name")
+			private String dongHName;
+
+			@JsonProperty("region_3depth_name")
+			private String dongName;
 		}
 
 		@Getter
