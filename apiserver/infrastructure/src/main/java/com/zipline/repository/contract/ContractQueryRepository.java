@@ -5,6 +5,7 @@ import static com.zipline.entity.contract.QCustomerContract.*;
 import static com.zipline.entity.customer.QCustomer.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -48,7 +49,13 @@ public class ContractQueryRepository {
 			}
 		}
 
-		if (filter.getStatus() != null && !filter.getStatus().isBlank()) {
+		if (Boolean.TRUE.equals(filter.getRecent())) {
+			builder.and(contract.createdAt.goe(LocalDateTime.now().minusDays(30)));
+		}
+
+		if (Boolean.TRUE.equals(filter.getProgress())) {
+			builder.and(contract.status.in(ContractStatus.getInProgressStatuses()));
+		} else if (filter.getStatus() != null && !filter.getStatus().isBlank()) {
 			try {
 				builder.and(contract.status.eq(ContractStatus.valueOf(filter.getStatus())));
 			} catch (IllegalArgumentException e) {
@@ -106,7 +113,7 @@ public class ContractQueryRepository {
 		}
 
 		List<Contract> result = query.fetch();
-		
+
 		return PageableExecutionUtils.getPage(result, pageable, () ->
 			queryFactory
 				.select(contract.count())

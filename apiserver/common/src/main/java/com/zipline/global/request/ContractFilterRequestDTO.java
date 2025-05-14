@@ -14,4 +14,6 @@ public class ContractFilterRequestDTO {
 	private String customerName;
 	private String address;
 	private String sort;
+	private Boolean recent;
+	private Boolean progress;
 }
