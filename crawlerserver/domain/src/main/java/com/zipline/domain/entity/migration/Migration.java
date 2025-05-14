@@ -38,55 +38,35 @@ public class Migration {
     @Column(name = "naver_last_migrated_at")
     private LocalDateTime naverLastMigratedAt;
 
-    @Column(name = "zigbang_status")
-    @Enumerated(EnumType.STRING)
-    private MigrationStatus zigbangStatus;
-
-    @Column(name = "zigbang_last_migrated_at")
-    private LocalDateTime zigbangLastMigratedAt;
-
     @Column(name = "error_log")
     private String errorLog;
 
 
-    public Migration(Long id, Long cortarNo, MigrationStatus naverStatus, LocalDateTime naverLastCrawledAt,
-                     MigrationStatus zigbangStatus, LocalDateTime zigbangLastCrawledAt, String errorLog) {
+    public Migration(Long id, Long cortarNo, MigrationStatus naverStatus, LocalDateTime naverLastCrawledAt, String errorLog) {
         this.id = id;
         this.cortarNo = cortarNo;
         this.naverStatus = naverStatus;
         this.naverLastMigratedAt = naverLastCrawledAt;
-        this.zigbangStatus = zigbangStatus;
-        this.zigbangLastMigratedAt = zigbangLastCrawledAt;
         this.errorLog = errorLog;
     }
 
     public Migration CreateMigration(Long cortarNo) {
         this.cortarNo = cortarNo;
         this.naverStatus = MigrationStatus.PENDING;
-        this.zigbangStatus = MigrationStatus.PENDING;
         this.naverLastMigratedAt = null;
-        this.zigbangLastMigratedAt = null;
         return this;
     }
 
     public Migration UpdateMigration(Long cortarNo) {
         this.cortarNo = cortarNo;
         this.naverStatus = MigrationStatus.PENDING;
-        this.zigbangStatus = MigrationStatus.PENDING;
         this.naverLastMigratedAt = null;
-        this.zigbangLastMigratedAt = null;
         return this;
     }
 
     public Migration updateNaverMigrationStatus(MigrationStatus status) {
         this.naverStatus = status;
         this.naverLastMigratedAt = LocalDateTime.now();
-        return this;
-    }
-
-    public Migration updateZigbangMigrationStatus(MigrationStatus status) {
-        this.zigbangStatus = status;
-        this.zigbangLastMigratedAt = LocalDateTime.now();
         return this;
     }
 
@@ -118,10 +98,6 @@ public class Migration {
         if (platform == Platform.NAVER) {
             this.naverStatus = status;
             this.naverLastMigratedAt = LocalDateTime.now();
-        }
-        if (platform == Platform.ZIGBANG) {
-            this.zigbangStatus = status;
-            this.zigbangLastMigratedAt = LocalDateTime.now();
         }
         this.errorLog = updatedLog;
         return this;
