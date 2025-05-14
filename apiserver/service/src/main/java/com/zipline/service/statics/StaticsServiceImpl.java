@@ -28,8 +28,8 @@ public class StaticsServiceImpl implements StaticsService {
 
 	@Override
 	public int getRecentContractCount(Long userId) {
-		LocalDateTime oneMonthAgo = LocalDateTime.now().minus(RANGE_FOR_RECENT_DATE, ChronoUnit.DAYS);
-		return contractRepository.countByUserUidAndCreatedAtAfter(userId, oneMonthAgo);
+		LocalDateTime oneMonthAgo = LocalDateTime.now().minusDays(RANGE_FOR_RECENT_DATE);
+		return contractRepository.countByUserUidAndCreatedAtAfterAndDeletedAtIsNull(userId, oneMonthAgo);
 	}
 
 	@Override
