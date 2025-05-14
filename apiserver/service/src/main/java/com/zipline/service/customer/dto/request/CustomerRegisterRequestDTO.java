@@ -77,6 +77,7 @@ public class CustomerRegisterRequestDTO {
 	private BigInteger maxDeposit;
 
 	@Schema(description = "생년월일", example = "20220410")
+	@Pattern(regexp = "\\d{8}", message = "생년월일은 yyyyMMdd 형식의 숫자여야 합니다.")
 	private String birthDay;
 
 	public Customer toEntity(User user) {

@@ -73,5 +73,6 @@ public class CustomerModifyRequestDTO {
 	private BigInteger maxDeposit;
 
 	@Schema(description = "생년월일", example = "20021123")
+	@Pattern(regexp = "\\d{8}", message = "생년월일은 yyyyMMdd 형식의 숫자여야 합니다.")
 	private String birthday;
 }
