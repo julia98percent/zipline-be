@@ -20,6 +20,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.zipline.global.config.S3Folder;
 import com.zipline.global.exception.common.FileUploadException;
 import com.zipline.global.exception.common.errorcode.CommonErrorCode;
+import com.zipline.global.request.SurveyFileDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,14 +36,15 @@ public class S3FileUploader {
 	private final AmazonS3 amazonS3;
 	private final FileValidator fileValidator;
 
-	public Map<Long, String> uploadSurveyFiles(Map<Long, MultipartFile> questionUidFileMap, S3Folder s3Folder) {
-		Map<Long, String> fileUrlMap = new HashMap<>();
+	public Map<Long, SurveyFileDTO> uploadSurveyFiles(Map<Long, SurveyFileDTO> questionUidFileMap, S3Folder s3Folder) {
+		Map<Long, SurveyFileDTO> fileUrlMap = new HashMap<>();
 
 		for (Long questionUid : questionUidFileMap.keySet()) {
-			MultipartFile file = questionUidFileMap.get(questionUid);
-			fileValidator.validateSurveyFile(file);
-			String uploadedUrl = uploadFile(file, s3Folder.getFolderPrefix());
-			fileUrlMap.put(questionUid, uploadedUrl);
+			SurveyFileDTO surveyFileDTO = questionUidFileMap.get(questionUid);
+			fileValidator.validateSurveyFile(surveyFileDTO.getFile());
+			String uploadedUrl = uploadFile(surveyFileDTO, s3Folder.getFolderPrefix());
+			fileUrlMap.put(questionUid,
+				SurveyFileDTO.createSurveyFileDTO(surveyFileDTO.getFileName(), surveyFileDTO.getFile(), uploadedUrl));
 		}
 		return fileUrlMap;
 	}
@@ -76,6 +78,22 @@ public class S3FileUploader {
 		return amazonS3.getUrl(bucket, storeFileName).toString();
 	}
 
+	public String uploadFile(SurveyFileDTO surveyFileDTO, String folderPrefix) {
+		MultipartFile file = surveyFileDTO.getFile();
+		String storeFileName = createStoreFileName(surveyFileDTO.getFileName(), folderPrefix);
+
+		ObjectMetadata metadata = createObjectMetadata(file);
+
+		try (InputStream inputStream = file.getInputStream()) {
+			amazonS3.putObject(new PutObjectRequest(bucket, storeFileName, inputStream, metadata));
+		} catch (IOException e) {
+			log.error("File Upload Failed : name = {}, size = {}, error= {}", file.getOriginalFilename(),
+				file.getSize(), e.getMessage());
+			throw new FileUploadException(CommonErrorCode.FILE_UPLOAD_FAILED);
+		}
+		return amazonS3.getUrl(bucket, storeFileName).toString();
+	}
+
 	private ObjectMetadata createObjectMetadata(MultipartFile multipartFile) {
 		ObjectMetadata objectMetadata = new ObjectMetadata();
 		objectMetadata.setContentType(multipartFile.getContentType());
@@ -94,11 +112,5 @@ public class S3FileUploader {
 		int pos = originalFileName.lastIndexOf(".");
 		String ext = originalFileName.substring(pos + 1);
 		return ext;
-	}
-
-	private String extractFileName(String originalFileName) {
-		int pos = originalFileName.lastIndexOf(".");
-		String fileName = originalFileName.substring(0, pos);
-		return fileName;
 	}
 }
