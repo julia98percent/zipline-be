@@ -37,7 +37,7 @@ public class ZigBangCrawl {
     @Column(name = "zigbang_last_crawled_at")
     private LocalDateTime lastCrawledAt;
 
-    @Column(name = "error_log", columnDefinition = "TEXT")
+    @Column(name = "error_log", columnDefinition = "LONGTEXT")
     private String errorLog;
 
     // 생성자

@@ -8,5 +8,5 @@ CREATE TABLE IF NOT EXISTS migrations (
     naver_last_migrated_at DATETIME,
     zigbang_status VARCHAR(20),
     zigbang_last_migrated_at DATETIME,
-    error_log TEXT
+    error_log LONGTEXT
 );

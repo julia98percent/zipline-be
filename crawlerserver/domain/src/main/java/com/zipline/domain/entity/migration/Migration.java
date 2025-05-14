@@ -38,7 +38,7 @@ public class Migration {
     @Column(name = "naver_last_migrated_at")
     private LocalDateTime naverLastMigratedAt;
 
-    @Column(name = "error_log")
+    @Column(name = "error_log", columnDefinition = "LONGTEXT")
     private String errorLog;
 
 
