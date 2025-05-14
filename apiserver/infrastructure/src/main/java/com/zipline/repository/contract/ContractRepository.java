@@ -17,9 +17,9 @@ import com.zipline.entity.enums.ContractStatus;
 public interface ContractRepository extends JpaRepository<Contract, Long> {
 	Optional<Contract> findByUidAndUserUidAndDeletedAtIsNull(Long contractUid, Long userUid);
 
-	int countByUserUidAndCreatedAtAfter(Long userId, LocalDateTime oneMonthAgo);
+	int countByUserUidAndCreatedAtAfterAndDeletedAtIsNull(Long userId, LocalDateTime oneMonthAgo);
 
-	int countByUserUidAndStatusIn(Long userId, List<ContractStatus> statuses);
+	int countByUserUidAndStatusInAndDeletedAtIsNull(Long userId, List<ContractStatus> statuses);
 
 	@Query("SELECT c FROM Contract c WHERE c.user.uid = :userUid AND c.agentProperty.uid = :propertyUid AND c.deletedAt IS NULL AND c.status IN :includedStatuses ORDER BY c.createdAt DESC LIMIT 1")
 	Contract findByUserUidAndAgentPropertyUidAndContractStatusNotCanceledAndDeletedAtIsNull(Long userUid,

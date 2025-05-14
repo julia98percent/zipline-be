@@ -1,5 +1,6 @@
 package com.zipline.entity.enums;
 
+import java.util.Arrays;
 import java.util.List;
 
 import lombok.Getter;
@@ -29,5 +30,11 @@ public enum ContractStatus {
 
 	public static List<ContractStatus> getClosedStatuses() {
 		return List.of(CANCELLED, TERMINATED);
+	}
+
+	public static List<ContractStatus> getInProgressStatuses() {
+		return Arrays.stream(values())
+			.filter(status -> status != LISTED && status != CANCELLED && status != TERMINATED)
+			.toList();
 	}
 }

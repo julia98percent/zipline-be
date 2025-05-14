@@ -28,29 +28,30 @@ public class StaticsServiceImpl implements StaticsService {
 
 	@Override
 	public int getRecentContractCount(Long userId) {
-		LocalDateTime oneMonthAgo = LocalDateTime.now().minus(RANGE_FOR_RECENT_DATE, ChronoUnit.DAYS);
-		return contractRepository.countByUserUidAndCreatedAtAfter(userId, oneMonthAgo);
+		LocalDateTime oneMonthAgo = LocalDateTime.now().minusDays(RANGE_FOR_RECENT_DATE);
+		return contractRepository.countByUserUidAndCreatedAtAfterAndDeletedAtIsNull(userId, oneMonthAgo);
 	}
 
 	@Override
 	public int getOngoingContractCount(Long userId) {
 		List<ContractStatus> ongoingStatuses = Arrays.asList(
-			ContractStatus.LISTED,
-			ContractStatus.NEGOTIATING,
-			ContractStatus.INTENT_SIGNED,
-			ContractStatus.CONTRACTED,
-			ContractStatus.IN_PROGRESS);
-		return contractRepository.countByUserUidAndStatusIn(userId, ongoingStatuses);
+				ContractStatus.NEGOTIATING,
+				ContractStatus.INTENT_SIGNED,
+				ContractStatus.CONTRACTED,
+				ContractStatus.IN_PROGRESS,
+				ContractStatus.PAID_COMPLETE,
+				ContractStatus.REGISTERED,
+				ContractStatus.MOVED_IN);
+
+		return contractRepository.countByUserUidAndStatusInAndDeletedAtIsNull(userId, ongoingStatuses);
 	}
 
 	@Override
 	public int getCompletedContractCount(Long userId) {
 		List<ContractStatus> completedStatuses = Arrays.asList(
-			ContractStatus.PAID_COMPLETE,
-			ContractStatus.REGISTERED,
-			ContractStatus.MOVED_IN,
+			ContractStatus.CANCELLED,
 			ContractStatus.TERMINATED);
-		return contractRepository.countByUserUidAndStatusIn(userId, completedStatuses);
+		return contractRepository.countByUserUidAndStatusInAndDeletedAtIsNull(userId, completedStatuses);
 	}
 
 	@Override
