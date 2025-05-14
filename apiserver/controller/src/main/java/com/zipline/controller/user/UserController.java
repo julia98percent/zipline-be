@@ -60,9 +60,10 @@ public class UserController {
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<TokenResponseDTO>> login(
 		@RequestBody @Valid LoginRequestDTO loginRequestDTO,
+		@RequestHeader("X-Device-Id") String deviceId,
 		HttpServletResponse response) {
 
-		TokenRequestDTO tokenRequestDto = userService.login(loginRequestDTO); // 로그인 & 토큰 발급
+		TokenRequestDTO tokenRequestDto = userService.login(loginRequestDTO, deviceId); // 로그인 & 토큰 발급
 
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenRequestDto.getRefreshToken())
 			.httpOnly(true)
@@ -88,11 +89,12 @@ public class UserController {
 	public ResponseEntity<ApiResponse<Void>> logout(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestHeader("Authorization") String authorizationHeader,
+		@RequestHeader("X-Device-Id") String deviceId,
 		HttpServletResponse response
 	) {
 		Long uid = Long.parseLong(userDetails.getUsername());
 		String accessToken = authorizationHeader.replace("Bearer ", "");
-		userService.logout(uid, accessToken);
+		userService.logout(uid, accessToken, deviceId);
 
 		ResponseCookie expiredCookie = ResponseCookie.from("refreshToken", "")
 			.httpOnly(true)
@@ -141,8 +143,9 @@ public class UserController {
 	}
 
 	@GetMapping("/reissue")
-	public ResponseEntity<ApiResponse<TokenResponseDTO>> reissue(@CookieValue("refreshToken") String refreshToken) {
-		TokenRequestDTO tokenRequestDto = userService.reissue(refreshToken);
+	public ResponseEntity<ApiResponse<TokenResponseDTO>> reissue(@CookieValue("refreshToken") String refreshToken,
+		@RequestHeader("X-Device-Id") String deviceId) {
+		TokenRequestDTO tokenRequestDto = userService.reissue(refreshToken, deviceId);
 
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenRequestDto.getRefreshToken())
 			.httpOnly(true)

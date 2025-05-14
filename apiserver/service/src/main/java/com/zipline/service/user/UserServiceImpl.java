@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Transactional
-	public TokenRequestDTO login(LoginRequestDTO loginRequestDTO) {
+	public TokenRequestDTO login(LoginRequestDTO loginRequestDTO, String deviceId) {
 		User user = userRepository.findByLoginId(loginRequestDTO.getId())
 			.orElseThrow(() -> new UserException(UserErrorCode.INVALID_CREDENTIALS));
 
@@ -120,7 +120,7 @@ public class UserServiceImpl implements UserService {
 		TokenRequestDTO tokenRequestDto = tokenProvider.generateTokenDto(authentication, user.getUid());
 
 		redisTemplate.opsForValue().set(
-			"refreshToken:" + user.getUid(),
+			"refreshToken:" + user.getUid() + ":" + deviceId,
 			tokenRequestDto.getRefreshToken(),
 			Duration.ofDays(7)
 		);
@@ -128,12 +128,12 @@ public class UserServiceImpl implements UserService {
 		return tokenRequestDto;
 	}
 
-	public void logout(Long uid, String accessToken) {
+	public void logout(Long uid, String accessToken, String deviceId) {
 		if (!tokenProvider.validateToken(accessToken)) {
 			throw new AuthException(AuthErrorCode.UNAUTHORIZED_CLIENT);
 		}
 
-		String refreshKey = "refreshToken:" + uid;
+		String refreshKey = "refreshToken:" + uid + ":" + deviceId;
 		redisTemplate.delete(refreshKey);
 
 		Date expiration = tokenProvider.getExpiration(accessToken);
@@ -168,14 +168,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Transactional
-	public TokenRequestDTO reissue(String refreshToken) {
+	public TokenRequestDTO reissue(String refreshToken, String deviceId) {
 		if (!tokenProvider.validateToken(refreshToken)) {
 			throw new JwtException(AuthErrorCode.JWT_DECODE_FAIL.getMessage());
 		}
 
 		String uidStr = tokenProvider.getUserIdFromToken(refreshToken);
 		Long uid = Long.parseLong(uidStr);
-		String redisKey = "refreshToken:" + uidStr;
+		String redisKey = "refreshToken:" + uidStr + ":" + deviceId;
 		String saveRefreshToken = redisTemplate.opsForValue().get(redisKey);
 
 		if (saveRefreshToken == null || !saveRefreshToken.equals(refreshToken)) {
