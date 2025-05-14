@@ -28,6 +28,7 @@ import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.request.PageRequestDTO;
+import com.zipline.global.request.SurveyFileDTO;
 import com.zipline.global.util.S3FileUploader;
 import com.zipline.repository.survey.QuestionRepository;
 import com.zipline.repository.survey.SurveyAnswerRepository;
@@ -188,14 +189,16 @@ public class SurveyServiceImpl implements SurveyService {
 			return Collections.emptyList();
 		}
 
-		Map<Long, MultipartFile> questionUidFileMap = fileQuestionMapper.mapFilesToQuestions(files, questions);
-		Map<Long, String> questionUidUploadedUrlMap = s3FileUploader.uploadSurveyFiles(questionUidFileMap,
+		Map<Long, SurveyFileDTO> questionUidSurveyFileVOMap = fileQuestionMapper.mapFilesToQuestions(files, questions);
+		Map<Long, SurveyFileDTO> questionUidUploadedUrlMap = s3FileUploader.uploadSurveyFiles(
+			questionUidSurveyFileVOMap,
 			S3Folder.SURVEYS);
 
 		List<SurveyAnswer> fileAnswers = questionUidUploadedUrlMap.entrySet()
 			.stream()
-			.map(entry -> surveyAnswerFactory.createFileAnswer(entry.getKey(), entry.getValue(), questions,
-				surveyResponse))
+			.map(entry -> surveyAnswerFactory.createFileAnswer(entry.getKey(), entry.getValue().getUploadedUrl(),
+				questions,
+				surveyResponse, entry.getValue().getFileName()))
 			.collect(Collectors.toList());
 		return fileAnswers;
 	}
