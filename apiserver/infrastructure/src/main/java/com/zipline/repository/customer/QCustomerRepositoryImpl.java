@@ -109,7 +109,7 @@ public class QCustomerRepositoryImpl implements QCustomerRepository {
 		if (!StringUtils.hasText(regionCode)) {
 			return null;
 		}
-		return customer.legalDistrictCode.eq(regionCode);
+		return customer.legalDistrictCode.startsWith(regionCode);
 	}
 
 	private BooleanExpression customerType(Boolean isTenant, Boolean isLandlord,
