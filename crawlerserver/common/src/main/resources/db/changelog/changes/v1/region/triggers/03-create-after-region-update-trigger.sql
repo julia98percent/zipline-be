@@ -1,5 +1,6 @@
 --liquibase formatted sql
 --changeset jungwoo_shin:create-after-region-update-trigger runOnChange="true" endDelimiter:// dbms:mariadb
+DROP TRIGGER IF EXISTS after_region_update//
 
 CREATE TRIGGER after_region_update
 AFTER UPDATE ON regions
