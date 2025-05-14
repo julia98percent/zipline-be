@@ -48,7 +48,7 @@ public class QCustomerRepositoryImpl implements QCustomerRepository {
 				rentRange(customerFilterRequestDTO.getMinRent(), customerFilterRequestDTO.getMaxRent()),
 				label(customerFilterRequestDTO.getLabelUids())
 			)
-			.orderBy(customer.name.desc())
+			.orderBy(customer.uid.desc())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
 			.fetch();

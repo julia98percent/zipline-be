@@ -21,4 +21,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, QCust
 		"AND SUBSTRING(c.birthday, 5) = :mmdd " +
 		"AND c.deletedAt IS NULL")
 	List<Customer> findCustomersWithBirthdayToday(Long userUid, String mmdd);
+
+	boolean existsByNameAndPhoneNoAndUserUid(String name, String phoneNo, Long userUid);
 }
