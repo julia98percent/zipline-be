@@ -49,6 +49,8 @@ public class SurveyResponseDetailDTO {
 		private String questionType;
 		@Schema(description = "응답 내용 (텍스트/선택지 ID)", example = "주관식: 주관식 답변, 파일업로드: 이미지 URL, 객관식(단일): choiceUid, 객관식(다중): choiceUid1,choiceUid2")
 		private String answer;
+		@Schema(description = "파일명", example = "file.jpg")
+		private String fileName;
 		@Schema(description = "선택지 리스트")
 		private List<AnswerChoiceResponseDTO> choices;
 
@@ -59,6 +61,7 @@ public class SurveyResponseDetailDTO {
 			this.isRequired = surveyAnswer.getQuestion().isRequired();
 			this.questionType = surveyAnswer.getQuestion().getQuestionType().name();
 			this.answer = surveyAnswer.getAnswer();
+			this.fileName = surveyAnswer.getFileName();
 			this.choices = surveyAnswer.getQuestion().getChoices().stream().map(AnswerChoiceResponseDTO::new).collect(
 				Collectors.toList());
 		}
