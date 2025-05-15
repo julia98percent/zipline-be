@@ -33,7 +33,7 @@ public class ScheduleCreateRequestDTO {
   @NotNull(message = "제목은 필수 입력값입니다.")
   private String title;
 
-  @Size(min = 0, max = 200, message = "일정 설명은 2자 이상 200자 이하로 입력해주세요.")
+  @Size(min = 0, max = 200, message = "일정 설명은 200자 이하로 입력해주세요.")
   private String description;
 
   private Long customerUid;
