@@ -70,10 +70,9 @@ public class MessageServiceImpl implements MessageService {
     if (key == null || !key.matches("\\d{10}")) {
       return key;
     }
-    if (regionRepository.findCortarNameByCortarNo(key) == null) {
-      return key;
-    }
-    return regionRepository.findCortarNameByCortarNo(key);
+    String cortarName = regionRepository.findCortarNameByCortarNo(key);
+
+    return cortarName != null ? cortarName : key;
   }
 
   @Transactional
