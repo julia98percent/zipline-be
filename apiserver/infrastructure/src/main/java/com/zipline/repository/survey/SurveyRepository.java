@@ -1,5 +1,6 @@
 package com.zipline.repository.survey;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,6 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
 	Optional<Survey> findByUlidAndDeleteAtIsNull(String surveyUlid);
 
 	Optional<Survey> findFirstByUserOrderByCreatedAtDesc(User user);
+
+	List<Survey> findByUserUidAndDeletedAtIsNull(Long userUid);
 }

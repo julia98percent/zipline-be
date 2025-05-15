@@ -10,24 +10,30 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.zipline.entity.enums.QuestionType;
 import com.zipline.entity.survey.Question;
-import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
 import com.zipline.global.exception.survey.SurveyException;
+import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
+import com.zipline.global.request.SurveyFileDTO;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class FileQuestionMapper {
 
 	@Value("${survey.questionUid-delimiter}")
 	private String questionUidDelimiter;
 
-	public Map<Long, MultipartFile> mapFilesToQuestions(List<MultipartFile> files, List<Question> questions) {
-		Map<Long, MultipartFile> questionFileMap = new HashMap<>();
+	public Map<Long, SurveyFileDTO> mapFilesToQuestions(List<MultipartFile> files, List<Question> questions) {
+		Map<Long, SurveyFileDTO> questionFileMap = new HashMap<>();
 
 		for (MultipartFile file : files) {
 			String originalFilename = file.getOriginalFilename();
 			Long extractedQuestionUid = extractQuestionUid(originalFilename, questionUidDelimiter);
+			String extractFileName = extractFileName(originalFilename, questionUidDelimiter);
 
 			validateFileUploadQuestionExists(questions, extractedQuestionUid);
-			questionFileMap.put(extractedQuestionUid, file);
+			questionFileMap.put(extractedQuestionUid,
+				SurveyFileDTO.createSurveyFileDTOWithoutUploadedUrl(extractFileName, file));
 		}
 		return questionFileMap;
 	}
@@ -43,5 +49,10 @@ public class FileQuestionMapper {
 		int pos = originalFileName.indexOf(questionUidDelimiter);
 		Long questionUid = Long.parseLong(originalFileName.substring(0, pos));
 		return questionUid;
+	}
+
+	private String extractFileName(String originalFilename, String questionUidDelimiter) {
+		int pos = originalFilename.indexOf(questionUidDelimiter);
+		return originalFilename.substring(pos + questionUidDelimiter.length());
 	}
 }

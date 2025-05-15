@@ -10,8 +10,8 @@ import com.zipline.entity.survey.Choice;
 import com.zipline.entity.survey.Question;
 import com.zipline.entity.survey.SurveyAnswer;
 import com.zipline.entity.survey.SurveyResponse;
-import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
 import com.zipline.global.exception.survey.SurveyException;
+import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
 import com.zipline.service.survey.dto.request.SurveySubmitRequestDTO;
 
 @Component
@@ -36,9 +36,9 @@ public class SurveyAnswerFactory {
 	}
 
 	public SurveyAnswer createFileAnswer(Long questionUid, String fileUrl, List<Question> questions,
-		SurveyResponse response) {
+		SurveyResponse response, String originalFileName) {
 		Question question = findQuestionByUid(questions, questionUid);
-		return new SurveyAnswer(response, question, fileUrl, null);
+		return new SurveyAnswer(response, question, fileUrl, originalFileName);
 	}
 
 	private Question findQuestionByUid(List<Question> questions, Long uid) {
