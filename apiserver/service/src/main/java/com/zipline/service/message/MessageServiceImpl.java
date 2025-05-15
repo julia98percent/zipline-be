@@ -8,6 +8,7 @@ import com.zipline.global.exception.message.errorcode.MessageErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.repository.message.MessageHistoryRepository;
+import com.zipline.repository.region.RegionRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.message.dto.request.MessageHistoryRequestDTO;
 import com.zipline.service.message.dto.request.SendMessageRequestDTO;
@@ -15,6 +16,8 @@ import com.zipline.service.message.dto.response.MessageHistoryResponseDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,7 @@ public class MessageServiceImpl implements MessageService {
   private final MessageHistoryParamFormatter messageHistoryParamFormatter;
   private final MessageHistoryRepository messageHistoryRepository;
   private final UserRepository userRepository;
+  private final RegionRepository regionRepository;
 
 
   public void saveMessageHistory(String messageGroupId, Long userUID) {
@@ -45,11 +49,44 @@ public class MessageServiceImpl implements MessageService {
     messageHistoryRepository.save(messageHistory);
   }
 
+  private String replaceTemplateValues(String text) {
+    if (text == null) return null;
+
+    Pattern pattern = Pattern.compile("\\$\\$###\\{([^}]+)}");
+    Matcher matcher = pattern.matcher(text);
+
+    StringBuilder result = new StringBuilder();
+    while (matcher.find()) {
+      String key = matcher.group(1);
+      String replacement = getReplacementValue(key);
+      matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
+    }
+    matcher.appendTail(result);
+
+    return result.toString();
+  }
+
+  private String getReplacementValue(String key) {
+    if (key == null || !key.matches("\\d{10}")) {
+      return key;
+    }
+    String cortarName = regionRepository.findCortarNameByCortarNo(key);
+
+    return cortarName != null ? cortarName : key;
+  }
+
   @Transactional
   public String sendMessage(List<SendMessageRequestDTO> request, Long userUID) {
 
     try {
-      Map<String, Object> wrappedRequest = Map.of("messages", request);
+      List<SendMessageRequestDTO> processedRequest = request.stream()
+          .map(msg -> {
+            String processedText = replaceTemplateValues(msg.getText());
+            return msg.withText(processedText);
+          })
+          .toList();
+
+      Map<String, Object> wrappedRequest = Map.of("messages", processedRequest);
 
       String response = webClient.post()
           .uri("/send-many/detail")
