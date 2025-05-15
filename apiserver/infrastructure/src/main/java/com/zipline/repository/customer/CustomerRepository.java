@@ -22,5 +22,5 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, QCust
 		"AND c.deletedAt IS NULL")
 	List<Customer> findCustomersWithBirthdayToday(Long userUid, String mmdd);
 
-	boolean existsByNameAndPhoneNoAndUserUid(String name, String phoneNo, Long userUid);
+	boolean existsByNameAndPhoneNoAndUserUidAndDeletedAtIsNull(String name, String phoneNo, Long userUid);
 }

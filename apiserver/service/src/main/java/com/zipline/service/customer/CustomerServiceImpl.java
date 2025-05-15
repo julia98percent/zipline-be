@@ -263,7 +263,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	private void checkDuplicatedCustomer(String customerName, String phoneNo, Long userUid) {
-		if (customerRepository.existsByNameAndPhoneNoAndUserUid(customerName, phoneNo, userUid)) {
+		if (customerRepository.existsByNameAndPhoneNoAndUserUidAndDeletedAtIsNull(customerName, phoneNo, userUid)) {
 			throw new CustomerException(CustomerErrorCode.DUPLICATED_CUSTOMER);
 		}
 	}
