@@ -71,8 +71,14 @@ public class MessageTemplateServiceImpl implements MessageTemplateService {
 						throw new MessageTemplateException(MessageTemplateErrorCode.DUPLICATE_TEMPLATE_NAME);
 					});
 		}
+		if (messageTemplate.getCategory().equals(MessageTemplateCategory.BIRTHDAY) || messageTemplate.getCategory().equals(MessageTemplateCategory.EXPIRED_NOTI)) {
+			messageTemplateRepository.findByCategoryAndUserUidAndDeletedAtIsNull(request.getCategory(), userUid)
+					.ifPresent(template -> {
+						throw new MessageTemplateException(MessageTemplateErrorCode.DUPLICATE_TEMPLATE_CATEGORY);
+					});
+		}
 
-		messageTemplate.updateInfo(request.getName(), request.getContent());
+		messageTemplate.updateInfo(request.getName(), request.getCategory(), request.getContent());
 
 		return new MessageTemplateResponseDTO(messageTemplate);
 	}

@@ -32,7 +32,7 @@ public class MessageTemplate extends BaseTimeEntity {
   private User user;
 
   @Builder
-  public MessageTemplate(String name , MessageTemplateCategory category , String content,
+  public MessageTemplate(String name , MessageTemplateCategory category, String content,
     User user) {
     this.name = name;
     this.category = category;
@@ -40,8 +40,9 @@ public class MessageTemplate extends BaseTimeEntity {
     this.user = user;
   }
 
-  public void updateInfo(String name, String content) {
+  public void updateInfo(String name, MessageTemplateCategory category, String content) {
     this.name = name;
+    this.category = category;
     this.content = content;
   }
 }
