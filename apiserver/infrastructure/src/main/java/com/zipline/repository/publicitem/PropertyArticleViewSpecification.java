@@ -25,6 +25,13 @@ public class PropertyArticleViewSpecification {
 			buildingName == null ? null : criteriaBuilder.like(root.get("buildingName"), "%" + buildingName + "%");
 	}
 
+	public static Specification<PropertyArticle> addressContains(String keyword) {
+		return (root, query, criteriaBuilder) ->
+			keyword == null || keyword.trim().isEmpty()
+				? null
+				: criteriaBuilder.like(root.get("address"), "%" + keyword.trim() + "%");
+	}
+
 	/**
 	 * 카테고리로 검색하는 명세
 	 */
