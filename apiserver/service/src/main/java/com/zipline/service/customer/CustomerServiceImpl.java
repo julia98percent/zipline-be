@@ -93,10 +93,13 @@ public class CustomerServiceImpl implements CustomerService {
 	public CustomerDetailResponseDTO modifyCustomer(Long customerUid,
 		CustomerModifyRequestDTO customerModifyRequestDTO, Long userUid) {
 
-		checkDuplicatedCustomer(customerModifyRequestDTO.getName(), customerModifyRequestDTO.getPhoneNo(), userUid);
-		
-		Customer savedCustomer = customerRepository.findByUidAndDeletedAtIsNull(customerUid)
+		Customer savedCustomer = customerRepository.findByUidAndUserUidAndDeletedAtIsNull(customerUid, userUid)
 			.orElseThrow(() -> new CustomerException(CustomerErrorCode.CUSTOMER_NOT_FOUND));
+
+		if (!savedCustomer.getName().equals(customerModifyRequestDTO.getName()) || !savedCustomer.getPhoneNo()
+			.equals(customerModifyRequestDTO.getPhoneNo())) {
+			checkDuplicatedCustomer(customerModifyRequestDTO.getName(), customerModifyRequestDTO.getPhoneNo(), userUid);
+		}
 
 		List<Long> requestLabelUids = customerModifyRequestDTO.getLabelUids();
 
