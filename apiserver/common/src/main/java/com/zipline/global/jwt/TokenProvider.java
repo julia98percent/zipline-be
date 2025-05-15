@@ -57,11 +57,9 @@ public class TokenProvider {
 			.map(GrantedAuthority::getAuthority)
 			.collect(Collectors.joining(","));
 
-		long now = (new Date().getTime());
-		Claims claims = Jwts.claims().setSubject(uid.toString());
+		long now = new Date().getTime();
 
 		Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
-		Date refreshTokenExpiresIn = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
 		String accessToken = Jwts.builder()
 			.setSubject(uid.toString())
 			.claim(AUTHORITIES_KEY, authorities)
@@ -69,8 +67,9 @@ public class TokenProvider {
 			.signWith(key, SignatureAlgorithm.HS512)
 			.compact();
 
+		Date refreshTokenExpiresIn = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
 		String refreshToken = Jwts.builder()
-			.setClaims(claims)
+			.setSubject(uid.toString())
 			.setExpiration(refreshTokenExpiresIn)
 			.signWith(key, SignatureAlgorithm.HS512)
 			.compact();

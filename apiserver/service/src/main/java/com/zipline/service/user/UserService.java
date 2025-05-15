@@ -16,13 +16,13 @@ public interface UserService {
 
 	void signup(SignUpRequestDTO signUpRequestDto);
 
-	TokenRequestDTO login(LoginRequestDTO loginRequestDTO);
+	TokenRequestDTO login(LoginRequestDTO loginRequestDTO, String deviceId);
 
-	void logout(Long uid, String accessToken);
+	void logout(Long uid, String accessToken, String deviceId);
 
 	UserResponseDTO updateInfo(Long uid, UserModifyRequestDTO userModifyRequestDto);
 
-	TokenRequestDTO reissue(String refreshToken);
+	TokenRequestDTO reissue(String refreshToken, String deviceId);
 
 	FindUserIdResponseDTO findUserId(FindUserIdRequestDTO findUserIdRequestDto);
 
