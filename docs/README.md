@@ -149,7 +149,8 @@
 <br />
 
 ## 🛠️ 프로젝트 아키텍처
-![image](https://github.com/user-attachments/assets/cc2240d6-06eb-451f-baf7-1e715e5397c4)
+![drawio](https://github.com/user-attachments/assets/5c2a2162-c1f4-4cf5-b622-05182c474a5e)
+
 
 ## 🛠️ CI / CD 파이프라인
 
