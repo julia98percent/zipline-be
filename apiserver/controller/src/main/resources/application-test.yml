@@ -71,4 +71,5 @@ kakao:
     key: ${KAKAO_API_KEY}
 springdoc:
   swagger-ui:
-    supportedSubmitMethods: []
+    try-it-out-enabled: false
+    supported-submit-methods: []
