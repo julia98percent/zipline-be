@@ -1,4 +1,4 @@
-package com.zipline.service.message.dto.response;
+package com.zipline.global.response;
 
 import java.util.Collections;
 import java.util.Map;

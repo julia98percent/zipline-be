@@ -1,10 +1,10 @@
 package com.zipline.controller.message;
 
+import com.zipline.global.request.SendMessageRequestDTO;
 import com.zipline.global.response.ApiResponse;
+import com.zipline.global.response.MessageHistoryResponseDTO;
 import com.zipline.service.message.MessageService;
 import com.zipline.service.message.dto.request.MessageHistoryRequestDTO;
-import com.zipline.service.message.dto.request.SendMessageRequestDTO;
-import com.zipline.service.message.dto.response.MessageHistoryResponseDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import java.util.List;

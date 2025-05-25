@@ -1,4 +1,4 @@
-package com.zipline.service.message.dto.request;
+package com.zipline.global.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
