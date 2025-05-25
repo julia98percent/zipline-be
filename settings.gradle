@@ -6,10 +6,3 @@ include 'apiserver:domain'
 include 'apiserver:service'
 include 'apiserver:controller'
 include 'apiserver:infrastructure'
-
-// Crawler Server modules
-include 'crawlerserver:common'
-include 'crawlerserver:domain'
-include 'crawlerserver:service'
-include 'crawlerserver:controller'
-include 'crawlerserver:infrastructure'
