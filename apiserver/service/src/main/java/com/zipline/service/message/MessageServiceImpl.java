@@ -9,6 +9,7 @@ import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.request.SendMessageRequestDTO;
 import com.zipline.global.response.MessageHistoryResponseDTO;
+import com.zipline.message.MessageClient;
 import com.zipline.repository.message.MessageHistoryRepository;
 import com.zipline.repository.region.RegionRepository;
 import com.zipline.repository.user.UserRepository;
@@ -22,14 +23,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class MessageServiceImpl implements MessageService {
 
-  private final WebClient webClient;
+  private final MessageClient messageClient;
   private final MessageHistoryParamFormatter messageHistoryParamFormatter;
   private final MessageHistoryRepository messageHistoryRepository;
   private final UserRepository userRepository;
@@ -86,14 +86,7 @@ public class MessageServiceImpl implements MessageService {
           })
           .toList();
 
-      Map<String, Object> wrappedRequest = Map.of("messages", processedRequest);
-
-      String response = webClient.post()
-          .uri("/send-many/detail")
-          .bodyValue(wrappedRequest)
-          .retrieve()
-          .bodyToMono(String.class)
-          .block();
+      String response = messageClient.sendMessages(processedRequest);
 
       ObjectMapper objectMapper = new ObjectMapper();
       String groupId = objectMapper.readTree(response).path("groupInfo").path("_id").asText();
@@ -102,7 +95,6 @@ public class MessageServiceImpl implements MessageService {
       log.info("메시지 전송 성공: {} 개의 메시지", request.size());
 
       return response;
-
     } catch (Exception e) {
       log.info(e.getMessage());
       throw new MessageException(MessageErrorCode.MESSAGE_SEND_FAILED);
@@ -119,23 +111,7 @@ public class MessageServiceImpl implements MessageService {
 
       Map<String, String> queryParams = messageHistoryParamFormatter.formatQueryParams(requestDTO, userGroupIds);
 
-      return webClient.get()
-          .uri(uriBuilder -> {
-            uriBuilder.path("/groups/");
-            queryParams.forEach(uriBuilder::queryParam);
-            return uriBuilder.build();
-          })
-          .retrieve()
-          .onStatus(
-              status -> status.is4xxClientError() || status.is5xxServerError(),
-              clientResponse -> clientResponse.bodyToMono(String.class)
-                  .handle((errorBody, sink) -> {
-                    log.error("Error response from external API: {}", errorBody);
-                    sink.error(new MessageException(MessageErrorCode.MESSAGE_HISTORY_EXTERNAL_FAILED));
-                  })
-          )
-          .bodyToMono(MessageHistoryResponseDTO.class)
-          .block();
+      return messageClient.getMessageHistory(queryParams);
     } catch (Exception e) {
       log.error("Error response from internal API: {}", e.getMessage());
       throw new MessageException(MessageErrorCode.MESSAGE_HISTORY_INTERNAL_FAILED);
