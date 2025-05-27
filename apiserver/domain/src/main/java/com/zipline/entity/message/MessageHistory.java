@@ -10,12 +10,15 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "message_histories")
 @Entity
+@Getter
 public class MessageHistory extends BaseTimeEntity {
+
   @Id
   private String groupUid;
 
