@@ -1,6 +1,5 @@
 package com.zipline.controller.notification;
 
-import com.zipline.global.jwt.TokenProvider;
 import com.zipline.service.notification.EmitterService;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class NotificationController {
 
   private final EmitterService notificationService;
-  private final TokenProvider tokenProvider;
 
   @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public SseEmitter subscribe(
