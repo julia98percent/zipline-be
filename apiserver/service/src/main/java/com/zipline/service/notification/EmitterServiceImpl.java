@@ -1,6 +1,7 @@
 package com.zipline.service.notification;
 
-import com.zipline.repository.notification.NotificationRepository;
+import com.zipline.repository.notification.EmitterRepository;
+import com.zipline.service.notification.dto.response.NotificationResponseDTO;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,17 +11,18 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class NotificationServiceImpl implements NotificationService {
+public class EmitterServiceImpl implements EmitterService {
+
   private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
 
-  private final NotificationRepository notificationRepository;
+  private final EmitterRepository emitterRepository;
 
   public SseEmitter subscribe(String userId) {
     SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
-    notificationRepository.save(userId, emitter);
+    emitterRepository.save(userId, emitter);
 
-    emitter.onCompletion(() -> notificationRepository.deleteById(userId));
-    emitter.onTimeout(() -> notificationRepository.deleteById(userId));
+    emitter.onCompletion(() -> emitterRepository.deleteById(userId));
+    emitter.onTimeout(() -> emitterRepository.deleteById(userId));
 
     try {
       emitter.send(SseEmitter.event()
@@ -33,15 +35,15 @@ public class NotificationServiceImpl implements NotificationService {
     return emitter;
   }
 
-  public void notify(String message) {
-    notificationRepository.findAll().forEach((key, emitter) -> {
+  public void notify(NotificationResponseDTO message) {
+    emitterRepository.findAll().forEach((key, emitter) -> {
       try {
         emitter.send(SseEmitter.event()
             .name("notification")
             .data(message));
 
       } catch (IOException e) {
-        notificationRepository.deleteById(key);
+        emitterRepository.deleteById(key);
       }
     });
   }
