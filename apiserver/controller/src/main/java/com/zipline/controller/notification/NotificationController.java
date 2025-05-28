@@ -13,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -40,5 +42,14 @@ public class NotificationController {
         pageRequestDTO,
         Long.parseLong(principal.getName()));
     return ResponseEntity.ok(ApiResponse.ok("알림 조회 완료", notificationList));
+  }
+
+  @PutMapping("/{notificationUid}/read")
+  public ResponseEntity<ApiResponse<NotificationResponseDTO>> getNotifications(
+      @PathVariable Long notificationUid, Principal principal) {
+    NotificationResponseDTO notification = notificationService.modifyNotificationToRead(
+        notificationUid,
+        Long.parseLong(principal.getName()));
+    return ResponseEntity.ok(ApiResponse.ok("알림 읽음 처리 완료", notification));
   }
 }
