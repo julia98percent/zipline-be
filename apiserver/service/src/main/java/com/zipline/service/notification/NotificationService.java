@@ -9,5 +9,6 @@ public interface NotificationService {
   List<NotificationResponseDTO> getNotificationList(PageRequestDTO pageRequestDTO,
       Long userUid);
 
-  // isRead
+  NotificationResponseDTO modifyNotificationToRead(Long notificationUid,
+      Long userUid);
 }

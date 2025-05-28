@@ -59,4 +59,8 @@ public class Notification extends BaseTimeEntity {
     this.messageHistory = messageHistory;
     this.surveyResponse = surveyResponse;
   }
+
+  public void markAsRead() {
+    this.read = true;
+  }
 }

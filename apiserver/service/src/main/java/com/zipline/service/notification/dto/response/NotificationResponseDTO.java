@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Builder
 public class NotificationResponseDTO {
 
+  private Long uid;
   private NotificationCategory category;
   private String content;
   private boolean read;
@@ -29,6 +30,7 @@ public class NotificationResponseDTO {
     });
 
     return NotificationResponseDTO.builder()
+        .uid(notification.getUid())
         .category(notification.getCategory())
         .read(notification.isRead())
         .createdAt(notification.getCreatedAt())
