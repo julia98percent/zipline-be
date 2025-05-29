@@ -1,5 +1,7 @@
 package com.zipline.service.message;
 
+import static com.zipline.service.message.MessageHistoryMapper.mapToDTO;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.entity.message.MessageHistory;
 import com.zipline.entity.user.User;
@@ -50,7 +52,9 @@ public class MessageServiceImpl implements MessageService {
   }
 
   private String replaceTemplateValues(String text) {
-    if (text == null) return null;
+    if (text == null) {
+      return null;
+    }
 
     Pattern pattern = Pattern.compile("\\$\\$###\\{([^}]+)}");
     Matcher matcher = pattern.matcher(text);
@@ -101,7 +105,8 @@ public class MessageServiceImpl implements MessageService {
     }
   }
 
-  public MessageHistoryResponseDTO getMessageHistory(MessageHistoryRequestDTO requestDTO, Long userUID) {
+  public MessageHistoryResponseDTO getMessageHistory(MessageHistoryRequestDTO requestDTO,
+      Long userUID) {
     try {
       List<String> userGroupIds = messageHistoryRepository.findGroupUidsByUserId(userUID);
 
@@ -109,9 +114,11 @@ public class MessageServiceImpl implements MessageService {
         return MessageHistoryResponseDTO.emptyResponse();
       }
 
-      Map<String, String> queryParams = messageHistoryParamFormatter.formatQueryParams(requestDTO, userGroupIds);
+      Map<String, String> queryParams = messageHistoryParamFormatter.formatQueryParams(requestDTO,
+          userGroupIds);
 
-      return messageClient.getMessageHistory(queryParams);
+      Map<String, Object> messageHistory = messageClient.getMessageHistory(queryParams);
+      return mapToDTO(messageHistory);
     } catch (Exception e) {
       log.error("Error response from internal API: {}", e.getMessage());
       throw new MessageException(MessageErrorCode.MESSAGE_HISTORY_INTERNAL_FAILED);
