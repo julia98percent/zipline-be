@@ -45,7 +45,7 @@ public class NotificationController {
   }
 
   @PutMapping("/{notificationUid}/read")
-  public ResponseEntity<ApiResponse<NotificationResponseDTO>> getNotifications(
+  public ResponseEntity<ApiResponse<NotificationResponseDTO>> readNotification(
       @PathVariable Long notificationUid, Principal principal) {
     NotificationResponseDTO notification = notificationService.modifyNotificationToRead(
         notificationUid,

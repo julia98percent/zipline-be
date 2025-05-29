@@ -35,7 +35,7 @@ public class NotificationServiceImpl implements NotificationService {
   @Transactional
   public NotificationResponseDTO modifyNotificationToRead(Long notificationUid,
       Long userUid) {
-    Notification savedNotification = notificationRepository.findByUidAndUserUid(
+    Notification savedNotification = notificationRepository.findByUidAndUserUidAndDeletedAtNull(
         notificationUid, userUid).orElseThrow(() -> new NotificationException(
         NotificationErrorCode.NOTIFICATION_NOT_FOUND));
 

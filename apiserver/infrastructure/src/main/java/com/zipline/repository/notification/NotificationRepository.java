@@ -17,5 +17,5 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
   List<Notification> findRecentNotifications(@Param("userUid") Long userUid,
       @Param("twoWeeksAgo") LocalDateTime twoWeeksAgo, Pageable pageable);
 
-  Optional<Notification> findByUidAndUserUid(Long uid, Long userUid);
+  Optional<Notification> findByUidAndUserUidAndDeletedAtNull(Long uid, Long userUid);
 }
