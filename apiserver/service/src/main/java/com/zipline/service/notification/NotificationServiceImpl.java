@@ -44,4 +44,17 @@ public class NotificationServiceImpl implements NotificationService {
 
     return NotificationResponseDTO.from(savedNotification);
   }
+
+  @Transactional
+  public List<NotificationResponseDTO> modifyAllNotificationsToRead(Long userUid) {
+    List<Notification> unreadNotifications = notificationRepository
+        .findAllByUserUidAndReadIsFalseAndDeletedAtNull(userUid);
+
+    notificationRepository.markAllAsReadByUserUid(userUid);
+    unreadNotifications.forEach(Notification::markAsRead);
+
+    return unreadNotifications.stream()
+        .map(NotificationResponseDTO::from)
+        .collect(Collectors.toList());
+  }
 }

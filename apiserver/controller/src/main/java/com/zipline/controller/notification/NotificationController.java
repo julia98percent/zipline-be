@@ -52,4 +52,12 @@ public class NotificationController {
         Long.parseLong(principal.getName()));
     return ResponseEntity.ok(ApiResponse.ok("알림 읽음 처리 완료", notification));
   }
+
+  @PutMapping("/read")
+  public ResponseEntity<ApiResponse<List<NotificationResponseDTO>>> readAllNotifications(
+      Principal principal) {
+    List<NotificationResponseDTO> notification = notificationService.modifyAllNotificationsToRead(
+        Long.parseLong(principal.getName()));
+    return ResponseEntity.ok(ApiResponse.ok("모든 알림 읽음 처리 완료", notification));
+  }
 }
