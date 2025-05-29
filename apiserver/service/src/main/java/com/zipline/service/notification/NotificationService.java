@@ -11,4 +11,6 @@ public interface NotificationService {
 
   NotificationResponseDTO modifyNotificationToRead(Long notificationUid,
       Long userUid);
+
+  List<NotificationResponseDTO> modifyAllNotificationsToRead(Long userUid);
 }

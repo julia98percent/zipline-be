@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -17,5 +18,11 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
   List<Notification> findRecentNotifications(@Param("userUid") Long userUid,
       @Param("twoWeeksAgo") LocalDateTime twoWeeksAgo, Pageable pageable);
 
-  Optional<Notification> findByUidAndUserUid(Long uid, Long userUid);
+  Optional<Notification> findByUidAndUserUidAndDeletedAtNull(Long uid, Long userUid);
+
+  @Modifying
+  @Query("UPDATE Notification n SET n.read = true WHERE n.user.uid = :userUid AND n.deletedAt IS NULL")
+  void markAllAsReadByUserUid(@Param("userUid") Long userUid);
+
+  List<Notification> findAllByUserUidAndReadIsFalseAndDeletedAtNull(Long userUid);
 }

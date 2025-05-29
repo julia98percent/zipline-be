@@ -35,7 +35,7 @@ public class NotificationServiceImpl implements NotificationService {
   @Transactional
   public NotificationResponseDTO modifyNotificationToRead(Long notificationUid,
       Long userUid) {
-    Notification savedNotification = notificationRepository.findByUidAndUserUid(
+    Notification savedNotification = notificationRepository.findByUidAndUserUidAndDeletedAtNull(
         notificationUid, userUid).orElseThrow(() -> new NotificationException(
         NotificationErrorCode.NOTIFICATION_NOT_FOUND));
 
@@ -43,5 +43,18 @@ public class NotificationServiceImpl implements NotificationService {
     notificationRepository.save(savedNotification);
 
     return NotificationResponseDTO.from(savedNotification);
+  }
+
+  @Transactional
+  public List<NotificationResponseDTO> modifyAllNotificationsToRead(Long userUid) {
+    List<Notification> unreadNotifications = notificationRepository
+        .findAllByUserUidAndReadIsFalseAndDeletedAtNull(userUid);
+
+    notificationRepository.markAllAsReadByUserUid(userUid);
+    unreadNotifications.forEach(Notification::markAsRead);
+
+    return unreadNotifications.stream()
+        .map(NotificationResponseDTO::from)
+        .collect(Collectors.toList());
   }
 }
