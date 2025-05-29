@@ -1,8 +1,8 @@
 package com.zipline.service.message;
 
 import com.zipline.global.request.SendMessageRequestDTO;
-import com.zipline.global.response.MessageHistoryResponseDTO;
 import com.zipline.service.message.dto.request.MessageHistoryRequestDTO;
+import com.zipline.service.message.dto.response.MessageHistoryResponseDTO;
 import java.util.List;
 
 public interface MessageService {
