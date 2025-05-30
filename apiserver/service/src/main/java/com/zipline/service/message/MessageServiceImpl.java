@@ -1,6 +1,7 @@
 package com.zipline.service.message;
 
 import static com.zipline.service.message.MessageHistoryMapper.mapToDTO;
+import static com.zipline.service.message.MessageHistoryMapper.messageListMapToDTO;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.entity.message.MessageHistory;
@@ -16,6 +17,7 @@ import com.zipline.repository.region.RegionRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.message.dto.request.MessageHistoryRequestDTO;
 import com.zipline.service.message.dto.response.MessageHistoryResponseDTO;
+import com.zipline.service.message.dto.response.MessageListResponseDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -123,5 +125,16 @@ public class MessageServiceImpl implements MessageService {
       log.error("Error response from internal API: {}", e.getMessage());
       throw new MessageException(MessageErrorCode.MESSAGE_HISTORY_INTERNAL_FAILED);
     }
+  }
+
+  public MessageListResponseDTO getMessageList(String messageGroupUid, Long userUID) {
+    boolean isGroupUidExists = messageHistoryRepository.existsByUserUidAndGroupUid(userUID,
+        messageGroupUid);
+    if (!isGroupUidExists) {
+      throw new MessageException(MessageErrorCode.MESSAGE_HISTORY_INTERNAL_FAILED);
+    }
+    Map<String, Object> messageList = messageClient.getMessageList(messageGroupUid);
+    return messageListMapToDTO(messageList);
+
   }
 }
