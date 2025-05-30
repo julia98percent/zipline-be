@@ -57,4 +57,14 @@ public class NotificationServiceImpl implements NotificationService {
         .map(NotificationResponseDTO::from)
         .collect(Collectors.toList());
   }
+
+  @Transactional
+  public void deleteNotification(Long notificationUid,
+      Long userUid) {
+    Notification savedNotification = notificationRepository.findByUidAndUserUidAndDeletedAtNull(
+        notificationUid, userUid).orElseThrow(() -> new NotificationException(
+        NotificationErrorCode.NOTIFICATION_NOT_FOUND));
+
+    savedNotification.delete(LocalDateTime.now());
+  }
 }

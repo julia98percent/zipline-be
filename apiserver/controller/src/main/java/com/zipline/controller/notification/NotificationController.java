@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,5 +60,14 @@ public class NotificationController {
     List<NotificationResponseDTO> notification = notificationService.modifyAllNotificationsToRead(
         Long.parseLong(principal.getName()));
     return ResponseEntity.ok(ApiResponse.ok("모든 알림 읽음 처리 완료", notification));
+  }
+
+  @DeleteMapping("/{notificationUid}")
+  public ResponseEntity<ApiResponse<Void>> deleteNotification(
+      @PathVariable Long notificationUid, Principal principal) {
+    notificationService.deleteNotification(
+        notificationUid,
+        Long.parseLong(principal.getName()));
+    return ResponseEntity.ok(ApiResponse.ok("알림 삭제 완료"));
   }
 }

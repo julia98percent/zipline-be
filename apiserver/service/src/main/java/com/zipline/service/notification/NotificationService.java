@@ -13,4 +13,7 @@ public interface NotificationService {
       Long userUid);
 
   List<NotificationResponseDTO> modifyAllNotificationsToRead(Long userUid);
+
+  void deleteNotification(Long notificationUid,
+      Long userUid);
 }
