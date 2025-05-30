@@ -17,4 +17,6 @@ public interface MessageClient {
 
   String scheduleMessages(String groupId, LocalDateTime scheduleDateTime);
 
+  Map<String, Object> getMessageList(String groupId);
+
 }

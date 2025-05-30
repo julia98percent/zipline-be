@@ -83,4 +83,23 @@ public class SolapiMessageClient implements MessageClient {
         .bodyToMono(String.class)
         .block();
   }
+
+  public Map<String, Object> getMessageList(String groupId) {
+    return webClient.get()
+        .uri("/groups/{groupId}/messages", groupId)
+        .retrieve()
+        .onStatus(
+            status -> status.is4xxClientError() || status.is5xxServerError(),
+            clientResponse -> clientResponse.bodyToMono(String.class)
+                .handle((errorBody, sink) -> {
+                  log.error("Error response from external API: {}", errorBody);
+                  sink.error(
+                      new MessageException(MessageErrorCode.MESSAGE_HISTORY_EXTERNAL_FAILED));
+                })
+        )
+        .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+        })
+        .block();
+  }
+
 }
