@@ -1,5 +1,8 @@
 package com.zipline.service.message;
 
+import static com.zipline.service.message.MessageHistoryMapper.mapToDTO;
+import static com.zipline.service.message.MessageHistoryMapper.messageListMapToDTO;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zipline.entity.message.MessageHistory;
 import com.zipline.entity.user.User;
@@ -8,12 +11,13 @@ import com.zipline.global.exception.message.errorcode.MessageErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
 import com.zipline.global.request.SendMessageRequestDTO;
-import com.zipline.global.response.MessageHistoryResponseDTO;
 import com.zipline.message.MessageClient;
 import com.zipline.repository.message.MessageHistoryRepository;
 import com.zipline.repository.region.RegionRepository;
 import com.zipline.repository.user.UserRepository;
 import com.zipline.service.message.dto.request.MessageHistoryRequestDTO;
+import com.zipline.service.message.dto.response.MessageHistoryResponseDTO;
+import com.zipline.service.message.dto.response.MessageListResponseDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +54,9 @@ public class MessageServiceImpl implements MessageService {
   }
 
   private String replaceTemplateValues(String text) {
-    if (text == null) return null;
+    if (text == null) {
+      return null;
+    }
 
     Pattern pattern = Pattern.compile("\\$\\$###\\{([^}]+)}");
     Matcher matcher = pattern.matcher(text);
@@ -101,7 +107,8 @@ public class MessageServiceImpl implements MessageService {
     }
   }
 
-  public MessageHistoryResponseDTO getMessageHistory(MessageHistoryRequestDTO requestDTO, Long userUID) {
+  public MessageHistoryResponseDTO getMessageHistory(MessageHistoryRequestDTO requestDTO,
+      Long userUID) {
     try {
       List<String> userGroupIds = messageHistoryRepository.findGroupUidsByUserId(userUID);
 
@@ -109,12 +116,25 @@ public class MessageServiceImpl implements MessageService {
         return MessageHistoryResponseDTO.emptyResponse();
       }
 
-      Map<String, String> queryParams = messageHistoryParamFormatter.formatQueryParams(requestDTO, userGroupIds);
+      Map<String, String> queryParams = messageHistoryParamFormatter.formatQueryParams(requestDTO,
+          userGroupIds);
 
-      return messageClient.getMessageHistory(queryParams);
+      Map<String, Object> messageHistory = messageClient.getMessageHistory(queryParams);
+      return mapToDTO(messageHistory);
     } catch (Exception e) {
       log.error("Error response from internal API: {}", e.getMessage());
       throw new MessageException(MessageErrorCode.MESSAGE_HISTORY_INTERNAL_FAILED);
     }
+  }
+
+  public MessageListResponseDTO getMessageList(String messageGroupUid, Long userUID) {
+    boolean isGroupUidExists = messageHistoryRepository.existsByUserUidAndGroupUid(userUID,
+        messageGroupUid);
+    if (!isGroupUidExists) {
+      throw new MessageException(MessageErrorCode.MESSAGE_HISTORY_INTERNAL_FAILED);
+    }
+    Map<String, Object> messageList = messageClient.getMessageList(messageGroupUid);
+    return messageListMapToDTO(messageList);
+
   }
 }

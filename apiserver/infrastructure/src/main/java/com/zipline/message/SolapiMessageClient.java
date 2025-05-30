@@ -3,12 +3,12 @@ package com.zipline.message;
 import com.zipline.global.exception.message.MessageException;
 import com.zipline.global.exception.message.errorcode.MessageErrorCode;
 import com.zipline.global.request.SendMessageRequestDTO;
-import com.zipline.global.response.MessageHistoryResponseDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -16,6 +16,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 @Slf4j
 public class SolapiMessageClient implements MessageClient {
+
   private final WebClient webClient;
 
   @Override
@@ -31,7 +32,7 @@ public class SolapiMessageClient implements MessageClient {
   }
 
   @Override
-  public MessageHistoryResponseDTO getMessageHistory(Map<String, String> queryParams) {
+  public Map<String, Object> getMessageHistory(Map<String, String> queryParams) {
     return webClient.get()
         .uri(uriBuilder -> {
           uriBuilder.path("/groups/");
@@ -44,10 +45,12 @@ public class SolapiMessageClient implements MessageClient {
             clientResponse -> clientResponse.bodyToMono(String.class)
                 .handle((errorBody, sink) -> {
                   log.error("Error response from external API: {}", errorBody);
-                  sink.error(new MessageException(MessageErrorCode.MESSAGE_HISTORY_EXTERNAL_FAILED));
+                  sink.error(
+                      new MessageException(MessageErrorCode.MESSAGE_HISTORY_EXTERNAL_FAILED));
                 })
         )
-        .bodyToMono(MessageHistoryResponseDTO.class)
+        .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+        })
         .block();
   }
 
@@ -80,4 +83,23 @@ public class SolapiMessageClient implements MessageClient {
         .bodyToMono(String.class)
         .block();
   }
+
+  public Map<String, Object> getMessageList(String groupId) {
+    return webClient.get()
+        .uri("/groups/{groupId}/messages", groupId)
+        .retrieve()
+        .onStatus(
+            status -> status.is4xxClientError() || status.is5xxServerError(),
+            clientResponse -> clientResponse.bodyToMono(String.class)
+                .handle((errorBody, sink) -> {
+                  log.error("Error response from external API: {}", errorBody);
+                  sink.error(
+                      new MessageException(MessageErrorCode.MESSAGE_HISTORY_EXTERNAL_FAILED));
+                })
+        )
+        .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+        })
+        .block();
+  }
+
 }
