@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-    implementation project(':apiserver:domain')
-    implementation project(':apiserver:common')
-    implementation project(':apiserver:infrastructure')
+    implementation project(':domain')
+    implementation project(':common')
+    implementation project(':infrastructure')
 
     // Spring Boot Core
     implementation 'org.springframework.boot:spring-boot-starter'
@@ -41,8 +41,8 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
 
     // Ensure these are implementation dependencies to make them available at compile time
-    implementation project(':apiserver:domain')
-    implementation project(':apiserver:common')
+    implementation project(':domain')
+    implementation project(':common')
 
     // Swagger/OpenAPI
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'

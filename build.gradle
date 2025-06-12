@@ -10,20 +10,34 @@ java {
     }
 }
 
+dependencies {
+    implementation project(':domain')
+    implementation project(':service')
+    implementation project(':controller')
+    implementation project(':infrastructure')
+    implementation project(':common')
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.7.0'
+}
+
+
 allprojects {
     group = 'com.zipline'
     version = '0.0.1-SNAPSHOT'
-    
+
     repositories {
         mavenCentral()
     }
 }
 
-subprojects {
+
+allprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
-    
+
     sourceCompatibility = '17'
     targetCompatibility = '17'
 
@@ -36,14 +50,14 @@ subprojects {
     dependencies {
         // Spring Boot Core
         implementation 'org.springframework.boot:spring-boot-starter'
-        
+
         // Validation
         implementation 'org.springframework.boot:spring-boot-starter-validation'
-        
+
         // Lombok
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
-        
+
         // Test
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
@@ -53,12 +67,15 @@ subprojects {
     }
 }
 
-// Root project configuration
 bootJar {
-    enabled = false
+    enabled = true
+    archiveFileName = 'api.jar'
+    mainClass.set('com.zipline.ApiServerApplication')
 }
 
 jar {
     enabled = true
 }
-
+springBoot {
+    mainClass.set('com.zipline.ApiServerApplication')
+}
