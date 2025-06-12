@@ -8,9 +8,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @SpringBootApplication
 @EnableJpaAuditing
-public class ApiServerApplication {
-	public static void main(String[] args) {
-		SpringApplication.run(ApiServerApplication.class, args);
-	}
-}
+public class ZiplineApplication {
 
+  public static void main(String[] args) {
+    SpringApplication.run(ZiplineApplication.class, args);
+  }
+}

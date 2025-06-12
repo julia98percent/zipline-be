@@ -1,8 +1,8 @@
 rootProject.name = 'zipline'
 
 // API Server modules
-include 'apiserver:common'
-include 'apiserver:domain'
-include 'apiserver:service'
-include 'apiserver:controller'
-include 'apiserver:infrastructure'
+include 'common'
+include 'domain'
+include 'service'
+include 'controller'
+include 'infrastructure'
