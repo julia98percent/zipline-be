@@ -2,11 +2,19 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id "org.sonarqube" version "6.0.1.5171"
 }
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "zipline-j"
+        property "sonar.projectName", "zipline-j"
     }
 }
 
@@ -69,13 +77,21 @@ allprojects {
 
 bootJar {
     enabled = true
-    archiveFileName = 'api.jar'
-    mainClass.set('com.zipline.ApiServerApplication')
+    archiveFileName = 'app.jar'
+    mainClass = 'com.zipline.ZiplineApplication'
 }
 
 jar {
     enabled = true
 }
 springBoot {
-    mainClass.set('com.zipline.ApiServerApplication')
+    mainClass = 'com.zipline.ZiplineApplication'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'service/src/java', 'domain/src/java', 'common/src/java', 'infrastructure/src/java', 'controller/src/java']
+        }
+    }
 }

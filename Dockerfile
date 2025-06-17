@@ -10,6 +10,7 @@ COPY controller ./controller
 COPY service ./service
 COPY domain ./domain
 COPY infrastructure ./infrastructure
+COPY src ./src
 
 RUN chmod +x ./gradlew
 RUN ./gradlew bootJar --no-daemon
@@ -19,7 +20,6 @@ WORKDIR /app
 
 COPY --from=build /app/build/libs/*.jar app.jar
 
-ENV SPRING_CONFIG_NAME=application
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
