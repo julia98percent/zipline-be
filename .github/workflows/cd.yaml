@@ -1,0 +1,58 @@
+name: ECR Build & Kubernetes Deploy
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    name: Docker build and push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: main Environment Docker build & Push Docker image to Amazon ECR
+        uses: docker/build-push-action@v2
+        env:
+          ECR: ${{ steps.login-ecr.outputs.registry }}
+          TAG: ${{ github.sha }}
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{env.ECR}}/tag:latest
+            ${{env.ECR}}/tag:${{env.TAG}}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Configure Kubernetes Context
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Apply Kubernetes Deployment
+        run: |
+          export IMAGE_TAG=${{ github.sha }}
+          envsubst < kubernetes-yaml/app/spring-boot-deployment.yaml | kubectl apply -f -
