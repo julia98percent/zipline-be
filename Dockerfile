@@ -19,7 +19,6 @@ WORKDIR /app
 
 COPY --from=build /app/build/libs/*.jar app.jar
 
-ENV SPRING_CONFIG_NAME=application
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
