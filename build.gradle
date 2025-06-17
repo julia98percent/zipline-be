@@ -69,13 +69,21 @@ allprojects {
 
 bootJar {
     enabled = true
-    archiveFileName = 'api.jar'
-    mainClass.set('com.zipline.ApiServerApplication')
+    archiveFileName = 'app.jar'
+    mainClass = 'com.zipline.ZiplineApplication'
 }
 
 jar {
     enabled = true
 }
 springBoot {
-    mainClass.set('com.zipline.ApiServerApplication')
+    mainClass = 'com.zipline.ZiplineApplication'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'service/src/java', 'domain/src/java', 'common/src/java', 'infrastructure/src/java', 'controller/src/java']
+        }
+    }
 }
