@@ -43,7 +43,7 @@ spec:
               echo "All monitoring services are ready!"
       containers:
         - name: spring-boot-app
-          image: zipline:1.1.4 # 실제 이미지 이름으로 변경
+          image: "${ECR}/zipline-j:${IMAGE_TAG}"
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
