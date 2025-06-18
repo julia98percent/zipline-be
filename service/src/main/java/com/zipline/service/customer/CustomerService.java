@@ -9,25 +9,38 @@ import com.zipline.service.customer.dto.request.CustomerModifyRequestDTO;
 import com.zipline.service.customer.dto.request.CustomerRegisterRequestDTO;
 import com.zipline.service.customer.dto.response.CustomerDetailResponseDTO;
 import com.zipline.service.customer.dto.response.CustomerListResponseDTO;
+import io.micrometer.core.annotation.Timed;
 
 public interface CustomerService {
 
-	void registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUid);
+  @Timed
+  void registerCustomer(CustomerRegisterRequestDTO customerRegisterRequestDTO, Long userUid);
 
-	CustomerDetailResponseDTO modifyCustomer(Long customerUid, CustomerModifyRequestDTO customerModifyRequestDTO,
-		Long userUid);
+  @Timed
+  CustomerDetailResponseDTO modifyCustomer(Long customerUid,
+      CustomerModifyRequestDTO customerModifyRequestDTO,
+      Long userUid);
 
-	void deleteCustomer(Long customerUID, Long userUid);
+  @Timed
+  void deleteCustomer(Long customerUID, Long userUid);
 
-	CustomerListResponseDTO getCustomers(PageRequestDTO pageRequestDTO, CustomerFilterRequestDTO filterRequestDTO,
-		Long userUid);
+  @Timed
+  CustomerListResponseDTO getCustomers(PageRequestDTO pageRequestDTO,
+      CustomerFilterRequestDTO filterRequestDTO,
+      Long userUid);
 
-	CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid);
+  @Timed
+  CustomerDetailResponseDTO getCustomer(Long customerUid, Long userUid);
 
-	CounselPageResponseDTO getCustomerCounsels(Long customerUid, PageRequestDTO pageRequestDTO, Long userUid);
+  @Timed
+  CounselPageResponseDTO getCustomerCounsels(Long customerUid, PageRequestDTO pageRequestDTO,
+      Long userUid);
 
-	AgentPropertyListResponseDTO getCustomerProperties(Long customerUid, PageRequestDTO pageRequestDTO, Long userUid);
+  @Timed
+  AgentPropertyListResponseDTO getCustomerProperties(Long customerUid,
+      PageRequestDTO pageRequestDTO, Long userUid);
 
-
-	ContractListResponseDTO getCustomerContracts(Long customerUid, PageRequestDTO pageRequestDTO, Long userUid);
+  @Timed
+  ContractListResponseDTO getCustomerContracts(Long customerUid, PageRequestDTO pageRequestDTO,
+      Long userUid);
 }

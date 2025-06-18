@@ -9,24 +9,34 @@ import com.zipline.service.user.dto.request.SignUpRequestDTO;
 import com.zipline.service.user.dto.request.UserModifyRequestDTO;
 import com.zipline.service.user.dto.response.FindUserIdResponseDTO;
 import com.zipline.service.user.dto.response.UserResponseDTO;
+import io.micrometer.core.annotation.Timed;
 
 public interface UserService {
 
-	UserResponseDTO findById(Long uid);
+  @Timed
+  UserResponseDTO findById(Long uid);
 
-	void signup(SignUpRequestDTO signUpRequestDto);
+  @Timed
+  void signup(SignUpRequestDTO signUpRequestDto);
 
-	TokenRequestDTO login(LoginRequestDTO loginRequestDTO, String deviceId);
+  @Timed
+  TokenRequestDTO login(LoginRequestDTO loginRequestDTO, String deviceId);
 
-	void logout(Long uid, String accessToken, String deviceId);
+  @Timed
+  void logout(Long uid, String accessToken, String deviceId);
 
-	UserResponseDTO updateInfo(Long uid, UserModifyRequestDTO userModifyRequestDto);
+  @Timed
+  UserResponseDTO updateInfo(Long uid, UserModifyRequestDTO userModifyRequestDto);
 
-	TokenRequestDTO reissue(String refreshToken, String deviceId);
+  @Timed
+  TokenRequestDTO reissue(String refreshToken, String deviceId);
 
-	FindUserIdResponseDTO findUserId(FindUserIdRequestDTO findUserIdRequestDto);
+  @Timed
+  FindUserIdResponseDTO findUserId(FindUserIdRequestDTO findUserIdRequestDto);
 
-	String findUserPassword(FindPasswordRequestDTO findPasswordRequestDTO);
+  @Timed
+  String findUserPassword(FindPasswordRequestDTO findPasswordRequestDTO);
 
-	void resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO);
+  @Timed
+  void resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO);
 }
