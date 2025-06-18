@@ -13,8 +13,11 @@ java {
 
 sonar {
     properties {
-        property "sonar.projectKey", "zipline-j"
-        property "sonar.projectName", "zipline-j"
+        property "sonar.projectKey", project.findProperty("is-local") ? "zipline-j-local" : "zipline-j"
+        property "sonar.projectName", project.findProperty("is-local") ? "zipline-j-local" : "zipline-j"
+        property "sonar.host.url", System.getenv("SONAR_HOST_URL") ?: project.findProperty("sonar.host-url")
+        property "sonar.token", System.getenv("SONAR_TOKEN") ?: project.findProperty("sonar.token")
+
     }
 }
 

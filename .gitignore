@@ -12,3 +12,4 @@ bin
 kubernetes/monitoring/grafana/grafana-secret.yaml
 *.iml
 **/.DS_Store
+gradle.properties
