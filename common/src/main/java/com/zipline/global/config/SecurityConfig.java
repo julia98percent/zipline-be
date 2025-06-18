@@ -61,7 +61,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/v1/users/login", "/api/v1/users/signup", "/api/v1/users/info",
 					"/api/v1/users/reissue", "/api/v1/users/find-id", "/api/v1/users/find-password",
-					"/api/v1/users/reset-password")
+					"/api/v1/users/reset-password", "/actuator/health", "/actuator/info")
 				.permitAll()
 				.requestMatchers(new RegexRequestMatcher("/api/v1/surveys/[A-Za-z0-9]+$", "GET"),
 					new RegexRequestMatcher("/api/v1/surveys/[A-Za-z0-9]{26}/submit$$", "POST"))
@@ -70,7 +70,7 @@ public class SecurityConfig {
 					"/api-docs/**",
 					"/v3/api-docs/**")
 				.permitAll()
-				.requestMatchers("/api/admin/**")
+				.requestMatchers("/api/admin/**", "/actuator/**")
 				.hasRole("ADMIN")
 				.requestMatchers("/api/**")
 				.hasAnyRole("AGENT", "ADMIN")
