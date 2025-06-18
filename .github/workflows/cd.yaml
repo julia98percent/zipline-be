@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Docker build and push
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout
@@ -58,7 +58,7 @@ jobs:
 
   deploy:
     name: Deploy to Kubernetes
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: build
 
     steps:
