@@ -64,5 +64,5 @@ jobs:
       - name: Send SonarQube Result to Slack
         uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK}}
           SLACK_MESSAGE: "SonarQube 분석 완료! 결과를 확인하세요: ${{ secrets.SONAR_HOST_URL }}/dashboard?id=zipline-j"
