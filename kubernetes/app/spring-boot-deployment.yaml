@@ -19,7 +19,8 @@ spec:
         prometheus.io/path: "/actuator/prometheus"
         prometheus.io/port: "8080"
     spec:
-      # initContainer로 모니터링 스택 대기
+      imagePullSecrets:
+        - name: regcred
       initContainers:
         - name: wait-for-monitoring
           image: busybox:1.35
