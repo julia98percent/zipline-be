@@ -9,5 +9,6 @@ db/Dockerfile
 bin
 .idea
 **/src/main/resources/application.yml
-kubernetes/**/*
+kubernetes/monitoring/grafana/grafana-secret.yaml
 *.iml
+**/*/.DS_Store

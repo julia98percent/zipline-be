@@ -3,7 +3,7 @@ name: Test and Local Build
 on:
   pull_request:
     branches:
-      - develop
+      - dev
 
 jobs:
   ci:

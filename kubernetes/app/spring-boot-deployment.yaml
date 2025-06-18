@@ -1,0 +1,228 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-boot-app
+  namespace: app
+  labels:
+    app: spring-boot-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: spring-boot-app
+  template:
+    metadata:
+      labels:
+        app: spring-boot-app
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8080"
+    spec:
+      # initContainer로 모니터링 스택 대기
+      initContainers:
+        - name: wait-for-monitoring
+          image: busybox:1.35
+          command: ['sh', '-c']
+          args:
+            - |
+              echo "Waiting for Prometheus..."
+              until nc -z prometheus-service.monitoring.svc.cluster.local 9090; do
+                echo "Prometheus not ready, waiting..."
+                sleep 5
+              done
+              echo "Prometheus is ready!"
+              
+              echo "Waiting for Grafana..."
+              until nc -z grafana-service.monitoring.svc.cluster.local 3000; do
+                echo "Grafana not ready, waiting..."
+                sleep 5
+              done
+              echo "Grafana is ready!"
+              
+              echo "All monitoring services are ready!"
+      containers:
+        - name: spring-boot-app
+          image: zipline:1.1.4 # 실제 이미지 이름으로 변경
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: SPRING_CONFIG_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: spring-boot-config
+                  key: SPRING_CONFIG_NAME
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  key: DB_URL
+                  name: spring-boot-secret
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: DB_PASSWORD
+                  name: spring-boot-secret
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  key: DB_NAME
+                  name: spring-boot-config
+            - name: DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  key: DB_USERNAME
+                  name: spring-boot-config
+            - name: NR_ACCOUNT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: NR_ACCOUNT_ID
+                  name: spring-boot-secret
+            - name: NR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: NR_API_KEY
+                  name: spring-boot-secret
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: DB_PORT
+                  name: spring-boot-config
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: REDIS_PORT
+                  name: spring-boot-config
+            - name: REDIS_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  key: REDIS_TIMEOUT
+                  name: spring-boot-config
+            - name: PORT_API
+              valueFrom:
+                configMapKeyRef:
+                  key: PORT_API
+                  name: spring-boot-config
+            - name: MAX_HTTP_TOMCAT_FORM_POST_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  key: MAX_HTTP_TOMCAT_FORM_POST_SIZE
+                  name: spring-boot-config
+            - name: AWS_REGION
+              valueFrom:
+                configMapKeyRef:
+                  key: AWS_REGION
+                  name: spring-boot-config
+            - name: AWS_STACK_VAL
+              valueFrom:
+                 configMapKeyRef:
+                   key: AWS_STACK_VAL
+                   name: spring-boot-config
+            - name: SURVEY_DELIMITER
+              valueFrom:
+                configMapKeyRef:
+                  key: SURVEY_DELIMITER
+                  name: spring-boot-config
+            - name: FILE_ALLOWED_MEME_TYPES
+              valueFrom:
+                configMapKeyRef:
+                  key: FILE_ALLOWED_MEME_TYPES
+                  name: spring-boot-config
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  key: REDIS_URL
+                  name: spring-boot-secret
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: JWT_SECRET
+                  name: spring-boot-secret
+            - name: JWT_ACC_EXPIRATION
+              valueFrom:
+                secretKeyRef:
+                  key: JWT_ACC_EXPIRATION
+                  name: spring-boot-secret
+            - name: JWT_REF_EXPIRATION
+              valueFrom:
+                secretKeyRef:
+                  key: JWT_REF_EXPIRATION
+                  name: spring-boot-secret
+            - name: AWS_ACC_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_ACC_KEY
+                  name: spring-boot-secret
+            - name: AWS_SEC_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_SEC_KEY
+                  name: spring-boot-secret
+            - name: AWS_S3_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_S3_BUCKET
+                  name: spring-boot-secret
+            - name: CORS_ALLOWED_ORIGINS_DEV
+              valueFrom:
+                secretKeyRef:
+                  key: CORS_ALLOWED_ORIGINS_DEV
+                  name: spring-boot-secret
+            - name: SMS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: SMS_API_KEY
+                  name: spring-boot-secret
+            - name: SMS_SEC_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: SMS_SEC_KEY
+                  name: spring-boot-secret
+            - name: SMS_AUTH_METHOD
+              valueFrom:
+                secretKeyRef:
+                  key: SMS_AUTH_METHOD
+                  name: spring-boot-secret
+            - name: SMS_FROM_NUMBER
+              valueFrom:
+                secretKeyRef:
+                  key: SMS_FROM_NUMBER
+                  name: spring-boot-secret
+            - name: KAKAO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: KAKAO_API_KEY
+                  name: spring-boot-secret
+#            - name: SPRING_PROFILES_ACTIVE
+#              value: "k8s"
+#            - name: SPRING_CONFIG_LOCATION
+#              value: "classpath:/application.yml,/etc/config/application-k8s.yml"
+#          volumeMounts:
+#            - name: config-volume
+#              mountPath: /etc/config
+#          readinessProbe:
+#            httpGet:
+#              path: /actuator/health/readiness
+#              port: 8080
+#            initialDelaySeconds: 30
+#            periodSeconds: 10
+#            timeoutSeconds: 5
+#          livenessProbe:
+#            httpGet:
+#              path: /actuator/health/liveness
+#              port: 8080
+#            initialDelaySeconds: 60
+#            periodSeconds: 10
+#            timeoutSeconds: 5
+#          resources:
+#            requests:
+#              memory: 512Mi
+#              cpu: 200m
+#            limits:
+#              memory: 1Gi
+#              cpu: 500m
+#      volumes:
+#        - name: config-volume
+#          configMap:
+#            name: spring-boot-config
