@@ -6,7 +6,7 @@ metadata:
   labels:
     app: spring-boot-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: spring-boot-app
@@ -49,6 +49,7 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+          args: ["-Xmx192m", "-Xms128m", "-jar", "app.jar"]
           env:
             - name: SPRING_CONFIG_NAME
               valueFrom:
@@ -195,13 +196,13 @@ spec:
                 secretKeyRef:
                   key: KAKAO_API_KEY
                   name: spring-boot-secret
-#            - name: SPRING_PROFILES_ACTIVE
-#              value: "k8s"
-#            - name: SPRING_CONFIG_LOCATION
-#              value: "classpath:/application.yml,/etc/config/application-k8s.yml"
-#          volumeMounts:
-#            - name: config-volume
-#              mountPath: /etc/config
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 300m
 #          readinessProbe:
 #            httpGet:
 #              path: /actuator/health/readiness
@@ -216,14 +217,3 @@ spec:
 #            initialDelaySeconds: 60
 #            periodSeconds: 10
 #            timeoutSeconds: 5
-#          resources:
-#            requests:
-#              memory: 512Mi
-#              cpu: 200m
-#            limits:
-#              memory: 1Gi
-#              cpu: 500m
-#      volumes:
-#        - name: config-volume
-#          configMap:
-#            name: spring-boot-config
