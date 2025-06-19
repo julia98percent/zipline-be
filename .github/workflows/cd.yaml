@@ -30,28 +30,15 @@ jobs:
 
       - name: Docker build & Push Docker image to Amazon ECR
         uses: docker/build-push-action@v5
-        env:
-          ECR: ${{ steps.login-ecr.outputs.registry }}
-          TAG: ${{ github.sha }}
         with:
           context: .
           platforms: linux/arm64
           push: true
           tags: |
-            ${{env.ECR}}/zipline-j:latest
-            ${{env.ECR}}/zipline-j:${{env.TAG}}
+            ${{ secrets.ECR_REGISTRY }}/zipline-j:latest
+            ${{ secrets.ECR_REGISTRY }}/zipline-j:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Save ECR registry info
-        run: echo "${{ steps.login-ecr.outputs.registry }}" > ecr-registry.txt
-
-      - name: Upload ECR registry info
-        uses: actions/upload-artifact@v4
-        with:
-          name: ecr-info
-          path: ecr-registry.txt
-          retention-days: 1
 
   deploy:
     name: Deploy to Kubernetes
@@ -61,16 +48,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Download ECR registry info
-        uses: actions/download-artifact@v4
-        with:
-          name: ecr-info
-
-      - name: Set ECR registry variable
-        run: |
-          ECR=$(cat ecr-registry.txt)
-          echo "ECR=$ECR" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4.1.0
@@ -89,14 +66,28 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.K3S_KUBECONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
-          
+
           echo "Verifying kubeconfig..."
           kubectl config view --minify
-          
+
           echo "Testing cluster connection..."
           kubectl cluster-info
           kubectl get nodes
 
+      - name: Login to Amazon ECR
+        id: login-ecr-deploy
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Create ECR ImagePullSecret
+        run: |
+          kubectl delete secret regcred -n app --ignore-not-found=true
+            
+          ECR_TOKEN=$(aws ecr get-login-password --region ap-northeast-2)
+          kubectl create secret docker-registry regcred \
+            --docker-server=${{ secrets.ECR_REGISTRY }} \
+            --docker-username=AWS \
+            --docker-password="$ECR_TOKEN" \
+            --namespace=app
 
       - name: Apply Kubernetes Secrets
         env:
@@ -123,7 +114,7 @@ jobs:
 
       - name: Apply Kubernetes Deployment
         env:
-          ECR: ${{ env.ECR }}
+          ECR: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           envsubst < kubernetes/app/spring-boot-deployment.yaml | kubectl apply -f -
