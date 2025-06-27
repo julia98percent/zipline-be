@@ -104,29 +104,6 @@ public class UserServiceImpl implements UserService {
 
 	}
 
-	@Transactional
-	public TokenRequestDTO login(LoginRequestDTO loginRequestDTO, String deviceId) {
-		User user = userRepository.findByLoginId(loginRequestDTO.getId())
-			.orElseThrow(() -> new UserException(UserErrorCode.INVALID_CREDENTIALS));
-
-		if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
-			throw new UserException(UserErrorCode.INVALID_CREDENTIALS);
-		}
-
-		List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getRole().name()));
-
-		Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUid(), null, authorities);
-
-		TokenRequestDTO tokenRequestDto = tokenProvider.generateTokenDto(authentication, user.getUid());
-
-		redisTemplate.opsForValue().set(
-			"refreshToken:" + user.getUid() + ":" + deviceId,
-			tokenRequestDto.getRefreshToken(),
-			Duration.ofDays(7)
-		);
-
-		return tokenRequestDto;
-	}
 
 	public void logout(Long uid, String accessToken, String deviceId) {
 		if (!tokenProvider.validateToken(accessToken)) {
@@ -263,3 +240,24 @@ public class UserServiceImpl implements UserService {
 		redisTemplate.delete(redisKey);
 	}
 }
+  @Transactional
+  public void authenticateAndLogin(LoginRequestDTO loginRequestDTO,
+      HttpServletRequest request) {
+    User user = userRepository.findByLoginId(loginRequestDTO.getId())
+        .orElseThrow(() -> new UserException(UserErrorCode.INVALID_CREDENTIALS));
+
+    if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
+      throw new UserException(UserErrorCode.INVALID_CREDENTIALS);
+    }
+
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken(loginRequestDTO.getId(),
+            loginRequestDTO.getPassword());
+
+    Authentication authentication = authenticationManager.authenticate(authenticationToken);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    HttpSession session = request.getSession(true);
+
+    session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+  }
