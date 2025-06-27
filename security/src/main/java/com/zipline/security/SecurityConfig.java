@@ -79,7 +79,9 @@ public class SecurityConfig {
         .cors(cors -> cors.configure(http))
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            .sessionFixation(sessionFixation -> sessionFixation.migrateSession())
             .maximumSessions(1)
+            .maxSessionsPreventsLogin(false)
         )
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/v1/users/login", "/api/v1/users/signup",
