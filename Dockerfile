@@ -10,6 +10,7 @@ COPY controller ./controller
 COPY service ./service
 COPY domain ./domain
 COPY infrastructure ./infrastructure
+COPY security ./security
 COPY src ./src
 
 RUN chmod +x ./gradlew
