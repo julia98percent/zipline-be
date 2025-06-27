@@ -20,7 +20,7 @@ public interface UserService {
   void signup(SignUpRequestDTO signUpRequestDto);
 
   @Timed
-  void authenticateAndLogin(LoginRequestDTO loginRequestDTO,
+  UserResponseDTO authenticateAndLogin(LoginRequestDTO loginRequestDTO,
       HttpServletRequest request);
 
   @Timed

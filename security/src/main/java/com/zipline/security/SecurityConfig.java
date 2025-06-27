@@ -82,7 +82,7 @@ public class SecurityConfig {
             .maximumSessions(1)
         )
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/v1/users/login", "/api/v1/users/signup", "/api/v1/users/info",
+            .requestMatchers("/api/v1/users/login", "/api/v1/users/signup",
                 "/api/v1/users/reissue", "/api/v1/users/find-id", "/api/v1/users/find-password",
                 "/api/v1/users/reset-password", "/actuator/health", "/actuator/info",
                 "/actuator/prometheus", "/api/v1/users/csrf")

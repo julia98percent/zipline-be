@@ -2,6 +2,8 @@ package com.zipline.controller.user;
 
 
 import com.zipline.global.response.ApiResponse;
+import com.zipline.global.exception.auth.AuthException;
+import com.zipline.global.exception.auth.errorcode.AuthErrorCode;
 import com.zipline.security.CustomUserDetails;
 import com.zipline.service.user.UserService;
 import com.zipline.service.user.dto.request.FindPasswordRequestDTO;
@@ -36,6 +38,9 @@ public class UserController {
   @GetMapping("/info")  // 특정 사용자 정보 조회
   public ResponseEntity<ApiResponse<UserResponseDTO>> findById(
       @AuthenticationPrincipal CustomUserDetails userDetails) {
+    if (userDetails == null) {
+      throw new AuthException(AuthErrorCode.UNAUTHORIZED_CLIENT);
+    }
     UserResponseDTO dto = userService.findById(userDetails.getUserUid());
     ApiResponse<UserResponseDTO> response = ApiResponse.ok("조회 성공", dto);
     return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -50,11 +55,11 @@ public class UserController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<ApiResponse<String>> login(
+  public ResponseEntity<ApiResponse<UserResponseDTO>> login(
       @RequestBody @Valid LoginRequestDTO loginRequestDTO,
       HttpServletRequest request) {
-    userService.authenticateAndLogin(loginRequestDTO, request);
-    ApiResponse<String> responseBody = ApiResponse.ok("로그인 성공");
+    UserResponseDTO userInfo = userService.authenticateAndLogin(loginRequestDTO, request);
+    ApiResponse<UserResponseDTO> responseBody = ApiResponse.ok("로그인 성공", userInfo);
     return ResponseEntity.ok(responseBody);
   }
 

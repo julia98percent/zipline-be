@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Transactional
-  public void authenticateAndLogin(LoginRequestDTO loginRequestDTO,
+  public UserResponseDTO authenticateAndLogin(LoginRequestDTO loginRequestDTO,
       HttpServletRequest request) {
     User user = userRepository.findByLoginId(loginRequestDTO.getId())
         .orElseThrow(() -> new UserException(UserErrorCode.INVALID_CREDENTIALS));
@@ -128,6 +128,11 @@ public class UserServiceImpl implements UserService {
     HttpSession session = request.getSession(true);
 
     session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+ 
+    Survey survey = surveyRepository.findFirstByUserOrderByCreatedAtDesc(user)
+        .orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
+    
+    return UserResponseDTO.userSurvey(user, survey);
   }
 
   public UserResponseDTO updateInfo(Long uid, UserModifyRequestDTO userModifyRequestDto) {
