@@ -27,6 +27,7 @@ dependencies {
     implementation project(':controller')
     implementation project(':infrastructure')
     implementation project(':common')
+    implementation project(':security')
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
@@ -94,7 +95,7 @@ springBoot {
 sourceSets {
     main {
         java {
-            srcDirs = ['src/main/java', 'service/src/java', 'domain/src/java', 'common/src/java', 'infrastructure/src/java', 'controller/src/java']
+            srcDirs = ['src/main/java', 'service/src/java', 'domain/src/java', 'common/src/java', 'infrastructure/src/java', 'controller/src/java', 'security/src/java']
         }
     }
 }
