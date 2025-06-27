@@ -1,25 +1,8 @@
 package com.zipline.controller.user;
 
-import java.security.Principal;
-import java.time.Duration;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.zipline.global.jwt.dto.TokenRequestDTO;
 import com.zipline.global.response.ApiResponse;
+import com.zipline.security.CustomUserDetails;
 import com.zipline.service.user.UserService;
 import com.zipline.service.user.dto.request.FindPasswordRequestDTO;
 import com.zipline.service.user.dto.request.FindUserIdRequestDTO;

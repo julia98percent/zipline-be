@@ -1,16 +1,18 @@
 package com.zipline.controller.message;
 
+
 import com.zipline.global.response.ApiResponse;
+import com.zipline.security.CustomUserDetails;
 import com.zipline.service.message.MessageTemplateService;
 import com.zipline.service.message.dto.request.MessageTemplateRequestDTO;
 import com.zipline.service.message.dto.response.MessageTemplateResponseDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.security.Principal;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -33,29 +35,39 @@ public class MessageTemplateController {
   }
 
   @PostMapping("")
-  public ResponseEntity<ApiResponse<Void>> createMessageTemplate(@RequestBody MessageTemplateRequestDTO request, Principal principal) {
-    messageTemplateService.createMessageTemplate(request, Long.parseLong(principal.getName()));
+  public ResponseEntity<ApiResponse<Void>> createMessageTemplate(
+      @RequestBody MessageTemplateRequestDTO request,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    messageTemplateService.createMessageTemplate(request, userDetails.getUserUid());
     ApiResponse<Void> response = ApiResponse.create("문자 템플릿 등록 성공");
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
   @GetMapping("")
-  public ResponseEntity<ApiResponse<List<MessageTemplateResponseDTO>>> getMessageTemplateList(Principal principal) {
-    List<MessageTemplateResponseDTO> messageTemplateList =messageTemplateService.getMessageTemplateList(Long.parseLong(principal.getName()));
-    ApiResponse<List<MessageTemplateResponseDTO>> response = ApiResponse.ok("문자 템플릿 목록 조회 성공", messageTemplateList);
+  public ResponseEntity<ApiResponse<List<MessageTemplateResponseDTO>>> getMessageTemplateList(
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    List<MessageTemplateResponseDTO> messageTemplateList = messageTemplateService.getMessageTemplateList(
+        userDetails.getUserUid());
+    ApiResponse<List<MessageTemplateResponseDTO>> response = ApiResponse.ok("문자 템플릿 목록 조회 성공",
+        messageTemplateList);
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 
   @PatchMapping("/{templateUid}")
-  public ResponseEntity<ApiResponse<MessageTemplateResponseDTO>> modifyMessageTemplate(@PathVariable Long templateUid, @Valid @RequestBody MessageTemplateRequestDTO request, Principal principal) {
-    MessageTemplateResponseDTO modifiedMessageTemplate =messageTemplateService.modifyMessageTemplate(templateUid, request, Long.parseLong(principal.getName()));
-    ApiResponse<MessageTemplateResponseDTO> response = ApiResponse.ok("문자 템플릿 수정 성공", modifiedMessageTemplate);
+  public ResponseEntity<ApiResponse<MessageTemplateResponseDTO>> modifyMessageTemplate(
+      @PathVariable Long templateUid, @Valid @RequestBody MessageTemplateRequestDTO request,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    MessageTemplateResponseDTO modifiedMessageTemplate = messageTemplateService.modifyMessageTemplate(
+        templateUid, request, userDetails.getUserUid());
+    ApiResponse<MessageTemplateResponseDTO> response = ApiResponse.ok("문자 템플릿 수정 성공",
+        modifiedMessageTemplate);
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 
   @DeleteMapping("/{templateUid}")
-  public ResponseEntity<ApiResponse<Void>> deleteMessageTemplate(@PathVariable Long templateUid, Principal principal) {
-    messageTemplateService.deleteMessageTemplate(templateUid, Long.parseLong(principal.getName()));
+  public ResponseEntity<ApiResponse<Void>> deleteMessageTemplate(@PathVariable Long templateUid,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    messageTemplateService.deleteMessageTemplate(templateUid, userDetails.getUserUid());
     ApiResponse<Void> responseBody = ApiResponse.ok("문자 템플릿 삭제 성공");
     return ResponseEntity.ok(responseBody);
   }
