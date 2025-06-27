@@ -27,6 +27,11 @@ spring:
       max-request-size: 100MB
   cache:
     type: redis
+  session:
+    redis:
+      namespace: ${REDIS_SESSION_NAMESPACE}
+      flush-mode: ${SESSION_FLUSH_MODE}
+    timeout: ${SESSION_TIMEOUT}
 server:
   port: ${PORT_API}
   tomcat:
@@ -75,7 +80,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: '*'
+        include: "*"
   endpoint:
     health:
       show-details: always
