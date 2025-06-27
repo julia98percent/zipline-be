@@ -18,6 +18,7 @@ data:
   AWS_REGION: ap-northeast-2
   AWS_STACK_VAL: "false"
   SURVEY_DELIMITER: $$###
-  FILE_ALLOWED_MEME_TYPES: image/jpg,image/jpeg,image/png,image/webp,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,
+  FILE_ALLOWED_MIME_TYPES:
+    image/jpg,image/jpeg,image/png,image/webp,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,
     application/csv,
     text/plain,application/x-tika-ooxml

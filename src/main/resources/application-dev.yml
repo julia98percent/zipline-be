@@ -36,12 +36,6 @@ server:
   port: ${PORT_API}
   tomcat:
     max-http-form-post-size: ${MAX_HTTP_TOMCAT_FORM_POST_SIZE}
-jwt:
-  secret: ${JWT_SECRET}
-  accessToken:
-    expiration: ${JWT_ACC_EXPIRATION}
-  refreshToken:
-    expiration: ${JWT_REF_EXPIRATION}
 aws:
   region: ${AWS_REGION}
   credentials:

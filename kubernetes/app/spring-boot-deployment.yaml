@@ -133,27 +133,12 @@ spec:
             - name: FILE_ALLOWED_MEME_TYPES
               valueFrom:
                 configMapKeyRef:
-                  key: FILE_ALLOWED_MEME_TYPES
+                  key: FILE_ALLOWED_MIME_TYPES
                   name: spring-boot-config
             - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
                   key: REDIS_URL
-                  name: spring-boot-secret
-            - name: JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  key: JWT_SECRET
-                  name: spring-boot-secret
-            - name: JWT_ACC_EXPIRATION
-              valueFrom:
-                secretKeyRef:
-                  key: JWT_ACC_EXPIRATION
-                  name: spring-boot-secret
-            - name: JWT_REF_EXPIRATION
-              valueFrom:
-                secretKeyRef:
-                  key: JWT_REF_EXPIRATION
                   name: spring-boot-secret
             - name: AWS_ACC_KEY
               valueFrom:
