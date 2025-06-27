@@ -1,21 +1,5 @@
 package com.zipline.service.user;
 
-import java.time.Duration;
-import java.time.LocalTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.zipline.entity.survey.Survey;
 import com.zipline.entity.user.Authority;
 import com.zipline.entity.user.PasswordQuestion;
@@ -27,8 +11,6 @@ import com.zipline.global.exception.survey.SurveyException;
 import com.zipline.global.exception.survey.errorcode.SurveyErrorCode;
 import com.zipline.global.exception.user.UserException;
 import com.zipline.global.exception.user.errorcode.UserErrorCode;
-import com.zipline.global.jwt.TokenProvider;
-import com.zipline.global.jwt.dto.TokenRequestDTO;
 import com.zipline.repository.survey.SurveyRepository;
 import com.zipline.repository.user.PasswordQuestionAnswerRepository;
 import com.zipline.repository.user.PasswordQuestionRepository;
@@ -42,224 +24,198 @@ import com.zipline.service.user.dto.request.SignUpRequestDTO;
 import com.zipline.service.user.dto.request.UserModifyRequestDTO;
 import com.zipline.service.user.dto.response.FindUserIdResponseDTO;
 import com.zipline.service.user.dto.response.UserResponseDTO;
-
-import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.util.Set;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-//todo: 추후 webconfig 활용 리펙터링 
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-	private final UserRepository userRepository;
-	private final SurveyRepository surveyRepository;
-	private final PasswordQuestionRepository passwordQuestionRepository;
-	private final PasswordQuestionAnswerRepository passwordQuestionAnswerRepository;
-	private final PasswordEncoder passwordEncoder;
-	private final TokenProvider tokenProvider;
-	private final RedisTemplate<String, String> redisTemplate;
-	private final SurveyService surveyService;
+  @Transactional(readOnly = true)
+  public UserResponseDTO findById(Long uid) {
+    User user = userRepository.findById(uid)
+        .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+    Survey survey = surveyRepository.findFirstByUserOrderByCreatedAtDesc(user)
+        .orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
 
-	@Transactional(readOnly = true)
-	public UserResponseDTO findById(Long uid) {
-		User user = userRepository.findById(uid)
-			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-		Survey survey = surveyRepository.findFirstByUserOrderByCreatedAtDesc(user)
-			.orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
+    return UserResponseDTO.userSurvey(user, survey);
+  }
 
-		return UserResponseDTO.userSurvey(user, survey);
-	}
+  private final UserRepository userRepository;
+  private final SurveyRepository surveyRepository;
+  private final PasswordQuestionRepository passwordQuestionRepository;
+  private final PasswordQuestionAnswerRepository passwordQuestionAnswerRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final RedisTemplate<String, String> redisTemplate;
+  private final SurveyService surveyService;
+  private final AuthenticationManager authenticationManager;
 
-	@Transactional
-	public void signup(SignUpRequestDTO signUpRequestDto) {
+  @Transactional(readOnly = true)
+  public UserResponseDTO findById(String id) {
+    User user = userRepository.findByLoginId(id)
+        .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+    Survey survey = surveyRepository.findFirstByUserOrderByCreatedAtDesc(user)
+        .orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
 
-		if (!signUpRequestDto.getPassword().equals(signUpRequestDto.getPasswordCheck())) {
-			throw new UserException(UserErrorCode.INVALID_PASSWORD_CHECK);
-		}
+    return UserResponseDTO.userSurvey(user, survey);
+  }
 
-		if (userRepository.existsById(signUpRequestDto.getId())) {
-			throw new UserException(UserErrorCode.INVALID_USER_ID);
-		}
+  @Transactional
+  public void signup(SignUpRequestDTO signUpRequestDto) {
 
-		PasswordQuestion question = passwordQuestionRepository.findById(signUpRequestDto.getPasswordQuestionUid())
-			.orElseThrow(() -> new UserException(UserErrorCode.PASSWORD_QUESTION_NOT_FOUND));
+    if (!signUpRequestDto.getPassword().equals(signUpRequestDto.getPasswordCheck())) {
+      throw new UserException(UserErrorCode.INVALID_PASSWORD_CHECK);
+    }
 
-		User user = User.builder()
-			.id(signUpRequestDto.getId())
-			.password(passwordEncoder.encode(signUpRequestDto.getPassword()))
-			.name(signUpRequestDto.getName())
-			.phoneNo(signUpRequestDto.getPhoneNo())
-			.email(signUpRequestDto.getEmail())
-			.role(Authority.ROLE_AGENT)
-			.noticeMonth(3)
-			.noticeTime(LocalTime.of(11, 0))
-			.build();
-		surveyService.createDefaultSurveyForUser(user);
-		userRepository.save(user);
+    if (userRepository.existsById(signUpRequestDto.getId())) {
+      throw new UserException(UserErrorCode.INVALID_USER_ID);
+    }
 
-		PasswordQuestionAnswer passwordQuestionAnswer = PasswordQuestionAnswer.create(user, question,
-			signUpRequestDto.getQuestionAnswer());
-		passwordQuestionAnswerRepository.save(passwordQuestionAnswer);
+    PasswordQuestion question = passwordQuestionRepository.findById(
+            signUpRequestDto.getPasswordQuestionUid())
+        .orElseThrow(() -> new UserException(UserErrorCode.PASSWORD_QUESTION_NOT_FOUND));
 
-	}
+    User user = User.builder()
+        .id(signUpRequestDto.getId())
+        .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
+        .name(signUpRequestDto.getName())
+        .phoneNo(signUpRequestDto.getPhoneNo())
+        .email(signUpRequestDto.getEmail())
+        .role(Authority.ROLE_AGENT)
+        .noticeMonth(3)
+        .noticeTime(LocalTime.of(11, 0))
+        .build();
+    surveyService.createDefaultSurveyForUser(user);
+    userRepository.save(user);
 
-	@Transactional
-	public TokenRequestDTO login(LoginRequestDTO loginRequestDTO, String deviceId) {
-		User user = userRepository.findByLoginId(loginRequestDTO.getId())
-			.orElseThrow(() -> new UserException(UserErrorCode.INVALID_CREDENTIALS));
+    PasswordQuestionAnswer passwordQuestionAnswer = PasswordQuestionAnswer.create(user, question,
+        signUpRequestDto.getQuestionAnswer());
+    passwordQuestionAnswerRepository.save(passwordQuestionAnswer);
 
-		if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
-			throw new UserException(UserErrorCode.INVALID_CREDENTIALS);
-		}
+  }
 
-		List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getRole().name()));
+  @Transactional
+  public void authenticateAndLogin(LoginRequestDTO loginRequestDTO,
+      HttpServletRequest request) {
+    User user = userRepository.findByLoginId(loginRequestDTO.getId())
+        .orElseThrow(() -> new UserException(UserErrorCode.INVALID_CREDENTIALS));
 
-		Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUid(), null, authorities);
+    if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
+      throw new UserException(UserErrorCode.INVALID_CREDENTIALS);
+    }
 
-		TokenRequestDTO tokenRequestDto = tokenProvider.generateTokenDto(authentication, user.getUid());
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken(loginRequestDTO.getId(),
+            loginRequestDTO.getPassword());
 
-		redisTemplate.opsForValue().set(
-			"refreshToken:" + user.getUid() + ":" + deviceId,
-			tokenRequestDto.getRefreshToken(),
-			Duration.ofDays(7)
-		);
+    Authentication authentication = authenticationManager.authenticate(authenticationToken);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		return tokenRequestDto;
-	}
+    HttpSession session = request.getSession(true);
 
-	public void logout(Long uid, String accessToken, String deviceId) {
-		if (!tokenProvider.validateToken(accessToken)) {
-			throw new AuthException(AuthErrorCode.UNAUTHORIZED_CLIENT);
-		}
+    session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+  }
 
-		String refreshKey = "refreshToken:" + uid + ":" + deviceId;
-		redisTemplate.delete(refreshKey);
+  public UserResponseDTO updateInfo(Long uid, UserModifyRequestDTO userModifyRequestDto) {
+    User user = userRepository.findById(uid)
+        .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+    Survey survey = surveyRepository.findFirstByUserOrderByCreatedAtDesc(user)
+        .orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
+    user.updateInfo(
+        userModifyRequestDto.getName(),
+        userModifyRequestDto.getUrl(),
+        userModifyRequestDto.getPhoneNo(),
+        userModifyRequestDto.getEmail(),
+        userModifyRequestDto.getNoticeMonth(),
+        userModifyRequestDto.getNoticeTime()
+    );
 
-		Date expiration = tokenProvider.getExpiration(accessToken);
-		long now = System.currentTimeMillis();
-		long remainingExpiration = expiration.getTime() - now;
+    userRepository.save(user);
+    return UserResponseDTO.userSurvey(user, survey);
+  }
 
-		if (remainingExpiration > 0) {
-			redisTemplate.opsForValue().set(
-				"blacklist:" + accessToken,
-				"logout",
-				Duration.ofMillis(remainingExpiration)
-			);
-		}
-	}
+  @Transactional(readOnly = true)
+  public FindUserIdResponseDTO findUserId(FindUserIdRequestDTO findUserIdRequestDto) {
+    User user = userRepository.findByNameAndEmail(
+        findUserIdRequestDto.getName(),
+        findUserIdRequestDto.getEmail()
+    ).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-	public UserResponseDTO updateInfo(Long uid, UserModifyRequestDTO userModifyRequestDto) {
-		User user = userRepository.findById(uid)
-			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-		Survey survey = surveyRepository.findFirstByUserOrderByCreatedAtDesc(user)
-			.orElseThrow(() -> new SurveyException(SurveyErrorCode.SURVEY_NOT_FOUND));
-		user.updateInfo(
-			userModifyRequestDto.getName(),
-			userModifyRequestDto.getUrl(),
-			userModifyRequestDto.getPhoneNo(),
-			userModifyRequestDto.getEmail(),
-			userModifyRequestDto.getNoticeMonth(),
-			userModifyRequestDto.getNoticeTime()
-		);
+    return new FindUserIdResponseDTO(user.getId());
+  }
 
-		userRepository.save(user);
-		return UserResponseDTO.userSurvey(user, survey);
-	}
+  @Transactional
+  public String findUserPassword(FindPasswordRequestDTO findPasswordRequestDTO) {
+    User user = userRepository.findByLoginId(findPasswordRequestDTO.getLoginId())
+        .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-	@Transactional
-	public TokenRequestDTO reissue(String refreshToken, String deviceId) {
-		if (!tokenProvider.validateToken(refreshToken)) {
-			throw new JwtException(AuthErrorCode.JWT_DECODE_FAIL.getMessage());
-		}
+    PasswordQuestion question = passwordQuestionRepository.findById(
+            findPasswordRequestDTO.getPasswordQuestionUid())
+        .orElseThrow(() -> new UserException(UserErrorCode.PASSWORD_QUESTION_NOT_FOUND));
 
-		String uidStr = tokenProvider.getUserIdFromToken(refreshToken);
-		Long uid = Long.parseLong(uidStr);
-		String redisKey = "refreshToken:" + uidStr + ":" + deviceId;
-		String saveRefreshToken = redisTemplate.opsForValue().get(redisKey);
+    PasswordQuestionAnswer answer = passwordQuestionAnswerRepository.findByUserAndPasswordQuestion(
+            user, question)
+        .orElseThrow(() -> new UserException(UserErrorCode.PASSWORD_QUESTION_NOT_FOUND));
 
-		if (saveRefreshToken == null || !saveRefreshToken.equals(refreshToken)) {
-			throw new JwtException(AuthErrorCode.JWT_SIGNATURE_FAIL.getMessage());
-		}
+    if (!answer.getAnswer().equals(findPasswordRequestDTO.getAnswer())) {
+      throw new UserException(UserErrorCode.INCORRECT_QUESTION_ANSWER);
+    }
 
-		User user = userRepository.findById(uid)
-			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+    Set<String> keys = redisTemplate.keys("resetToken:*");
+    if (keys != null) {
+      for (String key : keys) {
+        String uidStr = redisTemplate.opsForValue().get(key);
+        if (uidStr != null && uidStr.equals(user.getUid().toString())) {
+          redisTemplate.delete(key);
+        }
+      }
+    }
 
-		List<GrantedAuthority> authorities =
-			List.of(new SimpleGrantedAuthority(user.getRole().name()));
+    String resetToken = UUID.randomUUID().toString();
 
-		Authentication authentication = new UsernamePasswordAuthenticationToken(uid, null, authorities);
+    redisTemplate.opsForValue()
+        .set("resetToken:" + resetToken, user.getUid().toString(),
+            Duration.ofMinutes(5));   //비밀번호 재설정 제한시간 5분
 
-		TokenRequestDTO tokenRequestDto = tokenProvider.generateTokenDto(authentication, uid);
+    return resetToken;
+  }
 
-		redisTemplate.opsForValue().set(redisKey, refreshToken, Duration.ofDays(7));
+  @Transactional
+  public void resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO) {
+    if (!resetPasswordRequestDTO.getNewPassword()
+        .equals(resetPasswordRequestDTO.getNewPasswordCheck())) {
+      throw new UserException(UserErrorCode.INVALID_PASSWORD_CHECK);
+    }
 
-		return tokenRequestDto;
-	}
+    String resetToken = resetPasswordRequestDTO.getToken();
 
-	@Transactional(readOnly = true)
-	public FindUserIdResponseDTO findUserId(FindUserIdRequestDTO findUserIdRequestDto) {
-		User user = userRepository.findByNameAndEmail(
-			findUserIdRequestDto.getName(),
-			findUserIdRequestDto.getEmail()
-		).orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+    if (resetToken == null) {
+      throw new AuthException(AuthErrorCode.EXPIRED_TOKEN);
+    }
 
-		return new FindUserIdResponseDTO(user.getId());
-	}
+    String redisKey = "resetToken:" + resetToken;
+    String uidStr = redisTemplate.opsForValue().get(redisKey);
 
-	@Transactional
-	public String findUserPassword(FindPasswordRequestDTO findPasswordRequestDTO) {
-		User user = userRepository.findByLoginId(findPasswordRequestDTO.getLoginId())
-			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+    User user = userRepository.findByLoginId(uidStr)
+        .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-		PasswordQuestion question = passwordQuestionRepository.findById(findPasswordRequestDTO.getPasswordQuestionUid())
-			.orElseThrow(() -> new UserException(UserErrorCode.PASSWORD_QUESTION_NOT_FOUND));
+    user.updatePassword(passwordEncoder.encode(resetPasswordRequestDTO.getNewPassword()));
+    userRepository.save(user);
 
-		PasswordQuestionAnswer answer = passwordQuestionAnswerRepository.findByUserAndPasswordQuestion(user, question)
-			.orElseThrow(() -> new UserException(UserErrorCode.PASSWORD_QUESTION_NOT_FOUND));
-
-		if (!answer.getAnswer().equals(findPasswordRequestDTO.getAnswer())) {
-			throw new UserException(UserErrorCode.INCORRECT_QUESTION_ANSWER);
-		}
-
-		Set<String> keys = redisTemplate.keys("resetToken:*");
-		if (keys != null) {
-			for (String key : keys) {
-				String uidStr = redisTemplate.opsForValue().get(key);
-				if (uidStr != null && uidStr.equals(user.getUid().toString())) {
-					redisTemplate.delete(key);
-				}
-			}
-		}
-
-		String resetToken = UUID.randomUUID().toString();
-
-		redisTemplate.opsForValue()
-			.set("resetToken:" + resetToken, user.getUid().toString(), Duration.ofMinutes(5));   //비밀번호 재설정 제한시간 5분
-
-		return resetToken;
-	}
-
-	@Transactional
-	public void resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO) {
-		if (!resetPasswordRequestDTO.getNewPassword().equals(resetPasswordRequestDTO.getNewPasswordCheck())) {
-			throw new UserException(UserErrorCode.INVALID_PASSWORD_CHECK);
-		}
-
-		String redisKey = "resetToken:" + resetPasswordRequestDTO.getToken();
-		String uidStr = redisTemplate.opsForValue().get(redisKey);
-
-		if (uidStr == null) {
-			throw new AuthException(AuthErrorCode.EXPIRED_TOKEN);
-		}
-
-		Long uid = Long.parseLong(uidStr);
-		User user = userRepository.findById(uid)
-			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-
-		user.updatePassword(passwordEncoder.encode(resetPasswordRequestDTO.getNewPassword()));
-		userRepository.save(user);
-
-		redisTemplate.delete(redisKey);
-	}
+    redisTemplate.delete(redisKey);
+  }
 }

@@ -1,16 +1,18 @@
 package com.zipline.controller.notification;
 
+
 import com.zipline.global.request.PageRequestDTO;
 import com.zipline.global.response.ApiResponse;
+import com.zipline.security.CustomUserDetails;
 import com.zipline.service.notification.EmitterService;
 import com.zipline.service.notification.NotificationService;
 import com.zipline.service.notification.dto.response.NotificationResponseDTO;
-import java.security.Principal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -31,43 +33,44 @@ public class NotificationController {
 
   @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public SseEmitter subscribe(
-      Principal principal) {
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-    return emitterService.subscribe(principal.getName());
+    return emitterService.subscribe(String.valueOf(userDetails.getUserUid()));
   }
 
   @GetMapping("")
   public ResponseEntity<ApiResponse<List<NotificationResponseDTO>>> getNotifications(
-      @ModelAttribute PageRequestDTO pageRequestDTO, Principal principal) {
+      @ModelAttribute PageRequestDTO pageRequestDTO,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
     List<NotificationResponseDTO> notificationList = notificationService.getNotificationList(
         pageRequestDTO,
-        Long.parseLong(principal.getName()));
+        userDetails.getUserUid());
     return ResponseEntity.ok(ApiResponse.ok("알림 조회 완료", notificationList));
   }
 
   @PutMapping("/{notificationUid}/read")
   public ResponseEntity<ApiResponse<NotificationResponseDTO>> readNotification(
-      @PathVariable Long notificationUid, Principal principal) {
+      @PathVariable Long notificationUid, @AuthenticationPrincipal CustomUserDetails userDetails) {
     NotificationResponseDTO notification = notificationService.modifyNotificationToRead(
         notificationUid,
-        Long.parseLong(principal.getName()));
+        userDetails.getUserUid());
     return ResponseEntity.ok(ApiResponse.ok("알림 읽음 처리 완료", notification));
   }
 
   @PutMapping("/read")
   public ResponseEntity<ApiResponse<List<NotificationResponseDTO>>> readAllNotifications(
-      Principal principal) {
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
     List<NotificationResponseDTO> notification = notificationService.modifyAllNotificationsToRead(
-        Long.parseLong(principal.getName()));
+        userDetails.getUserUid());
     return ResponseEntity.ok(ApiResponse.ok("모든 알림 읽음 처리 완료", notification));
   }
 
   @DeleteMapping("/{notificationUid}")
   public ResponseEntity<ApiResponse<Void>> deleteNotification(
-      @PathVariable Long notificationUid, Principal principal) {
+      @PathVariable Long notificationUid, @AuthenticationPrincipal CustomUserDetails userDetails) {
     notificationService.deleteNotification(
         notificationUid,
-        Long.parseLong(principal.getName()));
+        userDetails.getUserUid());
     return ResponseEntity.ok(ApiResponse.ok("알림 삭제 완료"));
   }
 }

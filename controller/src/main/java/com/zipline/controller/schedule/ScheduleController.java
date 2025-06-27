@@ -1,6 +1,8 @@
 package com.zipline.controller.schedule;
 
+
 import com.zipline.global.response.ApiResponse;
+import com.zipline.security.CustomUserDetails;
 import com.zipline.service.schedule.ScheduleService;
 import com.zipline.service.schedule.dto.request.DateRangeRequest;
 import com.zipline.service.schedule.dto.request.ScheduleCreateRequestDTO;
@@ -8,9 +10,9 @@ import com.zipline.service.schedule.dto.request.ScheduleModifyRequestDTO;
 import com.zipline.service.schedule.dto.response.ScheduleResponseDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.security.Principal;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -33,9 +35,10 @@ public class ScheduleController {
   }
 
   @PostMapping("")
-  public ResponseEntity<ApiResponse<Void>> createSchedule(@RequestBody @Valid ScheduleCreateRequestDTO request,
-      Principal principal) {
-    scheduleService.createSchedule(request, Long.parseLong(principal.getName()));
+  public ResponseEntity<ApiResponse<Void>> createSchedule(
+      @RequestBody @Valid ScheduleCreateRequestDTO request,
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    scheduleService.createSchedule(request, userDetails.getUserUid());
 
     ApiResponse<Void> responseBody = ApiResponse.ok("일정 생성 성공");
     return ResponseEntity.ok(responseBody);
@@ -44,10 +47,10 @@ public class ScheduleController {
   @GetMapping("")
   public ResponseEntity<ApiResponse<List<ScheduleResponseDTO>>> getScheduleList(
       @Valid @ModelAttribute DateRangeRequest dateRange,
-      Principal principal) {
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
 
     List<ScheduleResponseDTO> scheduleList = scheduleService.getScheduleList(dateRange,
-        Long.parseLong(principal.getName())
+        userDetails.getUserUid()
     );
 
     ApiResponse<List<ScheduleResponseDTO>> response = ApiResponse.ok("일정 목록 조회 성공", scheduleList);
@@ -58,9 +61,9 @@ public class ScheduleController {
   public ResponseEntity<ApiResponse<ScheduleResponseDTO>> modifySchedule(
       @PathVariable Long scheduleUid,
       @Valid @RequestBody ScheduleModifyRequestDTO request,
-      Principal principal) {
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
     ScheduleResponseDTO response = scheduleService.modifySchedule(
-        Long.parseLong(principal.getName()), scheduleUid,request);
+        userDetails.getUserUid(), scheduleUid, request);
 
     ApiResponse<ScheduleResponseDTO> responseBody = ApiResponse.ok("일정 수정 성공", response);
     return ResponseEntity.ok(responseBody);
@@ -68,8 +71,8 @@ public class ScheduleController {
 
   @DeleteMapping("/{scheduleUid}")
   public ResponseEntity<ApiResponse<Void>> deleteSchedule(@PathVariable Long scheduleUid,
-      Principal principal) {
-    scheduleService.deleteSchedule(scheduleUid, Long.parseLong(principal.getName()));
+      @AuthenticationPrincipal CustomUserDetails userDetails) {
+    scheduleService.deleteSchedule(scheduleUid, userDetails.getUserUid());
 
     ApiResponse<Void> responseBody = ApiResponse.ok("일정 삭제 성공");
     return ResponseEntity.ok(responseBody);
