@@ -28,6 +28,7 @@ dependencies {
     implementation project(':infrastructure')
     implementation project(':common')
     implementation project(':security')
+    implementation 'org.springframework.session:spring-session-data-redis'
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
