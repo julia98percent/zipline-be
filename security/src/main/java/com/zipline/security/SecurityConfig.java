@@ -86,8 +86,8 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/v1/users/login", "/api/v1/users/signup",
                 "/api/v1/users/reissue", "/api/v1/users/find-id", "/api/v1/users/find-password",
-                "/api/v1/users/reset-password", "/actuator/health", "/actuator/info",
-                "/actuator/prometheus", "/api/v1/users/csrf")
+                "/api/v1/users/reset-password", "/actuator/health", "/actuator/health/**", 
+                "/actuator/info", "/actuator/prometheus", "/api/v1/users/csrf")
             .permitAll()
             .requestMatchers(new RegexRequestMatcher("/api/v1/surveys/[A-Za-z0-9]+$", "GET"),
                 new RegexRequestMatcher("/api/v1/surveys/[A-Za-z0-9]{26}/submit$$", "POST"))
