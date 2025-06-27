@@ -27,16 +27,15 @@ spring:
       max-request-size: 100MB
   cache:
     type: redis
+  session:
+    redis:
+      namespace: ${REDIS_SESSION_NAMESPACE}
+      flush-mode: ${SESSION_FLUSH_MODE}
+    timeout: ${SESSION_TIMEOUT}
 server:
   port: ${PORT_API}
   tomcat:
     max-http-form-post-size: ${MAX_HTTP_TOMCAT_FORM_POST_SIZE}
-jwt:
-  secret: ${JWT_SECRET}
-  accessToken:
-    expiration: ${JWT_ACC_EXPIRATION}
-  refreshToken:
-    expiration: ${JWT_REF_EXPIRATION}
 aws:
   region: ${AWS_REGION}
   credentials:
@@ -75,7 +74,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: '*'
+        include: "*"
   endpoint:
     health:
       show-details: always

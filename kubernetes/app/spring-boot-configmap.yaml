@@ -10,11 +10,15 @@ data:
   DB_USERNAME: root
   REDIS_PORT: "6379"
   REDIS_TIMEOUT: "2000"
+  REDIS_SESSION_NAMESPACE: "spring:session:zipline"
+  SESSION_TIMEOUT: "30m"
+  SESSION_FLUSH_MODE: "on_save"
   PORT_API: "8080"
   MAX_HTTP_TOMCAT_FORM_POST_SIZE: 10MB
   AWS_REGION: ap-northeast-2
   AWS_STACK_VAL: "false"
   SURVEY_DELIMITER: $$###
-  FILE_ALLOWED_MEME_TYPES: image/jpg,image/jpeg,image/png,image/webp,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,
+  FILE_ALLOWED_MIME_TYPES:
+    image/jpg,image/jpeg,image/png,image/webp,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,
     application/csv,
     text/plain,application/x-tika-ooxml

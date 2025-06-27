@@ -6,7 +6,12 @@ metadata:
   labels:
     app: spring-boot-app
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: spring-boot-app
@@ -24,7 +29,7 @@ spec:
       initContainers:
         - name: wait-for-monitoring
           image: busybox:1.35
-          command: ['sh', '-c']
+          command: [ "sh", "-c" ]
           args:
             - |
               echo "Waiting for Prometheus..."
@@ -117,9 +122,9 @@ spec:
                   name: spring-boot-config
             - name: AWS_STACK_VAL
               valueFrom:
-                 configMapKeyRef:
-                   key: AWS_STACK_VAL
-                   name: spring-boot-config
+                configMapKeyRef:
+                  key: AWS_STACK_VAL
+                  name: spring-boot-config
             - name: SURVEY_DELIMITER
               valueFrom:
                 configMapKeyRef:
@@ -128,27 +133,12 @@ spec:
             - name: FILE_ALLOWED_MEME_TYPES
               valueFrom:
                 configMapKeyRef:
-                  key: FILE_ALLOWED_MEME_TYPES
+                  key: FILE_ALLOWED_MIME_TYPES
                   name: spring-boot-config
             - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
                   key: REDIS_URL
-                  name: spring-boot-secret
-            - name: JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  key: JWT_SECRET
-                  name: spring-boot-secret
-            - name: JWT_ACC_EXPIRATION
-              valueFrom:
-                secretKeyRef:
-                  key: JWT_ACC_EXPIRATION
-                  name: spring-boot-secret
-            - name: JWT_REF_EXPIRATION
-              valueFrom:
-                secretKeyRef:
-                  key: JWT_REF_EXPIRATION
                   name: spring-boot-secret
             - name: AWS_ACC_KEY
               valueFrom:
@@ -195,27 +185,42 @@ spec:
                 secretKeyRef:
                   key: KAKAO_API_KEY
                   name: spring-boot-secret
-#            - name: SPRING_PROFILES_ACTIVE
-#              value: "k8s"
-#            - name: SPRING_CONFIG_LOCATION
-#              value: "classpath:/application.yml,/etc/config/application-k8s.yml"
-#          volumeMounts:
-#            - name: config-volume
-#              mountPath: /etc/config
-#          readinessProbe:
-#            httpGet:
-#              path: /actuator/health/readiness
-#              port: 8080
-#            initialDelaySeconds: 30
-#            periodSeconds: 10
-#            timeoutSeconds: 5
-#          livenessProbe:
-#            httpGet:
-#              path: /actuator/health/liveness
-#              port: 8080
-#            initialDelaySeconds: 60
-#            periodSeconds: 10
-#            timeoutSeconds: 5
+            - name: REDIS_SESSION_NAMESPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: spring-boot-config
+                  key: REDIS_SESSION_NAMESPACE
+            - name: SESSION_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  name: spring-boot-config
+                  key: SESSION_TIMEOUT
+            - name: SESSION_FLUSH_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: spring-boot-config
+                  key: SESSION_FLUSH_MODE
+          #            - name: SPRING_PROFILES_ACTIVE
+          #              value: "k8s"
+          #            - name: SPRING_CONFIG_LOCATION
+          #              value: "classpath:/application.yml,/etc/config/application-k8s.yml"
+          #          volumeMounts:
+          #            - name: config-volume
+          #              mountPath: /etc/config
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
 #          resources:
 #            requests:
 #              memory: 512Mi

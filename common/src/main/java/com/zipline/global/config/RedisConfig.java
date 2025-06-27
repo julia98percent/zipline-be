@@ -9,34 +9,37 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
+
 
 @Configuration
+@EnableRedisHttpSession(maxInactiveIntervalInSeconds = 1800)
 public class RedisConfig {
-	@Value("${spring.data.redis.port}")
-	private int port;
 
-	@Value("${spring.data.redis.host}")
-	private String host;
+  @Value("${spring.data.redis.port}")
+  private int port;
 
-	@Bean
-	public RedisConnectionFactory redisConnectionFactory() {
-		LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(host, port);
-		return lettuceConnectionFactory;
-	}
+  @Value("${spring.data.redis.host}")
+  private String host;
 
-	@Bean
-	public RedisTemplate<String, String> redisTemplate() {
-		StringRedisTemplate redisTemplate = new StringRedisTemplate();
-		redisTemplate.setConnectionFactory(redisConnectionFactory());
-		return redisTemplate;
-	}
+  @Bean
+  public RedisConnectionFactory redisConnectionFactory() {
+    return new LettuceConnectionFactory(host, port);
+  }
 
-	@Bean
-	public ObjectMapper objectMapper() {
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.getFactory().setStreamWriteConstraints(
-			StreamWriteConstraints.builder().maxNestingDepth(2000).build()
-		);
-		return objectMapper;
-	}
+  @Bean
+  public RedisTemplate<String, String> redisTemplate() {
+    StringRedisTemplate redisTemplate = new StringRedisTemplate();
+    redisTemplate.setConnectionFactory(redisConnectionFactory());
+    return redisTemplate;
+  }
+
+  @Bean
+  public ObjectMapper objectMapper() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.getFactory().setStreamWriteConstraints(
+        StreamWriteConstraints.builder().maxNestingDepth(2000).build()
+    );
+    return objectMapper;
+  }
 }
