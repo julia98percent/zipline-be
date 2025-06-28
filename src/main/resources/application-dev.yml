@@ -90,3 +90,10 @@ management:
         account-id: ${NR_ACCOUNT_ID}
         enabled: true
         api-key: ${NR_API_KEY}
+logging:
+  level:
+    org.springframework.web.servlet.DispatcherServlet: WARN
+    org.springframework.security: WARN
+    org.springframework.session: WARN
+    org.springframework.boot.actuator: WARN
+    org.hibernate.SQL: WARN
