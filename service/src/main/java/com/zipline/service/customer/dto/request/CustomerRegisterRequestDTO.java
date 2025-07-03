@@ -76,29 +76,29 @@ public class CustomerRegisterRequestDTO {
 	@DecimalMax(value = "1000000000", message = "최대 보증금은 1000000000 이하이어야 합니다.")
 	private BigInteger maxDeposit;
 
-	@Schema(description = "생년월일", example = "20220410")
-	@Pattern(regexp = "\\d{8}", message = "생년월일은 yyyyMMdd 형식의 숫자여야 합니다.")
-	private String birthDay;
+  @Schema(description = "생년월일", example = "20220410")
+  @Pattern(regexp = "\\d{8}", message = "생년월일은 yyyyMMdd 형식의 숫자여야 합니다.")
+  private String birthday;
 
-	public Customer toEntity(User user) {
-		return Customer.builder()
-			.user(user)
-			.name(name)
-			.phoneNo(phoneNo)
-			.telProvider(telProvider)
-			.legalDistrictCode(legalDistrictCode)
-			.minRent(minRent)
-			.maxRent(maxRent)
-			.trafficSource(trafficSource)
-			.isLandlord(landlord)
-			.isTenant(tenant)
-			.isBuyer(buyer)
-			.isSeller(seller)
-			.maxPrice(maxPrice)
-			.minPrice(minPrice)
-			.minDeposit(minDeposit)
-			.maxDeposit(maxDeposit)
-			.birthday(birthDay)
-			.build();
-	}
+  public Customer toEntity(User user) {
+    return Customer.builder()
+        .user(user)
+        .name(name)
+        .phoneNo(phoneNo)
+        .telProvider(telProvider)
+        .legalDistrictCode(legalDistrictCode)
+        .minRent(minRent)
+        .maxRent(maxRent)
+        .trafficSource(trafficSource)
+        .isLandlord(landlord)
+        .isTenant(tenant)
+        .isBuyer(buyer)
+        .isSeller(seller)
+        .maxPrice(maxPrice)
+        .minPrice(minPrice)
+        .minDeposit(minDeposit)
+        .maxDeposit(maxDeposit)
+        .birthday(birthday)
+        .build();
+  }
 }

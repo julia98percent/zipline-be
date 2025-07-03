@@ -127,21 +127,21 @@ public class ExcelServiceImpl implements ExcelService {
 		return geo.getLegalDistrictCode();
 	}
 
-	private Customer toCustomerEntity(CustomerExcelDTO dto, String legalCode, User user) {
-		return Customer.builder()
-			.user(user)
-			.name(dto.getName())
-			.phoneNo(dto.getPhoneNo())
-			.telProvider(dto.getTelProvider())
-			.legalDistrictCode(legalCode)
-			.minRent(dto.getMinRent()).maxRent(dto.getMaxRent())
-			.minDeposit(dto.getMinDeposit()).maxDeposit(dto.getMaxDeposit())
-			.minPrice(dto.getMinPrice()).maxPrice(dto.getMaxPrice())
-			.isBuyer(dto.isBuyer()).isSeller(dto.isSeller())
-			.isLandlord(dto.isLandlord()).isTenant(dto.isTenant())
-			.birthday(dto.getBirthDay())
-			.build();
-	}
+  private Customer toCustomerEntity(CustomerExcelDTO dto, String legalCode, User user) {
+    return Customer.builder()
+        .user(user)
+        .name(dto.getName())
+        .phoneNo(dto.getPhoneNo())
+        .telProvider(dto.getTelProvider())
+        .legalDistrictCode(legalCode)
+        .minRent(dto.getMinRent()).maxRent(dto.getMaxRent())
+        .minDeposit(dto.getMinDeposit()).maxDeposit(dto.getMaxDeposit())
+        .minPrice(dto.getMinPrice()).maxPrice(dto.getMaxPrice())
+        .isBuyer(dto.isBuyer()).isSeller(dto.isSeller())
+        .isLandlord(dto.isLandlord()).isTenant(dto.isTenant())
+        .birthday(dto.getBirthday())
+        .build();
+  }
 
 	private Map<String, Customer> prepareCustomersForProperty(List<AgentPropertyExcelDTO> list, User user) {
 		log.info("[매물 고객 준비 시작] 총 고객 수={}", list.size());
