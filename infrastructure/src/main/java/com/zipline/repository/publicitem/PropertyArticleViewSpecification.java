@@ -103,10 +103,10 @@ public class PropertyArticleViewSpecification {
         return null;
       }
       if (minTotalArea == null) {
-        return criteriaBuilder.lessThanOrEqualTo(root.get("netArea"), maxTotalArea);
+        return criteriaBuilder.lessThanOrEqualTo(root.get("totalArea"), maxTotalArea);
       }
       if (maxTotalArea == null) {
-        return criteriaBuilder.greaterThanOrEqualTo(root.get("netArea"), minTotalArea);
+        return criteriaBuilder.greaterThanOrEqualTo(root.get("totalArea"), minTotalArea);
       }
       return criteriaBuilder.between(root.get("netArea"), minTotalArea, maxTotalArea);
     };
