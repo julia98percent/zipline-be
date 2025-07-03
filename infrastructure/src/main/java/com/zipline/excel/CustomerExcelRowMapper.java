@@ -1,9 +1,11 @@
 package com.zipline.excel;
 
-import static com.zipline.global.util.ExcelParser.*;
+import static com.zipline.global.util.ExcelParser.formatPhone;
+import static com.zipline.global.util.ExcelParser.getCell;
+import static com.zipline.global.util.ExcelParser.parseBigInt;
+import static com.zipline.global.util.ExcelParser.parsePrimitiveBoolean;
 
 import java.math.BigInteger;
-
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Component;

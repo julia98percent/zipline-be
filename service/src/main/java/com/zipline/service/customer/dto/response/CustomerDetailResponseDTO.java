@@ -1,11 +1,9 @@
 package com.zipline.service.customer.dto.response;
 
-import java.math.BigInteger;
-import java.util.List;
-
 import com.zipline.entity.customer.Customer;
 import com.zipline.entity.label.LabelCustomer;
-
+import java.math.BigInteger;
+import java.util.List;
 import lombok.Getter;
 
 @Getter
@@ -54,14 +52,15 @@ public class CustomerDetailResponseDTO {
         .toList();
   }
 
-	@Getter
-	public static class LabelDTO {
-		private Long uid;
-		private String name;
+  @Getter
+  public static class LabelDTO {
 
-		public LabelDTO(Long uid, String name) {
-			this.uid = uid;
-			this.name = name;
-		}
-	}
+    private Long uid;
+    private String name;
+
+    public LabelDTO(Long uid, String name) {
+      this.uid = uid;
+      this.name = name;
+    }
+  }
 }

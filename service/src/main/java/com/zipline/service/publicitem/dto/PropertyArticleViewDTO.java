@@ -1,13 +1,11 @@
 package com.zipline.service.publicitem.dto;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.zipline.entity.enums.Category;
 import com.zipline.entity.enums.Platform;
 import com.zipline.entity.publicitem.PropertyArticle;
-
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,12 +64,12 @@ public class PropertyArticleViewDTO {
         .build();
   }
 
-	/**
-	 * PropertyArticle 엔티티 리스트를 DTO 리스트로 변환
-	 */
-	public static List<PropertyArticleViewDTO> fromList(List<PropertyArticle> articles) {
-		return articles.stream()
-			.map(PropertyArticleViewDTO::from)
-			.collect(Collectors.toList());
-	}
+  /**
+   * PropertyArticle 엔티티 리스트를 DTO 리스트로 변환
+   */
+  public static List<PropertyArticleViewDTO> fromList(List<PropertyArticle> articles) {
+    return articles.stream()
+        .map(PropertyArticleViewDTO::from)
+        .collect(Collectors.toList());
+  }
 }

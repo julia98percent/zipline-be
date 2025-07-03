@@ -15,22 +15,28 @@ public enum PublicItemErrorCode implements ErrorCode {
       HttpStatus.BAD_REQUEST);
 
 
-    private final String code;
-    private final String message;
-    private final HttpStatus status;
+  private final String code;
+  private final String message;
+  private final HttpStatus status;
 
-    PublicItemErrorCode(String code, String message, HttpStatus status) {
-        this.code = code;
-        this.message = message;
-        this.status = status;
-    }
+  PublicItemErrorCode(String code, String message, HttpStatus status) {
+    this.code = code;
+    this.message = message;
+    this.status = status;
+  }
 
-    @Override
-    public String getCode() { return code; }
+  @Override
+  public String getCode() {
+    return code;
+  }
 
-    @Override
-    public String getMessage() { return message; }
+  @Override
+  public String getMessage() {
+    return message;
+  }
 
-    @Override
-    public HttpStatus getStatus() { return status; }
+  @Override
+  public HttpStatus getStatus() {
+    return status;
+  }
 }
