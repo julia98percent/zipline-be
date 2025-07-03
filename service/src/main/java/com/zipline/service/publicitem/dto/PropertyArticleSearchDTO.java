@@ -46,17 +46,17 @@ public class PropertyArticleSearchDTO {
 	@Schema(description = "최대 월세", example = "2000")
 	private Long maxMonthlyRent;
 
-	@Schema(description = "최소 전용면적(㎡)", example = "10.0")
-	private Double minExclusiveArea;
+  @Schema(description = "최소 전용면적(㎡)", example = "10.0")
+  private Double minNetArea;
 
-	@Schema(description = "최대 전용면적(㎡)", example = "185.0")
-	private Double maxExclusiveArea;
+  @Schema(description = "최대 전용면적(㎡)", example = "185.0")
+  private Double maxNetArea;
 
-	@Schema(description = "최소 공급면적(㎡)", example = "10.0")
-	private Double minSupplyArea;
+  @Schema(description = "최소 공급면적(㎡)", example = "10.0")
+  private Double minTotalArea;
 
-	@Schema(description = "최대 공급면적(㎡)", example = "185.0")
-	private Double maxSupplyArea;
+  @Schema(description = "최대 공급면적(㎡)", example = "185.0")
+  private Double maxTotalArea;
 
 	private String address;
 }

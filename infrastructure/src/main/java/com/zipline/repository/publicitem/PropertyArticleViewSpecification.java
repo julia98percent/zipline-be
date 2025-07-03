@@ -85,36 +85,43 @@ public class PropertyArticleViewSpecification {
 		};
 	}
 
-	/**
-	 * 공급 면적 범위로 검색하는 명세
-	 */
-	public static Specification<PropertyArticle> supplyAreaBetween(Double minSupplyArea, Double maxSupplyArea) {
-		return (root, query, criteriaBuilder) -> {
-			if (minSupplyArea == null && maxSupplyArea == null)
-				return null;
-			if (minSupplyArea == null)
-				return criteriaBuilder.lessThanOrEqualTo(root.get("exclusiveArea"), maxSupplyArea);
-			if (maxSupplyArea == null)
-				return criteriaBuilder.greaterThanOrEqualTo(root.get("exclusiveArea"), minSupplyArea);
-			return criteriaBuilder.between(root.get("supplyArea"), minSupplyArea, maxSupplyArea);
-		};
-	}
+  /**
+   * 공급 면적 범위로 검색하는 명세
+   */
+  public static Specification<PropertyArticle> totalAreaBetween(Double minTotalArea,
+      Double maxTotalArea) {
+    return (root, query, criteriaBuilder) -> {
+      if (minTotalArea == null && maxTotalArea == null) {
+        return null;
+      }
+      if (minTotalArea == null) {
+        return criteriaBuilder.lessThanOrEqualTo(root.get("netArea"), maxTotalArea);
+      }
+      if (maxTotalArea == null) {
+        return criteriaBuilder.greaterThanOrEqualTo(root.get("netArea"), minTotalArea);
+      }
+      return criteriaBuilder.between(root.get("netArea"), minTotalArea, maxTotalArea);
+    };
+  }
 
-	/**
-	 * 전용 면적 범위로 검색하는 명세
-	 */
-	public static Specification<PropertyArticle> exclusiveAreaBetween(Double minExclusiveArea,
-		Double maxExclusiveArea) {
-		return (root, query, criteriaBuilder) -> {
-			if (minExclusiveArea == null && maxExclusiveArea == null)
-				return null;
-			if (minExclusiveArea == null)
-				return criteriaBuilder.lessThanOrEqualTo(root.get("exclusiveArea"), maxExclusiveArea);
-			if (maxExclusiveArea == null)
-				return criteriaBuilder.greaterThanOrEqualTo(root.get("exclusiveArea"), minExclusiveArea);
-			return criteriaBuilder.between(root.get("exclusiveArea"), minExclusiveArea, maxExclusiveArea);
-		};
-	}
+  /**
+   * 전용 면적 범위로 검색하는 명세
+   */
+  public static Specification<PropertyArticle> netAreaBetween(Double minNetArea,
+      Double maxNetArea) {
+    return (root, query, criteriaBuilder) -> {
+      if (minNetArea == null && maxNetArea == null) {
+        return null;
+      }
+      if (minNetArea == null) {
+        return criteriaBuilder.lessThanOrEqualTo(root.get("netArea"), maxNetArea);
+      }
+      if (maxNetArea == null) {
+        return criteriaBuilder.greaterThanOrEqualTo(root.get("netArea"), minNetArea);
+      }
+      return criteriaBuilder.between(root.get("netArea"), minNetArea, maxNetArea);
+    };
+  }
 
 	/**
 	 * 등록일 범위로 검색하는 명세

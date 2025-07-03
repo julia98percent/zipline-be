@@ -95,36 +95,37 @@ public class CounselResponseDTO {
 		}
 	}
 
-	@Getter
-	public static class PropertyInfo {
-		private String address;
-		private String type;
-		private BigInteger price;
-		private BigInteger deposit;
-		private BigInteger monthlyRent;
-		private Double exclusiveArea;
-		private Double supplyArea;
-		private Integer floor;
-		private Year constructionYear;
-		private boolean hasElevator;
-		private Double parkingCapacity;
-		private boolean hasPet;
-		private String description;
+  @Getter
+  public static class PropertyInfo {
 
-		public PropertyInfo(AgentProperty property) {
-			this.address = property.getAddress();
-			this.type = property.getRealCategory().name().toString();
-			this.price = property.getPrice();
-			this.deposit = property.getDeposit();
-			this.monthlyRent = property.getMonthlyRent();
-			this.exclusiveArea = property.getTotalArea();
-			this.supplyArea = property.getNetArea();
-			this.floor = property.getFloor();
-			this.constructionYear = property.getConstructionYear();
-			this.hasElevator = property.getHasElevator();
-			this.parkingCapacity = property.getParkingCapacity();
-			this.hasPet = property.getPetsAllowed();
-			this.description = property.getDetails();
-		}
-	}
+    private String address;
+    private String type;
+    private BigInteger price;
+    private BigInteger deposit;
+    private BigInteger monthlyRent;
+    private Double netArea;
+    private Double totalArea;
+    private Integer floor;
+    private Year constructionYear;
+    private boolean hasElevator;
+    private Double parkingCapacity;
+    private boolean petsAllowed;
+    private String description;
+
+    public PropertyInfo(AgentProperty property) {
+      this.address = property.getAddress();
+      this.type = property.getRealCategory().name().toString();
+      this.price = property.getPrice();
+      this.deposit = property.getDeposit();
+      this.monthlyRent = property.getMonthlyRent();
+      this.netArea = property.getNetArea();
+      this.totalArea = property.getTotalArea();
+      this.floor = property.getFloor();
+      this.constructionYear = property.getConstructionYear();
+      this.hasElevator = property.getHasElevator();
+      this.parkingCapacity = property.getParkingCapacity();
+      this.petsAllowed = property.getPetsAllowed();
+      this.description = property.getDetails();
+    }
+  }
 }

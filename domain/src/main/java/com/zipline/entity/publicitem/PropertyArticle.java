@@ -62,11 +62,11 @@ public class PropertyArticle {
 	@Column(name = "latitude")
 	private Double latitude;
 
-	@Column(name = "supply_area")
-	private Double supplyArea;
+  @Column(name = "total_area")
+  private Double totalArea;
 
-	@Column(name = "exclusive_area")
-	private Double exclusiveArea;
+  @Column(name = "net_area")
+  private Double netArea;
 
 	@Column(name = "address")
 	private String address;
@@ -90,26 +90,27 @@ public class PropertyArticle {
 		return new PropertyArticleBuilder();
 	}
 
-	public static class PropertyArticleBuilder {
-		private Long id;
-		private String articleId;
-		private String regionCode;
-		private Category category;
-		private String buildingName;
-		private String description;
-		private String buildingType;
-		private Long price;
-		private Long deposit;
-		private Long monthlyRent;
-		private Double longitude;
-		private Double latitude;
-		private Double supplyArea;
-		private Double exclusiveArea;
-		private String address;
-		private Platform platform;
-		private String platformUrl;
-		private LocalDateTime createdAt;
-		private LocalDateTime updatedAt;
+  public static class PropertyArticleBuilder {
+
+    private Long id;
+    private String articleId;
+    private String regionCode;
+    private Category category;
+    private String buildingName;
+    private String description;
+    private String buildingType;
+    private Long price;
+    private Long deposit;
+    private Long monthlyRent;
+    private Double longitude;
+    private Double latitude;
+    private Double netArea;
+    private Double totalArea;
+    private String address;
+    private Platform platform;
+    private String platformUrl;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
 		PropertyArticleBuilder() {
 		}
@@ -174,15 +175,15 @@ public class PropertyArticle {
 			return this;
 		}
 
-		public PropertyArticleBuilder supplyArea(Double supplyArea) {
-			this.supplyArea = supplyArea;
-			return this;
-		}
+    public PropertyArticleBuilder totalArea(Double totalArea) {
+      this.totalArea = totalArea;
+      return this;
+    }
 
-		public PropertyArticleBuilder exclusiveArea(Double exclusiveArea) {
-			this.exclusiveArea = exclusiveArea;
-			return this;
-		}
+    public PropertyArticleBuilder netArea(Double netArea) {
+      this.netArea = netArea;
+      return this;
+    }
 
 		public PropertyArticleBuilder address(String address) {
 			this.address = address;
@@ -209,21 +210,30 @@ public class PropertyArticle {
 			return this;
 		}
 
-		public PropertyArticle build() {
-			return new PropertyArticle(this.id, this.articleId, this.regionCode, this.category, this.buildingName,
-				this.description, this.buildingType, this.price, this.deposit, this.monthlyRent, this.longitude,
-				this.latitude, this.supplyArea, this.exclusiveArea, this.address, this.platform, this.platformUrl,
-				this.createdAt, this.updatedAt);
-		}
+    public PropertyArticle build() {
+      return new PropertyArticle(this.id, this.articleId, this.regionCode, this.category,
+          this.buildingName,
+          this.description, this.buildingType, this.price, this.deposit, this.monthlyRent,
+          this.longitude,
+          this.latitude, this.totalArea, this.netArea, this.address, this.platform,
+          this.platformUrl,
+          this.createdAt, this.updatedAt);
+    }
 
-		public String toString() {
-			return "PropertyArticle.PropertyArticleBuilder(id=" + this.id + ", articleId=" + this.articleId
-				+ ", regionCode=" + this.regionCode + ", category=" + this.category + ", buildingName="
-				+ this.buildingName + ", description=" + this.description + ", buildingType=" + this.buildingType
-				+ ", price=" + this.price + ", deposit=" + this.deposit + ", monthlyRent=" + this.monthlyRent
-				+ ", longitude=" + this.longitude + ", latitude=" + this.latitude + ", supplyArea=" + this.supplyArea
-				+ ", exclusiveArea=" + this.exclusiveArea + ", platform=" + this.platform + ", platformUrl="
-				+ this.platformUrl + ", createdAt=" + this.createdAt + ", updatedAt=" + this.updatedAt + ")";
-		}
-	}
+    public String toString() {
+      return "PropertyArticle.PropertyArticleBuilder(id=" + this.id + ", articleId="
+          + this.articleId
+          + ", regionCode=" + this.regionCode + ", category=" + this.category + ", buildingName="
+          + this.buildingName + ", description=" + this.description + ", buildingType="
+          + this.buildingType
+          + ", price=" + this.price + ", deposit=" + this.deposit + ", monthlyRent="
+          + this.monthlyRent
+          + ", longitude=" + this.longitude + ", latitude=" + this.latitude + ", totalArea="
+          + this.totalArea
+          + ", netArea=" + this.netArea + ", platform=" + this.platform
+          + ", platformUrl="
+          + this.platformUrl + ", createdAt=" + this.createdAt + ", updatedAt=" + this.updatedAt
+          + ")";
+    }
+  }
 }
