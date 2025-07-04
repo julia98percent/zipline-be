@@ -24,7 +24,6 @@ public class CounselResponseDTO {
 	private LocalDate dueDate;
 	private Long propertyUid;
 	private boolean completed;
-	private List<CounselDetailInfo> counselDetails;
 	private CustomerInfo customer;
 	private PropertyInfo property;
 
@@ -38,9 +37,6 @@ public class CounselResponseDTO {
 			.map(AgentProperty::getUid)
 			.orElse(null);
 		this.completed = counsel.isCompleted();
-		this.counselDetails = counselDetails.stream()
-			.map(CounselDetailInfo::new)
-			.collect(Collectors.toList());
 		this.customer = new CustomerInfo(counsel.getCustomer(), preferredRegion);
 		this.property = Optional.ofNullable(counsel.getAgentProperty())
 			.map(PropertyInfo::new)

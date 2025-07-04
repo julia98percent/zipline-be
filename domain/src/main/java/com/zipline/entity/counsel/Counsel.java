@@ -66,9 +66,6 @@ public class Counsel extends BaseTimeEntity {
 	@Column(name = "completed")
 	private boolean completed;
 
-	@OneToMany(mappedBy = "counsel", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-	private List<CounselDetail> details = new ArrayList<>();
-
 	public Counsel(String title, LocalDateTime counselDate, CounselType type, LocalDate dueDate, User user,
 		Customer customer, AgentProperty agentProperty, boolean completed) {
 		this.title = title;
@@ -78,19 +75,6 @@ public class Counsel extends BaseTimeEntity {
 		this.type = type;
 		this.dueDate = dueDate;
 		this.agentProperty = agentProperty;
-		this.completed = completed;
-	}
-
-	public void addDetail(CounselDetail detail) {
-		this.details.add(detail);
-	}
-
-	public void update(String title, LocalDateTime counselDate, CounselType type, LocalDate dueDate,
-		boolean completed) {
-		this.title = title;
-		this.counselDate = counselDate;
-		this.type = type;
-		this.dueDate = dueDate;
 		this.completed = completed;
 	}
 }
