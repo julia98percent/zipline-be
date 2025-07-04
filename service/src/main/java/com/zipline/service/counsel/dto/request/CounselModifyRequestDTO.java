@@ -25,6 +25,12 @@ public class CounselModifyRequestDTO {
   @NotNull(message = "상담 일자는 필수값 입니다.")
   private LocalDateTime counselDate;
 
+  @Valid
+  @Schema(description = "상담 내용", example = "관심 지역 - 서울 강남구, 2룸 이상", required = true)
+  @Size(max = 100, message = "상담 내용의 최대 길이는 500자 입니다.")
+  @NotBlank(message = "상담 내용은 필수입니다.")
+  private String content;
+
   @Schema(description = "상담 종류", example = "임대", required = true)
   @NotBlank(message = "상담 종류는 필수값 입니다.")
   private String type;
