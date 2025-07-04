@@ -61,7 +61,7 @@ public class Counsel extends BaseTimeEntity {
   @Column(name = "completed")
   private boolean completed;
 
-  @Column(name = "content", length = 200, nullable = false)
+  @Column(name = "content", length = 500, nullable = false)
   private String content;
 
 
