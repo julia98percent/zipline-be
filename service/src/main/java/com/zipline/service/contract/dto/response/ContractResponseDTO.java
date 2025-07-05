@@ -49,6 +49,7 @@ public class ContractResponseDTO {
 
   @Getter
   @AllArgsConstructor
+  @NoArgsConstructor
   public static class ContractCustomerInfo {
 
     private String name;
