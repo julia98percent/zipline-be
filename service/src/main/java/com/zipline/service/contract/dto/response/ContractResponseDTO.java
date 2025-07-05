@@ -33,6 +33,8 @@ public class ContractResponseDTO {
   private String propertyAddress;
   private Long propertyUid;
 
+  private String other;
+
   @Getter
   @NoArgsConstructor
   @Setter
@@ -94,6 +96,7 @@ public class ContractResponseDTO {
         .documents(documents)
         .propertyAddress(contract.getAgentProperty().getAddress())
         .propertyUid(contract.getAgentProperty().getUid())
+        .other(contract.getOther())
         .build();
   }
 }

@@ -318,7 +318,8 @@ public class ContractServiceImpl implements ContractService {
         contractRequestDTO.getContractEndDate(),
         contractRequestDTO.getExpectedContractEndDate(),
         newStatus,
-        agentProperty
+        agentProperty,
+        contractRequestDTO.getOther()
     );
 
     if (!prevStatus.equals(newStatus)) {
