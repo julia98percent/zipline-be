@@ -34,8 +34,7 @@ public enum ContractStatus {
 
   public static List<ContractStatus> getInProgressStatuses() {
     return Arrays.stream(values())
-        .filter(status -> status != LISTED && status != CANCELLED && status != TERMINATED
-            && status != CLOSED)
+        .filter(status -> status != LISTED && !getClosedStatuses().contains(status))
         .toList();
   }
 }
